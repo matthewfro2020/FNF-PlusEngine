@@ -84,7 +84,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"],
-		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"]
+		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"],
+		['Set Camera Bopping', "Sets how camera should bop.\nValue 1: Frequency (in beats)\nValue 2: Intensity scale (1 for default)"]
 	];
 	
 	public static var keysArray:Array<FlxKey> = [ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT]; //Used for Vortex Editor
@@ -92,6 +93,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	public static var GRID_COLUMNS_PER_PLAYER = 4;
 	public static var GRID_PLAYERS = 2;
 	public static var GRID_SIZE = 40;
+	public static var noteTypeList:Array<String> = [];
 	final BACKUP_EXT = '.bkp';
 
 	public var quantizations:Array<Int> = [
@@ -3337,40 +3339,104 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		btnY += 20;
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Open Chart...', function()
 		{
-			if(!fileDialog.completed) return;
 			upperBox.isMinimized = true;
 			upperBox.bg.visible = false;
-
-			fileDialog.open(function()
-			{
-				try
-				{
-					var filePath:String = fileDialog.path.replace('\\', '/');
-					var loadedChart:SwagSong = Song.parseJSON(fileDialog.data, filePath.substr(filePath.lastIndexOf('/')));
-					if(loadedChart == null || !Reflect.hasField(loadedChart, 'song')) //Check if chart is ACTUALLY a chart and valid
-					{
-						showOutput('Error: File loaded is not a Psych Engine/FNF 0.2.x.x chart.', true);
-						return;
+		
+			// Selector de archivos desde la raíz del juego
+			function openFileBrowser(currentPath:String = "./") {
+				// Lee carpetas y archivos .json
+				var entries = FileSystem.readDirectory(currentPath);
+				var folders = [];
+				var files = [];
+				for (entry in entries) {
+					var fullPath = currentPath + (currentPath.endsWith("/") ? "" : "/") + entry;
+					if (FileSystem.isDirectory(fullPath)) {
+						folders.push(entry + "/");
+					} else if (entry.toLowerCase().endsWith(".json")) {
+						files.push(entry);
 					}
-
-					var func:Void->Void = function()
-					{
-						loadChart(loadedChart);
-						Song.chartPath = fileDialog.path;
-						reloadNotesDropdowns();
-						prepareReload();
-						showOutput('Opened chart "${Song.chartPath}" successfully!');
+				}
+				folders.sort((a, b) -> a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+				files.sort((a, b) -> a.toLowerCase() < b.toLowerCase() ? -1 : 1);
+		
+				var displayList = folders.concat(files);
+				if (currentPath != "./" && currentPath != ".\\") displayList.unshift("../");
+		
+				var radioGrp:PsychUIRadioGroup = new PsychUIRadioGroup(0, 0, displayList, 25, Std.int(Math.min(15, displayList.length)), false, 340);
+				radioGrp.checked = 0;
+		
+				var hei:Float = radioGrp.height + 160;
+				openSubState(new BasePrompt(520, hei, 'Select a Chart File',
+					function(state:BasePrompt) {
+						var btn:PsychUIButton = new PsychUIButton(state.bg.x + state.bg.width - 40, state.bg.y, 'X', state.close, 40);
+						btn.cameras = state.cameras;
+						state.add(btn);
+		
+						radioGrp.screenCenter(X);
+						radioGrp.y = state.bg.y + 80;
+						radioGrp.cameras = state.cameras;
+						state.add(radioGrp);
+		
+						var btn:PsychUIButton = new PsychUIButton(0, radioGrp.y + radioGrp.height + 20, 'Open', function()
+						{
+							var selected = displayList[radioGrp.checked];
+							if (selected == "../") {
+								// Subir un nivel
+								var parent = currentPath.split("/");
+								parent.pop();
+								parent = parent.filter(x -> x != "" && x != ".");
+								openFileBrowser(parent.length > 0 ? parent.join("/") + "/" : "./");
+								state.close();
+								return;
+							}
+							if (selected.endsWith("/")) {
+								// Entrar a carpeta
+								openFileBrowser(currentPath + selected);
+								state.close();
+								return;
+							}
+							// Abrir archivo .json
+							var filePath = currentPath + selected;
+							state.close();
+		
+							if(FileSystem.exists(filePath))
+							{
+								try
+								{
+									var loadedChart:SwagSong = Song.parseJSON(File.getContent(filePath), selected, null);
+									if(loadedChart == null || !Reflect.hasField(loadedChart, 'song'))
+									{
+										showOutput('Error: File loaded is not a valid chart.', true);
+										return;
+									}
+		
+									var func:Void->Void = function()
+									{
+										loadChart(loadedChart);
+										Song.chartPath = filePath;
+										reloadNotesDropdowns();
+										prepareReload();
+										showOutput('Opened chart "$filePath" successfully!');
+									}
+		
+									if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
+									else func();
+								}
+								catch(e:Exception)
+								{
+									showOutput('Error: ${e.message}', true);
+								}
+							}
+							else showOutput('Error! Chart file not found.', true);
+						});
+						btn.cameras = state.cameras;
+						btn.screenCenter(X);
+						state.add(btn);
 					}
-					
-					if(!ignoreProgressCheckBox.checked) openSubState(new Prompt('Warning: Any unsaved progress\nwill be lost.', func));
-					else func();
-				}
-				catch(e:Exception)
-				{
-					showOutput('Error: ${e.message}', true);
-					trace(e.stack);
-				}
-			});
+				));
+			}
+		
+			openFileBrowser("./"); // Empieza desde la raíz del juego
 		}, btnWid);
 		btn.text.alignment = LEFT;
 		tab_group.add(btn);

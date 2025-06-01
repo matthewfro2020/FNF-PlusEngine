@@ -109,6 +109,14 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			'scoreZoom',
 			BOOL);
 		addOption(option);
+		
+		var option:Option = new Option(
+			'Abbreviate Score',
+			'If enabled, the score will be abbreviated (e.g. 10.00K, 1.00M).',
+			'abbreviateScore',
+			BOOL
+		);
+		addOption(option);
 
 		var option:Option = new Option('Health Bar Opacity',
 			'How much transparent should the health bar and icons be.',

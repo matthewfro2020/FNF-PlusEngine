@@ -22,7 +22,6 @@ import openfl.utils.Assets as OpenFlAssets;
 import openfl.events.KeyboardEvent;
 import haxe.Json;
 
-
 import cutscenes.DialogueBoxPsych;
 
 import states.StoryMenuState;
@@ -32,7 +31,6 @@ import states.editors.CharacterEditorState;
 
 import substates.PauseSubState;
 import substates.GameOverSubstate;
-import substates.ResultsSubState;
 
 #if !flash
 import openfl.filters.ShaderFilter;
@@ -212,6 +210,7 @@ class PlayState extends MusicBeatState
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+	public var arrowCam:FlxCamera;
 	public var camHUD:FlxCamera;
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
@@ -235,6 +234,10 @@ class PlayState extends MusicBeatState
     var popupVisible:Bool = false;
 	var comboPopup:ComboPopup;
 	var turnValue:Int = 10;
+	public var displayedScore:Int = 0;
+	var cameraBopFrequency:Float = 1;
+    var cameraBopIntensity:Float = 1;
+	var cameraBopEnabled:Bool = false;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -330,11 +333,14 @@ class PlayState extends MusicBeatState
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = initPsychCamera();
+		arrowCam = new FlxCamera();
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
+		arrowCam.bgColor.alpha = 0;
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
+		FlxG.cameras.add(arrowCam, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 
@@ -569,10 +575,8 @@ class PlayState extends MusicBeatState
 		trace("Antes de generateSong()");
         generateSong();
         trace("Después de generateSong()");
-        trace('Notas generadas: ' + notes.length);
-        trace('generateSong() terminado');
 
-		noteGroup.add(grpNoteSplashes);
+        noteGroup.add(grpNoteSplashes);
 
 		camFollow = new FlxObject();
 		camFollow.setPosition(camPos.x, camPos.y);
@@ -720,8 +724,8 @@ class PlayState extends MusicBeatState
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
 		super.create();
-
-        #if sys
+        
+		#if sys
         if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0 && Mods.currentModDirectory != "ModTemplate.zip" && Mods.currentModDirectory != "readme.txt") {
             ModCompatibilityChecker.checkModCompatibility(Mods.currentModDirectory, function(warning:String) {
             #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
@@ -1242,29 +1246,45 @@ class PlayState extends MusicBeatState
 		callOnScripts('onUpdateScore', [miss]);
 	}
 
+	function abbreviateScore(score:Int):String {
+		if (score >= 1_000_000)
+			return Std.string(Math.round(score / 10000) / 100) + "M";
+		else if (score >= 10_000)
+			return Std.string(Math.round(score / 10) / 100) + "K";
+		else
+			return Std.string(score);
+	}
+
 	public dynamic function updateScoreText()
     {
         var percent:Float = 0;
         if(totalPlayed != 0)
             percent = CoolUtil.floorDecimal(ratingPercent * 100, 2);
 
+		var showAbbr = ClientPrefs.data.abbreviateScore;
+
+		var scoreToShow = displayedScore;
+        var abbrScore = showAbbr ? abbreviateScore(scoreToShow) : Std.string(scoreToShow);
+
         if(ClientPrefs.data.newScoreTxt) {
             // Nuevo estilo: solo score, misses y precisión, con traducción
             var tempScore:String;
             if(!instakillOnMiss)
-                tempScore = Language.getPhrase('score_text_simple', 'Score: {1} | Misses: {2} | Accuracy: {3}%', [songScore, songMisses, percent]);
+                tempScore = Language.getPhrase('score_text_simple', 'Score: {1} | Misses: {2} | Accuracy: {3}%', [abbrScore, songMisses, percent]);
             else
-                tempScore = Language.getPhrase('score_text_simple_instakill', 'Score: {1} | Accuracy: {2}%', [songScore, percent]);
+                tempScore = Language.getPhrase('score_text_simple_instakill', 'Score: {1} | Accuracy: {2}%', [abbrScore, percent]);
         scoreTxt.text = tempScore;
 
-        // Mostrar rating y FC aparte
-        if(ratingTxt != null) {
-            var txt = ratingName;
-            if(ratingFC != null && ratingFC.length > 0)
-                txt += '\n' + ratingFC;
-            ratingTxt.text = txt;
-            ratingTxt.visible = true;
-        }
+		if(ratingTxt != null) {
+			var txt = Language.getPhrase('rating_' + ratingName);
+			if(ratingFC != null && ratingFC.length > 0) {
+				// Traduce el ratingFC si existe una traducción, si no, muestra el original
+				var fcText = Language.getPhrase(ratingFC);
+				txt += '\n' + fcText;
+			}
+			ratingTxt.text = txt;
+			ratingTxt.visible = true;
+		}
     } else {
         // Estilo clásico
         var str:String = Language.getPhrase('rating_$ratingName', ratingName);
@@ -1273,9 +1293,9 @@ class PlayState extends MusicBeatState
 
         var tempScore:String;
         if(!instakillOnMiss)
-            tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
+            tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [abbrScore, songMisses, str]);
         else
-            tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
+            tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [abbrScore, str]);
         scoreTxt.text = tempScore;
 
         if(ratingTxt != null)
@@ -1621,7 +1641,7 @@ class PlayState extends MusicBeatState
 		stagesFunc(function(stage:BaseStage) stage.eventPushed(event));
 		eventsPushed.push(event.event);
 	}
-
+	
 	// called by every event with the same name
 	function eventPushedUnique(event:EventNote) {
 		switch(event.event) {
@@ -1724,6 +1744,7 @@ class PlayState extends MusicBeatState
 
 	override function openSubState(SubState:FlxSubState)
 	{
+		if (videoCutscene != null) videoCutscene.pause();
 		stagesFunc(function(stage:BaseStage) stage.openSubState(SubState));
 		if (paused)
 		{
@@ -1744,7 +1765,8 @@ class PlayState extends MusicBeatState
 	override function closeSubState()
 	{
 		super.closeSubState();
-		
+
+		if (videoCutscene != null) videoCutscene.resume();
 		stagesFunc(function(stage:BaseStage) stage.closeSubState());
 		if (paused)
 		{
@@ -1868,6 +1890,25 @@ class PlayState extends MusicBeatState
 				openCharacterEditor();
 		}
 
+	    if (displayedScore != songScore)
+        {
+        var diff = songScore - displayedScore;
+        // Cambia el 10 por un número mayor si quieres que vaya más rápido
+        var step = Math.ceil(Math.abs(diff) / 10);
+        if (diff > 0)
+            displayedScore += step;
+        else
+            displayedScore -= step;
+
+        // Evita pasarse
+        if ((diff > 0 && displayedScore > songScore) || (diff < 0 && displayedScore < songScore))
+            displayedScore = songScore;
+
+        updateScoreText();
+
+		setOnScripts('ScoreOSU', displayedScore);
+        }
+
 		if (healthBar.bounds.max != null && health > healthBar.bounds.max)
 			health = healthBar.bounds.max;
 
@@ -1892,12 +1933,12 @@ class PlayState extends MusicBeatState
             {
                 judgementCounterText.visible = true;
                 judgementCounterText.text =
-                    'MVS:  ' + ratingsData[0].hits + '\n' +
-                    'SKS:  ' + ratingsData[1].hits + '\n' +
-                    'GDS:  ' + ratingsData[2].hits + '\n' +
-                    'BDS:  ' + ratingsData[3].hits + '\n' +
-                    'SHS:  ' + ratingsData[4].hits + '\n' +
-                    'MIS:  ' + songMisses;
+                    Language.getPhrase('judgement_mvs', 'MVS') + ':  ' + ratingsData[0].hits + '\n' +
+                    Language.getPhrase('judgement_sks', 'SKS') + ':  ' + ratingsData[1].hits + '\n' +
+                    Language.getPhrase('judgement_gds', 'GDS') + ':  ' + ratingsData[2].hits + '\n' +
+                    Language.getPhrase('judgement_bds', 'BDS') + ':  ' + ratingsData[3].hits + '\n' +
+                    Language.getPhrase('judgement_shs', 'SHS') + ':  ' + ratingsData[4].hits + '\n' +
+                    Language.getPhrase('judgement_mis', 'MIS') + ':  ' + songMisses;
             }
             else
             {
@@ -1931,6 +1972,7 @@ class PlayState extends MusicBeatState
 		{
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
+			arrowCam.zoom = FlxMath.lerp(1, arrowCam.zoom, Math.exp(-elapsed * 3.125 * camZoomingDecay * playbackRate));
 		}
 
 		FlxG.watch.addQuick("secShit", curSection);
@@ -2473,6 +2515,20 @@ class PlayState extends MusicBeatState
 			case 'Play Sound':
 				if(flValue2 == null) flValue2 = 1;
 				FlxG.sound.play(Paths.sound(value1), flValue2);
+
+						// ...existing code...
+			case "Set Camera Bopping":
+				// Value 1: frecuencia (en beats), Value 2: intensidad (1 = default)
+				var freq:Float = 1;
+				var intensity:Float = 1;
+				if (value1 != null && value1.trim() != "") freq = Std.parseFloat(value1);
+				if (value2 != null && value2.trim() != "") intensity = Std.parseFloat(value2);
+			
+				// Guarda los valores en variables de la clase para usarlas en el update/beatHit
+				cameraBopFrequency = freq;
+				cameraBopIntensity = intensity;
+				cameraBopEnabled = true;
+			// ...existing code...
 		}
 
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2, flValue1, flValue2, strumTime));
@@ -2616,31 +2672,30 @@ class PlayState extends MusicBeatState
 			#end
 			playbackRate = 1;
 
-		if (!chartingMode && !cpuControlled) {
-			openSubState(new substates.ResultsSubState(
-				songScore,
-				Highscore.getScore(Song.loadedSongName, storyDifficulty),
-				ratingPercent * 100,
-				ratingsData[0].hits,
-				ratingsData[1].hits, // sicks
-				ratingsData[2].hits, // goods
-				ratingsData[3].hits, // bads
-				ratingsData[4].hits, // shits
-				songMisses,
-				maxCombo,            // <--- combo máximo
-				totalNotes,          // <--- total de notas jugables
-				SONG.song,
-				Difficulty.getString(),
-				Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0,
-				Mods.currentModDirectory,
-				!isStoryMode, // fromFreeplay
-				isStoryMode,  // fromStory
-				practiceMode  // isPractice
-			));
-			// ...existing code...));
-            transitioning = true;
-            return true;
-        }
+		if (!chartingMode && !cpuControlled && !isStoryMode) {
+			MusicBeatState.switchState(new ResultsState({
+				score: songScore,
+				prevHighScore: Highscore.getScore(Song.loadedSongName, storyDifficulty),
+				accuracy: ratingPercent,
+				marvelous: ratingsData[0].hits,
+				sicks: ratingsData[1].hits,
+				goods: ratingsData[2].hits,
+				bads: ratingsData[3].hits,
+				shits: ratingsData[4].hits,
+				misses: songMisses,
+				maxCombo: maxCombo,
+				totalNotes: totalNotes,
+				songName: SONG.song,
+				difficulty: Difficulty.getString(),
+				isMod: Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0,
+				modFolder: Mods.currentModDirectory,
+				isPractice: practiceMode,
+				ratingName: ratingName,
+				ratingFC: ratingFC
+			}));
+			transitioning = true;
+			return true;
+		}
 
 			if (chartingMode)
 			{
@@ -3317,20 +3372,6 @@ class PlayState extends MusicBeatState
 		callOnScripts('onStepHit');
 	}
 
-	function doDaBeat()
-    {
-        turnValue = -turnValue;
-        for (i in 1...3) // Haxe usa 1...3 para 1 y 2
-        {
-            var icon = (i == 1) ? iconP1 : iconP2;
-            icon.angle = turnValue;
-            icon.scale.y = 0.3;
-
-            FlxTween.tween(icon, {angle: 0}, Conductor.crochet / 1000, {ease: FlxEase.circOut});
-            FlxTween.tween(icon.scale, {y: 1}, Conductor.crochet / 1000, {ease: FlxEase.circOut});
-        }
-        
-    }
 
 	var lastBeatHit:Int = -1;
 
@@ -3369,9 +3410,15 @@ class PlayState extends MusicBeatState
         }
 
 		super.beatHit();
-		lastBeatHit = curBeat;
 
-		doDaBeat();
+		if (cameraBopEnabled && Std.int(curBeat) % Std.int(cameraBopFrequency) == 0)
+        {
+            FlxG.camera.zoom += 0.015 * cameraBopIntensity;
+            camHUD.zoom += 0.03 * cameraBopIntensity;
+			arrowCam.zoom += 0.03 * cameraBopIntensity;
+        }
+
+		lastBeatHit = curBeat;
 
 		setOnScripts('curBeat', curBeat);
 		callOnScripts('onBeatHit');
@@ -3405,6 +3452,7 @@ class PlayState extends MusicBeatState
 			{
 				FlxG.camera.zoom += 0.015 * camZoomingMult;
 				camHUD.zoom += 0.03 * camZoomingMult;
+				arrowCam.zoom += 0.03 * camZoomingMult;
 			}
 
 			if (SONG.notes[curSection].changeBPM)

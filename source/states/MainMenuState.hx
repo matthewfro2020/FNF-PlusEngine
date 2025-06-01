@@ -5,6 +5,7 @@ import flixel.effects.FlxFlicker;
 import lime.app.Application;
 import states.editors.MasterEditorMenu;
 import options.OptionsState;
+import flixel.text.FlxText;
 
 enum MainMenuColumn {
 	LEFT;
@@ -37,6 +38,8 @@ class MainMenuState extends MusicBeatState
 
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
+
+	var onlineLevelsText:FlxText;
 
 	static var showOutdatedWarning:Bool = true;
 	override function create()
@@ -108,6 +111,11 @@ class MainMenuState extends MusicBeatState
 		fnfVer.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(fnfVer);
 		changeItem();
+
+        onlineLevelsText = new FlxText(12, 12, 0, '', 20);
+        onlineLevelsText.setFormat(null, 20, 0xFFFFFFFF, "left");
+        onlineLevelsText.scrollFactor.set();
+        add(onlineLevelsText);
 
 		#if ACHIEVEMENTS_ALLOWED
 		// Unlocks "Freaky on a Friday Night" achievement if it's a Friday and between 18:00 PM and 23:59 PM
@@ -351,6 +359,12 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
 			#end
+		}
+
+		// Crash de prueba: presiona F8 para lanzar un error y probar el CrashHandler
+		if (FlxG.keys.justPressed.F8)
+		{
+			throw "Crash de prueba: ¡El CrashHandler funciona!";
 		}
 
 		super.update(elapsed);

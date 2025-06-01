@@ -1,6 +1,7 @@
 package objects;
 
 import flixel.addons.display.FlxPieDial;
+import psychlua.LuaUtils;
 
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
@@ -28,6 +29,7 @@ class VideoSprite extends FlxSpriteGroup {
 		this.videoName = videoName;
 		scrollFactor.set();
 		switch(camera.toLowerCase()) {
+			case "arrow": cameras = [FlxG.cameras.list[2]]; // arrowCam normalmente es la tercera
             case "hud": cameras = [FlxG.cameras.list[1]]; // camHUD normalmente es la segunda
             case "game": cameras = [FlxG.cameras.list[0]]; // camGame normalmente es la primera
             case "other": cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]]; // camOther suele ser la última
@@ -70,6 +72,10 @@ class VideoSprite extends FlxSpriteGroup {
 
 		// start video and adjust resolution to screen size
 		videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null);
+		videoSprite.bitmap.onFormatSetup.add(function() {
+		});
+		videoSprite.bitmap.onEndReached.add(function() {
+		});
 	}
 
 	var alreadyDestroyed:Bool = false;
@@ -171,5 +177,15 @@ class VideoSprite extends FlxSpriteGroup {
 	public function play() videoSprite?.play();
 	public function resume() videoSprite?.resume();
 	public function pause() videoSprite?.pause();
+	
+	function onGamePaused()
+    {
+        pause();
+    }
+
+    function onGameResumed()
+    {
+        resume();
+    }
 	#end
 }

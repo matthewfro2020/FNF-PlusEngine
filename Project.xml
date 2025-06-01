@@ -115,8 +115,10 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" version="5.6.1"/>
+	<haxelib name="flixel-ui" version="2.6.2"/>
 	<haxelib name="flixel-addons" version="3.2.2"/>
 	<haxelib name="tjson" version="1.4.0"/>
+
 
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
@@ -187,6 +189,13 @@
 	<haxeflag name="--macro" value="include('my.pack')" />
 
 	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED" />
+
+	<!-- ____________________________ Modcharts? _______________________________ -->
+
+	<haxedef name="FM_ENGINE" value="PSYCH"/>
+    <haxedef name="FM_ENGINE_VERSION" value="1.0"/>
+	<haxelib name="funkin-modchart" />
+    <haxeflag name="--macro" value="modchart.core.macros.Macro.includeFiles()"/>
 
 	<!-- _________________________________ Custom _______________________________ -->
 

@@ -59,6 +59,7 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+	public static var originalWindowTitle:String = null;
 
 	public function new(scriptName:String) {
 		lua = LuaL.newstate();
@@ -741,6 +742,11 @@ class FunkinLua {
 			return true;
 		});
 		Lua_helper.add_callback(lua, "endSong", function() {
+			
+			#if windows
+            var window = Lib.current.stage.window;
+            if (FunkinLua.originalWindowTitle != null) window.title = FunkinLua.originalWindowTitle;
+            #end
 			game.KillNotes();
 			game.endSong();
 			return true;
@@ -1286,7 +1292,7 @@ class FunkinLua {
 			}
 			return false;
 		});
-		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String, ?forMidSong:Bool = false, ?canSkip:Bool = true, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true, ?camera:String = "other") {
+			Lua_helper.add_callback(lua, "startVideo", function(videoFile:String, ?forMidSong:Bool = false, ?canSkip:Bool = true, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true, ?camera:String = "other") {
 			#if VIDEOS_ALLOWED
 			if(FileSystem.exists(Paths.video(videoFile)))
 			{
@@ -1303,7 +1309,6 @@ class FunkinLua {
 				luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
 			}
 			return false;
-
 			#else
 			PlayState.instance.inCutscene = true;
 			new FlxTimer().start(0.1, function(tmr:FlxTimer)
@@ -1562,12 +1567,16 @@ class FunkinLua {
 			return closed;
 		});
 
-		Lua_helper.add_callback(lua, "setWallpaper", function(path:String) setWallpaper(path));
-		Lua_helper.add_callback(lua, "toggleTaskbar", function(show:Bool) toggleTaskbar(show));
 		Lua_helper.add_callback(lua, "setFullscreen", function(enable:Bool) setFullscreen(enable));
 		Lua_helper.add_callback(lua, "tweenWindowSize", function(width:Int, height:Int, duration:Float = 1, ease:String = "linear") tweenWindowSize(width, height, duration, ease));
         Lua_helper.add_callback(lua, "winTweenX", function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") return winTweenX(tag, targetX, duration, ease));
         Lua_helper.add_callback(lua, "winTweenY", function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") return winTweenY(tag, targetY, duration, ease));
+		Lua_helper.add_callback(lua, "resizeGame", function(width:Int, height:Int) {
+			FlxG.resizeGame(width, height);
+		});
+		Lua_helper.add_callback(lua, "setTextWin", function(text:String, animated:Bool = false, duration:Float = 1) {
+            setTextWin(text, animated, duration);
+        });
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
@@ -1675,6 +1684,29 @@ class FunkinLua {
 				video.videoSprite.bitmap.play();
 		}
 	}
+
+	public static function setTextWin(text:String, animated:Bool = false, duration:Float = 1) {
+    #if windows
+    var window = Lib.current.stage.window;
+    if (originalWindowTitle == null) originalWindowTitle = window.title;
+    if (!animated) {
+        window.title = text;
+    } else {
+        var total = text.length;
+        var current = 0;
+        var interval = duration / Math.max(1, total);
+        window.title = "";
+        var timer = new flixel.util.FlxTimer();
+        timer.start(interval, function(tmr:flixel.util.FlxTimer) {
+            current++;
+            window.title = text.substr(0, current);
+            if (current < total) {
+                tmr.reset(interval);
+            }
+        });
+    }
+    #end
+    }
 
 	public function set(variable:String, data:Dynamic) {
 		if(lua == null) {
@@ -1890,25 +1922,6 @@ class FunkinLua {
 		luaTrace('This platform doesn\'t support Runtime Shaders!', false, false, FlxColor.RED);
 		#end
 		return false;
-	}
-
-	public static function setWallpaper(path:String) {
-	    #if windows
-	    var absPath = haxe.io.Path.normalize(path);
-	    Sys.command('powershell', [
-	        '-command',
-	        'Add-Type -TypeDefinition "using System;using System.Runtime.InteropServices;public class Wallpaper{[DllImport(\\"user32.dll\\",SetLastError=true)]public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);}" ; [Wallpaper]::SystemParametersInfo(20, 0, \'' + absPath + '\', 3)'
-	    ]);
-	    #end
-	}
-
-	public static function toggleTaskbar(show:Bool) {
-    #if windows
-    var cmd = show
-        ? "powershell -command \"$x = (New-Object -ComObject Shell.Application).Windows() | Where-Object { $$_.FullName -like '*explorer.exe' }; $x.Visible = $$true\""
-        : "powershell -command \"$x = (New-Object -ComObject Shell.Application).Windows() | Where-Object { $$_.FullName -like '*explorer.exe' }; $x.Visible = $$false\"";
-    Sys.command(cmd);
-    #end
 	}
 
 	public static function setFullscreen(enable:Bool) {

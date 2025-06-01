@@ -26,23 +26,18 @@ class ComboPopup {
 
     public function show(noteRating:String, combo:Int, msOffset:Int) {
         // Color y texto según rating
-        var ratingText = noteRating;
+        var ratingText = Language.getPhrase('combo_' + noteRating.toLowerCase(), noteRating);
         var ratingColor = FlxColor.WHITE;
         switch (noteRating.toLowerCase()) {
             case "marvelous":
-                ratingText = "Marvelous!!";
                 ratingColor = 0xFFFFC800;
             case "sick":
-                ratingText = "Sick!";
                 ratingColor = 0xFF7FC9FF;
             case "good":
-                ratingText = "Good";
                 ratingColor = 0xFF7FFF8E;
             case "bad":
-                ratingText = "Bad";
                 ratingColor = 0xFFA17FFF;
             case "shit":
-                ratingText = "Shit";
                 ratingColor = 0xFFFF7F7F;
         }
 
@@ -81,7 +76,7 @@ class ComboPopup {
     }
 
     public function showMiss(missCount:Int) {
-        comboTxt.text = "Miss\nx-" + missCount;
+        comboTxt.text = Language.getPhrase('combo_miss', 'Miss') + "\nx-" + missCount;
         comboTxt.color = FlxColor.RED;
         comboTxt.alpha = 1;
         comboTxt.visible = !ClientPrefs.data.hideHud;
