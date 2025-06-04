@@ -25,7 +25,7 @@ class OutdatedSubState extends MusicBeatSubstate
 
 		warnText = new FlxText(0, 0, FlxG.width,
             Language.getPhrase('outdated_warning',
-                "Hey bro. Looks like you're using an outdated version of Plus Engine ({1}).\n-----------------------------------------------\nPress ENTER to update to the latest version {2}\nPress ESCAPE if you're on the correct engine version.\nYou can disable this warning by unchecking the "Check for Updates" option in the Options Menu\n----------------------------------------------\nThanks for using Engine!",
+                "Hey bro. Looks like you're using an outdated version of Plus Engine ({1}).\n-----------------------------------------------\nPress ENTER to update to the latest version {2}\nPress ESCAPE if you're on the correct engine version.\nYou can disable this warning by unchecking the (Check for Updates) option in the Options Menu\n----------------------------------------------\nThanks for using Engine!",
                 [MainMenuState.plusEngineVersion, updateVersion]
         ),
         32);
