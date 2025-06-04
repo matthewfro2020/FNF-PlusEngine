@@ -1,22 +1,26 @@
-**🎮 FNF-PlusEngine**
-Welcome to FNF-PlusEngine! This is a modified version of Friday Night Funkin', based on Psych Engine, with added features and improvements for a more dynamic and customizable gameplay experience.
+# 🎮 FNF-PlusEngine
+Welcome to FNF-PlusEngine! This is a modified version of Friday Night Funkin', based on Psych Engine, with added features and improvements for a more dynamic and customizable gameplay experience adding advanced modcharts variables so you can create your craziest modcharts, and more.
 
-## Features
+### Features
 - Video in HUD: Now you can play videos directly on camHUD or camGame. Perfect for custom cutscenes or visual effects. More info here.
 - New Lua Variables: Added custom variables like setFullscreen, tweenWindowSize, winTweenX, and winTweenY for advanced window control.
 - Mod compatibility in the engine.
 - Cool Font and New RatingTxt and ScoreTxt
 - Judgement Counter
+- Advanced Variables for craziest Modcharts
+- Fix select json in Charting Editor
+- New results State and really cool
+- and More...
 
-## 📦 Latest Releases
-
+### 📦 Latest Release
 
 > v0.2 - Video in HUD
 - Added support for playing videos on camHUD or camGame.
 - Fix the Achievements an Easter Eggs of Psych.
 - New judgement bop
 
-## 🤝 Contributions... Only me =')
+### 🤝 Contributions
+- **[Funkin Modchart](https://github.com/TheoDevelops/FunkinModchart) - Developed by TheoDev**
 - Contributions are welcome! If you have ideas, improvements, or fixes, feel free to fork the repo and open a pull request.
 
 **Thanks for checking out FNF-PlusEngine! If you enjoy the project, leave a ⭐ and share it with other FNF fans.**
@@ -27,7 +31,9 @@ To learn about new Lua scripts, click [here](https://github.com/LeninAsto/FNF-Pl
 
 To learn more about mod compatibility in the engine, [click here](https://github.com/LeninAsto/FNF-PlusEngine/blob/main/docs/scripts/readme-compatibility.txt).
 
-<summary><h2>Psych Team</h2></summary>
+To learn about new Advances variables for Modcharts, clic [here]()
+
+# Psych Team
 
 Psych Engine by ShadowMario
 
@@ -37,7 +43,7 @@ Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), 
 * Shadow Mario - Main Programmer and Head of Psych Engine.
 * Riveren - Main Artist/Animator of Psych Engine.
 
-### Special Thanks
+## Special Thanks
 * bbpanzu - Ex-Team Member (Programmer).
 * crowplexus - HScript Iris, Input System v3, and Other PRs.
 * Kamizeta - Creator of Pessy, Psych Engine's mascot.
