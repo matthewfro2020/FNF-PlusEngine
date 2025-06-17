@@ -3,6 +3,7 @@ package debug;
 import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
+import openfl.text.Font;
 import openfl.system.System;
 
 /**
@@ -23,7 +24,9 @@ class FPSCounter extends TextField
 
 	@:noCompletion private var times:Array<Float>;
 
-	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
+	var vcrFontName:String;
+
+	public function new(x:Float = 10, y:Float = 10, color:Int = 0xFFFFFFFF)
 	{
 		super();
 
@@ -33,7 +36,13 @@ class FPSCounter extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 14, color);
+
+		// Carga la fuente solo una vez
+		var vcrFont:Font = Font.fromFile(Paths.font("vcr.ttf"));
+		vcrFontName = vcrFont.fontName;
+
+		defaultTextFormat = new TextFormat(vcrFontName, 18, color);
+		setTextFormat(defaultTextFormat);
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
@@ -60,21 +69,53 @@ class FPSCounter extends TextField
 		deltaTimeout = 0.0;
 	}
 
+	// Función para interpolar colores RGB
+	function lerpColor(color1:Int, color2:Int, t:Float):Int {
+		var r1 = (color1 >> 16) & 0xFF;
+		var g1 = (color1 >> 8) & 0xFF;
+		var b1 = color1 & 0xFF;
+
+		var r2 = (color2 >> 16) & 0xFF;
+		var g2 = (color2 >> 8) & 0xFF;
+		var b2 = color2 & 0xFF;
+
+		var r = Std.int(r1 + (r2 - r1) * t);
+		var g = Std.int(g1 + (g2 - g1) * t);
+		var b = Std.int(b1 + (b2 - b1) * t);
+
+		return 0xFF000000 | (r << 16) | (g << 8) | b;
+	}
+
 	public dynamic function updateText():Void {
 		text = 'FPS: ${currentFPS}'
-		+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+			+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
 
 		if (ClientPrefs.data.showStateInFPS) {
-			// Añadir el nombre del state actual
 			var stateName = "";
 			if (FlxG.state != null)
 				stateName = Type.getClassName(Type.getClass(FlxG.state));
 			text += '\nState: $stateName';
 		}
 
-		textColor = 0xFFFFFFFF;
-		if (currentFPS < FlxG.drawFramerate * 0.5)
-			textColor = 0xFFFF0000;
+		var targetFPS = ClientPrefs.data.framerate;
+		var percent = currentFPS / targetFPS;
+
+		var color:Int;
+		if (percent >= 1.0) {
+			color = 0xFF00FF00;
+		} else if (percent >= 0.8) {
+			var t = (percent - 0.8) / 0.2;
+			color = lerpColor(0xFFFFFF00, 0xFF00FF00, t);
+		} else {
+			var t = percent / 0.8;
+			color = lerpColor(0xFFFF0000, 0xFFFFFF00, t);
+		}
+		textColor = color;
+
+		// Usa el nombre de la fuente ya cargada
+		var vcrFormat = new TextFormat(vcrFontName, 18, color);
+		setTextFormat(vcrFormat);
+		defaultTextFormat = vcrFormat;
 	}
 
 	inline function get_memoryMegas():Float

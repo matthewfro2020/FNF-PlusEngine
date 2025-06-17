@@ -33,7 +33,9 @@ import backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since
 
 //crash handler stuff
 #if CRASH_HANDLER
-import backend.CrashHandler;
+import openfl.events.UncaughtErrorEvent;
+import haxe.CallStack;
+import haxe.io.Path;
 #end
 
 import backend.Highscore;
@@ -179,7 +181,7 @@ class Main extends Sprite
 		FlxG.keys.preventDefaultKeys = [TAB];
 		
 		#if CRASH_HANDLER
-		CrashHandler.init();
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#end
 
 		#if DISCORD_ALLOWED
@@ -206,4 +208,54 @@ class Main extends Sprite
 			sprite.__cacheBitmapData = null;
 		}
 	}
+
+	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
+	// very cool person for real they don't get enough credit for their work
+	#if CRASH_HANDLER
+	function onCrash(e:UncaughtErrorEvent):Void
+	{
+		var errMsg:String = "";
+		var path:String;
+		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
+		var dateNow:String = Date.now().toString();
+
+		dateNow = dateNow.replace(" ", "_");
+		dateNow = dateNow.replace(":", "'");
+
+		path = "./crash/" + "PlusEngine_" + dateNow + ".txt";
+
+		for (stackItem in callStack)
+		{
+			switch (stackItem)
+			{
+				case FilePos(s, file, line, column):
+					errMsg += file + " (line " + line + ")\n";
+				default:
+					Sys.println(stackItem);
+			}
+		}
+
+		errMsg += "\nUncaught Error: " + e.error;
+		// remove if you're modding and want the crash log message to contain the link
+		// please remember to actually modify the link for the github page to report the issues to.
+		#if officialBuild
+		errMsg += "\nPlease report this error to the GitHub page: https://github.com/LeninAsto/FNF-PlusEngine";
+		#end
+		errMsg += "\n\n> Crash Handler written by: sqirra-rng";
+
+		if (!FileSystem.exists("./crash/"))
+			FileSystem.createDirectory("./crash/");
+
+		File.saveContent(path, errMsg + "\n");
+
+		Sys.println(errMsg);
+		Sys.println("Crash dump saved in " + Path.normalize(path));
+
+		Application.current.window.alert(errMsg, "Error!");
+		#if DISCORD_ALLOWED
+		DiscordClient.shutdown();
+		#end
+		Sys.exit(1);
+	}
+	#end
 }

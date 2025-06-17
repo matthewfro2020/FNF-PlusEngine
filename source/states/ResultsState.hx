@@ -22,7 +22,7 @@ class ResultsState extends FlxState
 
     // Variables animadas
     var animatedScore:Int = 0;
-    var animatedMarvelous:Int = 0;
+    var animatedEpics:Int = 0;
     var animatedSicks:Int = 0;
     var animatedGoods:Int = 0;
     var animatedBads:Int = 0;
@@ -33,7 +33,7 @@ class ResultsState extends FlxState
 
     // Referencias a los textos
     var scoreText:FlxText;
-    var marvel:FlxText;
+    var epics:FlxText;
     var sicks:FlxText;
     var goods:FlxText;
     var bads:FlxText;
@@ -107,9 +107,9 @@ class ResultsState extends FlxState
         var judgY = 220;
         var judgSpacing = 56; // Más espacio
 
-        marvel = new FlxText(leftX, judgY, 340, 'MARVELOUS: 0', 32);
-        marvel.setFormat("vcr.ttf", 32, 0xFFFFC800, "left");
-        add(marvel);
+        epics = new FlxText(leftX, judgY, 340, 'EPICS: 0', 32);
+        epics.setFormat("vcr.ttf", 32, 0xFFA17FFF, "left");
+        add(epics);
 
         sicks = new FlxText(rightX, judgY, 340, 'SICKS: 0', 32);
         sicks.setFormat("vcr.ttf", 32, 0xFF7FC9FF, "left");
@@ -120,7 +120,7 @@ class ResultsState extends FlxState
         add(goods);
 
         bads = new FlxText(rightX, judgY + judgSpacing, 340, 'BADS: 0', 32);
-        bads.setFormat("vcr.ttf", 32, 0xFFA17FFF, "left");
+        bads.setFormat("vcr.ttf", 32, 0xFF636363, "left");
         add(bads);
 
         shits = new FlxText(leftX, judgY + judgSpacing * 2, 340, 'SHITS: 0', 32);
@@ -188,13 +188,13 @@ class ResultsState extends FlxState
         }
         scoreText.text = StringTools.lpad(Std.string(animatedScore), "0", 8);
 
-        // 2. Marvelous
-        if (animatedMarvelous < params.marvelous) {
-            animatedMarvelous = animateInt(animatedMarvelous, params.marvelous);
-            marvel.text = 'MARVELOUS: $animatedMarvelous';
+        // 2. Epics
+        if (animatedEpics < params.epics) {
+            animatedEpics = animateInt(animatedEpics, params.epics);
+            epics.text = 'EPICS: $animatedEpics';
             return;
         }
-        marvel.text = 'MARVELOUS: $animatedMarvelous';
+        epics.text = 'EPICS: $animatedEpics';
 
         // 3. Sicks
         if (animatedSicks < params.sicks) {

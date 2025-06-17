@@ -5,8 +5,6 @@ import backend.StageData;
 import backend.WeekData;
 import backend.Song;
 import backend.Rating;
-import backend.ModCompatibilityChecker;
-import backend.ComboPopup;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -59,20 +57,20 @@ import crowplexus.hscript.Printer;
 #end
 
 /**
- * Aquí es donde sucede y se gestiona toda la jugabilidad.
+ * This is where all the Gameplay stuff happens and is managed
  *
- * Aquí tienes algunos consejos útiles si estás haciendo un mod en el source:
+ * here's some useful tips if you are making a mod in source:
  *
- * Si quieres agregar tu escenario al juego, copia states/stages/Template.hx,
- * y pon tu código de escenario ahí, luego, en PlayState, busca
- * "switch (curStage)", y agrega tu escenario a esa lista.
+ * If you want to add your stage to the game, copy states/stages/Template.hx,
+ * and put your stage code there, then, on PlayState, search for
+ * "switch (curStage)", and add your stage to that list.
  *
- * Si quieres programar Eventos, puedes hacerlo en un archivo de Stage o en PlayState, si eliges lo último, busca:
+ * If you want to code Events, you can either code it on a Stage file or on PlayState, if you're doing the latter, search for:
  *
- * "function eventPushed" - Solo se llama *una vez* cuando el juego carga, úsalo para precargar eventos que usan los mismos assets, sin importar los valores.
- * "function eventPushedUnique" - Se llama una vez por evento, úsalo para precargar eventos que usan diferentes assets según sus valores.
- * "function eventEarlyTrigger" - Se usa para hacer que tu evento comience unos MILISEGUNDOS antes.
- * "function triggerEvent" - Se llama cuando la canción llega al timestamp de tu evento, probablemente esto es lo que estabas buscando.
+ * "function eventPushed" - Only called *one time* when the game loads, use it for precaching events that use the same assets, no matter the values
+ * "function eventPushedUnique" - Called one time per event, use it for precaching events that uses different assets based on its values
+ * "function eventEarlyTrigger" - Used for making your event start a few MILLISECONDS earlier
+ * "function triggerEvent" - Called when the song hits your event's timestamp, this is probably what you were looking for
 **/
 class PlayState extends MusicBeatState
 {
@@ -89,7 +87,7 @@ class PlayState extends MusicBeatState
 		['Good', 0.8], //From 70% to 79%
 		['Great', 0.9], //From 80% to 89%
 		['Sick!', 0.95], //From 90% to 94%
-		['Marvelous!!', 1], //From 95% to 99%
+		['Epic!!', 1], //From 95% to 99%
 		['Perfect!!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
 
@@ -227,12 +225,9 @@ class PlayState extends MusicBeatState
     var timeTxtTween:FlxTween;
 	var comboTxt:FlxText;
     var msTxt:FlxText;
-	var ratingTxtTween:FlxTween = null;
     var judgementCounterText:FlxText;
-	var ratingTxt:FlxText = null;
 	var popupTimer:FlxTimer = null;
     var popupVisible:Bool = false;
-	var comboPopup:ComboPopup;
 	var turnValue:Int = 10;
 	public var displayedScore:Int = 0;
 	var cameraBopFrequency:Float = 1;
@@ -624,24 +619,6 @@ class PlayState extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
 
-		ratingTxt = new FlxText(0, 500, 400, "Perfect!!!\nMFC", 40); // Texto temporal
-		ratingTxt.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		ratingTxt.scrollFactor.set();
-		ratingTxt.borderSize = 2;
-		ratingTxt.visible = false;
-		ratingTxt.cameras = [camHUD];
-		
-		// Posición según downScroll
-		if (ClientPrefs.data.downScroll)
-			ratingTxt.y = 30;
-		else
-			ratingTxt.y = FlxG.height - ratingTxt.height - 30; // Más arriba
-		
-		ratingTxt.x = FlxG.width - ratingTxt.width - 15;
-		uiGroup.add(ratingTxt);
-		
-		ratingTxt.text = ""; // Limpia el texto si no quieres mostrar nada al inicio
-
 		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
@@ -654,8 +631,6 @@ class PlayState extends MusicBeatState
 		uiGroup.cameras = [camHUD];
 		noteGroup.cameras = [camHUD];
 		comboGroup.cameras = [camHUD];
-
-		comboPopup = new ComboPopup(comboTxt, msTxt, playbackRate);
 
 		startingSong = true;
 
@@ -724,21 +699,8 @@ class PlayState extends MusicBeatState
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
 		super.create();
-        
-		#if sys
-        if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0 && Mods.currentModDirectory != "ModTemplate.zip" && Mods.currentModDirectory != "readme.txt") {
-            ModCompatibilityChecker.checkModCompatibility(Mods.currentModDirectory, function(warning:String) {
-            #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-            addTextToDebug(warning, FlxColor.YELLOW);
-            #else
-            FlxG.log.warn(warning);
-            #end
-        });
-     }
-#end
-
 		Paths.clearUnusedMemory();
-
+     
 		cacheCountdown();
 		cachePopUpScore();
 
@@ -1256,60 +1218,33 @@ class PlayState extends MusicBeatState
 	}
 
 	public dynamic function updateScoreText()
-    {
-        var percent:Float = 0;
-        if(totalPlayed != 0)
-            percent = CoolUtil.floorDecimal(ratingPercent * 100, 2);
-
+	{
+		var percent:Float = 0;
+		if(totalPlayed != 0)
+			percent = CoolUtil.floorDecimal(ratingPercent * 100, 2);
+	
 		var showAbbr = ClientPrefs.data.abbreviateScore;
-
+	
 		var scoreToShow = displayedScore;
-        var abbrScore = showAbbr ? abbreviateScore(scoreToShow) : Std.string(scoreToShow);
-
-        if(ClientPrefs.data.newScoreTxt) {
-            // Nuevo estilo: solo score, misses y precisión, con traducción
-            var tempScore:String;
-            if(!instakillOnMiss)
-                tempScore = Language.getPhrase('score_text_simple', 'Score: {1} | Misses: {2} | Accuracy: {3}%', [abbrScore, songMisses, percent]);
-            else
-                tempScore = Language.getPhrase('score_text_simple_instakill', 'Score: {1} | Accuracy: {2}%', [abbrScore, percent]);
-        scoreTxt.text = tempScore;
-
-		if(ratingTxt != null) {
-			var txt = Language.getPhrase('rating_' + ratingName);
-			if(ratingFC != null && ratingFC.length > 0) {
-				// Traduce el ratingFC si existe una traducción, si no, muestra el original
-				var fcText = Language.getPhrase(ratingFC);
-				txt += '\n' + fcText;
-			}
-			ratingTxt.text = txt;
-			ratingTxt.visible = true;
-		}
-    } else {
-        // Estilo clásico
-        var str:String = Language.getPhrase('rating_$ratingName', ratingName);
-        if(totalPlayed != 0)
-            str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
-
-        var tempScore:String;
-        if(!instakillOnMiss)
-            tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [abbrScore, songMisses, str]);
-        else
-            tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [abbrScore, str]);
-        scoreTxt.text = tempScore;
-
-        if(ratingTxt != null)
-            ratingTxt.visible = false;
-        }
-
-		if (!ClientPrefs.data.downScroll) {
-        ratingTxt.y = FlxG.height - ratingTxt.height - 30; // Usa -30 para dejar más espacio
-        }
-    }
+		var abbrScore = showAbbr ? abbreviateScore(scoreToShow) : Std.string(scoreToShow);
+	
+		var str:String = '';
+		if(totalPlayed != 0)
+			str = '${percent}% / $ratingName [$ratingFC]';
+		else
+			str = '$ratingName [$ratingFC]';
+	
+		var tempScore:String;
+		if(!instakillOnMiss)
+			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [abbrScore, songMisses, str]);
+		else
+			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [abbrScore, str]);
+		scoreTxt.text = tempScore;
+	}
 
 	public dynamic function fullComboFunction()
 	{
-        var marvelous:Int = ratingsData[0].hits;  
+        var epics:Int = ratingsData[0].hits;  
 		var sicks:Int = ratingsData[1].hits;
 		var goods:Int = ratingsData[2].hits;
 		var bads:Int = ratingsData[3].hits;
@@ -1322,7 +1257,7 @@ class PlayState extends MusicBeatState
 			else if (bads > 0) ratingFC = 'BFC';
 			else if (goods > 0) ratingFC = 'GFC';
 			else if (sicks > 0) ratingFC = 'SFC';
-			else if (marvelous > 0) ratingFC = 'MFC';
+			else if (epics > 0) ratingFC = 'EFC';
 		} else {
 			if (songMisses < 2) ratingFC = 'SMC';
 			else if (songMisses < 5) ratingFC = 'LMC';
@@ -2677,7 +2612,7 @@ class PlayState extends MusicBeatState
 				score: songScore,
 				prevHighScore: Highscore.getScore(Song.loadedSongName, storyDifficulty),
 				accuracy: ratingPercent,
-				marvelous: ratingsData[0].hits,
+				epics: ratingsData[0].hits,
 				sicks: ratingsData[1].hits,
 				goods: ratingsData[2].hits,
 				bads: ratingsData[3].hits,
@@ -2842,7 +2777,110 @@ class PlayState extends MusicBeatState
 				RecalculateRating(false);
 			}
 		}
-		comboPopup.show(note.rating, combo, Math.floor(note.strumTime - Conductor.songPosition));
+
+		var uiFolder:String = "";
+		var antialias:Bool = ClientPrefs.data.antialiasing;
+		if (stageUI != "normal")
+		{
+			uiFolder = uiPrefix + "UI/";
+			antialias = !isPixelStage;
+		}
+
+		rating.loadGraphic(Paths.image(uiFolder + daRating.image + uiPostfix));
+		rating.screenCenter();
+		rating.x = placement - 40;
+		rating.y -= 60;
+		rating.acceleration.y = 550 * playbackRate * playbackRate;
+		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+		rating.visible = (!ClientPrefs.data.hideHud && showRating);
+		rating.x += ClientPrefs.data.comboOffset[0];
+		rating.y -= ClientPrefs.data.comboOffset[1];
+		rating.antialiasing = antialias;
+
+		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'combo' + uiPostfix));
+		comboSpr.screenCenter();
+		comboSpr.x = placement;
+		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+		comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+		comboSpr.visible = (!ClientPrefs.data.hideHud && showCombo);
+		comboSpr.x += ClientPrefs.data.comboOffset[0];
+		comboSpr.y -= ClientPrefs.data.comboOffset[1];
+		comboSpr.antialiasing = antialias;
+		comboSpr.y += 60;
+		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
+		comboGroup.add(rating);
+
+		if (!PlayState.isPixelStage)
+		{
+			rating.setGraphicSize(Std.int(rating.width * 0.7));
+			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
+		}
+		else
+		{
+			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
+			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
+		}
+
+		comboSpr.updateHitbox();
+		rating.updateHitbox();
+
+		rating.scale.set(0.3, 0.3);
+        FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.08, {
+        ease: FlxEase.circOut
+        });
+
+		var daLoop:Int = 0;
+		var xThing:Float = 0;
+		if (showCombo)
+			comboGroup.add(comboSpr);
+
+		var separatedScore:String = Std.string(combo).lpad('0', 3);
+		for (i in 0...separatedScore.length)
+		{
+			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiFolder + 'num' + Std.parseInt(separatedScore.charAt(i)) + uiPostfix));
+			numScore.screenCenter();
+			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2];
+			numScore.y += 80 - ClientPrefs.data.comboOffset[3];
+
+			if (!PlayState.isPixelStage) numScore.setGraphicSize(Std.int(numScore.width * 0.5));
+			else numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
+			numScore.updateHitbox();
+
+			numScore.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
+			numScore.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
+			numScore.velocity.x = FlxG.random.float(-5, 5) * playbackRate;
+			numScore.visible = !ClientPrefs.data.hideHud;
+			numScore.antialiasing = antialias;
+
+			if (combo >= 10 || combo == 0)
+			if(showComboNum)
+				comboGroup.add(numScore);
+
+			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
+				onComplete: function(tween:FlxTween)
+				{
+					numScore.destroy();
+				},
+				startDelay: Conductor.crochet * 0.002 / playbackRate
+			});
+
+			daLoop++;
+			if(numScore.x > xThing) xThing = numScore.x;
+		}
+		comboSpr.x = xThing + 50;
+		FlxTween.tween(rating, {alpha: 0}, 0.2 / playbackRate, {
+			startDelay: Conductor.crochet * 0.001 / playbackRate
+		});
+
+		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
+			onComplete: function(tween:FlxTween)
+			{
+				comboSpr.destroy();
+				rating.destroy();
+			},
+			startDelay: Conductor.crochet * 0.002 / playbackRate
+		});
     }
 
 	public var strumsBlocked:Array<Bool> = [];
@@ -3128,7 +3166,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 		vocals.volume = 0;
-		comboPopup.showMiss(songMisses);
     }
 
 	function opponentNoteHit(note:Note):Void
@@ -3365,8 +3402,6 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
-		if (comboPopup != null) comboPopup.onStepHit(curStep);
-
 		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
 		callOnScripts('onStepHit');
@@ -3394,20 +3429,6 @@ class PlayState extends MusicBeatState
 		characterBopper(curBeat);
 
 		doTimeBump();
-
-		if (ratingTxt != null && ratingTxt.visible)
-        {
-            if (ratingTxtTween != null)
-                ratingTxtTween.cancel();
-
-            ratingTxt.scale.set(1.8, 1.8);
-            ratingTxtTween = FlxTween.tween(ratingTxt.scale, {x: 1.1, y: 1.1}, 0.3, {
-				ease: FlxEase.expoOut,
-                onComplete: function(twn:FlxTween) {
-                    ratingTxtTween = null;
-            }
-        });
-        }
 
 		super.beatHit();
 

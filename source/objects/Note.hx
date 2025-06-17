@@ -7,7 +7,6 @@ import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
 import objects.StrumNote;
-import objects.SustainSplash;
 
 import flixel.math.FlxRect;
 
@@ -77,7 +76,6 @@ class Note extends FlxSprite
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
-	public var sustainSplash:SustainSplash = null;
 	public var noteType(default, set):String = null;
 
 	public var eventName:String = '';
@@ -502,18 +500,6 @@ class Note extends FlxSprite
 			var strum = (noteData >= 0 && noteData < PlayState.instance.strumLineNotes.length)
 				? PlayState.instance.strumLineNotes.members[noteData]
 				: null;
-			if (sustainSplash == null && strum != null)
-			{
-				sustainSplash = new SustainSplash();
-				sustainSplash.setupSusSplash(strum, this);
-				if (PlayState.instance.noteGroup != null)
-    PlayState.instance.noteGroup.add(sustainSplash);
-			}
-		}
-		else if (sustainSplash != null)
-		{
-			sustainSplash.kill();
-			sustainSplash = null;
 		}
 	}
 
@@ -521,11 +507,6 @@ class Note extends FlxSprite
 	{
 		super.destroy();
 		_lastValidChecked = '';
-		
-		if (sustainSplash != null) {
-            sustainSplash.kill();
-            sustainSplash = null;
-        }
 
 		super.destroy();
 	}

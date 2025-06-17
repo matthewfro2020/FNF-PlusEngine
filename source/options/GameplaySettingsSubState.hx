@@ -64,7 +64,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeHitsoundVolume;
 
 		var option:Option = new Option('Rating Offset',
-			'Changes how late/early you have to hit for a "Marvelous!!"\nHigher values mean you have to hit later.',
+			'Changes how late/early you have to hit for a "Epic!!"\nHigher values mean you have to hit later.',
 			'ratingOffset',
 			INT);
 		option.displayFormat = '%vms';
@@ -73,9 +73,9 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.maxValue = 30;
 		addOption(option);
 
-		var option:Option = new Option('Marvelous!! Hit Window',
-			'Changes the amount of time you have\nfor hitting a "Marvelous!!" in milliseconds.',
-			'marvelousWindow',
+		var option:Option = new Option('Epic!! Hit Window',
+			'Changes the amount of time you have\nfor hitting a "Epic!!" in milliseconds.',
+			'epicWindow',
 			FLOAT);
 		option.displayFormat = '%vms';
 		option.scrollSpeed = 5;
@@ -130,12 +130,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
         var option:Option = new Option('Judgement Counter',
             'Show the judgement counter during gameplay.',
             'judgementCounter',
-            BOOL);
-        addOption(option);
-
-		var option:Option = new Option('Use de New ScoreTxt',
-            'If enabled, ScoreTxt will only display score, misses, and accuracy.\nThe rating and ratingFC will be displayed separately.',
-            'newScoreTxt',
             BOOL);
         addOption(option);
 
