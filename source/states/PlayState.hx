@@ -504,17 +504,14 @@ class PlayState extends MusicBeatState
 		//judgementCounterText.allowMarkup = true; // No work
 		add(judgementCounterText);
 
-		// Mostrar la versión del motor y del juego en la parte inferior de la pantalla
-		versionText = new FlxText(0, FlxG.height - 120, FlxG.width, 
-			"Plus Engine v" + MainMenuState.plusEngineVersion + "\n" +
-			"Psych Engine v" + MainMenuState.psychEngineVersion + "\n" +
-			"Friday Night Funkin v0.2.8\n(Modified)", 12);
+		// Mostrar la versión del motor, nombre de la canción y dificultad en la esquina inferior izquierda
+		versionText = new FlxText(10, FlxG.height - 38, FlxG.width, 
+			"Plus Engine v" + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + Difficulty.getString() + ")", 18);
 		// Configura la fuente, tamaño, color y borde del texto
-		versionText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		versionText.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionText.scrollFactor.set();
-		versionText.screenCenter(X); // Centra horizontalmente el texto
-		versionText.alpha = 0.5; // Hace el texto un poco transparente
-		versionText.borderSize = 1.5; // Tamaño del borde
+		versionText.alpha = 0.7; // Hace el texto un poco transparente
+		versionText.borderSize = 1; // Tamaño del borde
 		versionText.cameras = [camOther]; // Asigna la cámara del HUD
 		add(versionText); // Agrega el texto a la escena
 
@@ -677,6 +674,7 @@ class PlayState extends MusicBeatState
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
 
 		super.create();
+		
 		Paths.clearUnusedMemory();
 
 		cacheCountdown();
@@ -2804,8 +2802,8 @@ class PlayState extends MusicBeatState
 		}
 		else
 		{
-			rating.scale.set(0.6, 0.6);
-            FlxTween.tween(rating.scale, {x: 1, y: 1}, 0.08, {
+			rating.scale.set(0.8, 0.8);
+            FlxTween.tween(rating.scale, {x: 4, y: 4}, 0.08, {
                 ease: FlxEase.circOut
             });
 		}
