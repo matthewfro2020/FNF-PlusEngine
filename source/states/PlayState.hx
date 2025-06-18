@@ -1196,19 +1196,24 @@ class PlayState extends MusicBeatState
 	}
 
 	public dynamic function updateScoreText()
-    {
-        var str:String = Language.getPhrase('rating_$ratingName', ratingName);
-        if(totalPlayed != 0)
+	{
+		var str:String = Language.getPhrase('rating_$ratingName', ratingName);
+		if(totalPlayed != 0)
 		{
 			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
-            str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
+			str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
 		}
-
-        var tempScore:String;
-		if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
-		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
-        scoreTxt.text = tempScore;
-    }
+	
+		var scoreToShow:Int = displayedScore; // Usar el score animado
+		var scoreStr:String = ClientPrefs.data.abbreviateScore ? abbreviateScore(scoreToShow) : Std.string(scoreToShow);
+	
+		var tempScore:String;
+		if(!instakillOnMiss)
+			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [scoreStr, songMisses, str]);
+		else
+			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [scoreStr, str]);
+		scoreTxt.text = tempScore;
+	}
 
 	public dynamic function fullComboFunction()
 	{
