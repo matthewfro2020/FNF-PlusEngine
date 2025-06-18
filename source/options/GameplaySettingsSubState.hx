@@ -133,6 +133,12 @@ class GameplaySettingsSubState extends BaseOptionsMenu
             BOOL);
         addOption(option);
 
+		var option:Option = new Option('Use de New ScoreTxt',
+            'If enabled, ScoreTxt will only display score, misses, and accuracy.\nThe rating and ratingFC will be displayed separately.',
+            'newScoreTxt',
+            BOOL);
+        addOption(option);
+
 		super();
 	}
 

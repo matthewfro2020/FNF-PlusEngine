@@ -494,13 +494,6 @@ class Note extends FlxSprite
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
-
-		if (isSustainNote && mustPress && canBeHit && !wasGoodHit)
-		{
-			var strum = (noteData >= 0 && noteData < PlayState.instance.strumLineNotes.length)
-				? PlayState.instance.strumLineNotes.members[noteData]
-				: null;
-		}
 	}
 
 	override public function destroy()

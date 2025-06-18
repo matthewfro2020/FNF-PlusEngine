@@ -120,7 +120,7 @@ class ResultsState extends FlxState
         add(goods);
 
         bads = new FlxText(rightX, judgY + judgSpacing, 340, 'BADS: 0', 32);
-        bads.setFormat("vcr.ttf", 32, 0xFF636363, "left");
+        bads.setFormat("vcr.ttf", 32, 0xFF888888, "left");
         add(bads);
 
         shits = new FlxText(leftX, judgY + judgSpacing * 2, 340, 'SHITS: 0', 32);
