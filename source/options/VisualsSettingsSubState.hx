@@ -118,6 +118,14 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		);
 		addOption(option);
 
+		var option:Option = new Option(
+			'Use Freaky Font',
+			'Enable to use the freaky.ttf font instead of vcr.ttf.',
+			'useFreakyFont',
+			BOOL
+		);
+		addOption(option);
+
 		var option:Option = new Option('Health Bar Opacity',
 			'How much transparent should the health bar and icons be.',
 			'healthBarAlpha',

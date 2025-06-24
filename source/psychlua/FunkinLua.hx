@@ -33,6 +33,7 @@ import substates.PauseSubState;
 import substates.GameOverSubstate;
 
 import psychlua.LuaUtils;
+import psychlua.WindowTweens;
 import psychlua.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
@@ -209,9 +210,6 @@ class FunkinLua {
 		set('splashSkin', ClientPrefs.data.splashSkin);
 		set('splashSkinPostfix', NoteSplash.getSplashSkinPostfix());
 		set('splashAlpha', ClientPrefs.data.splashAlpha);
-		var now = Date.now();
-        set('time', now.toString().split(" ")[1]); 
-        set('date', now.toString().split(" ")[0]);
 
 		// build target (windows, mac, linux, etc.)
 		set('buildTarget', LuaUtils.getBuildTarget());
@@ -1568,15 +1566,10 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "setFullscreen", function(enable:Bool) setFullscreen(enable));
-		Lua_helper.add_callback(lua, "tweenWindowSize", function(width:Int, height:Int, duration:Float = 1, ease:String = "linear") tweenWindowSize(width, height, duration, ease));
-        Lua_helper.add_callback(lua, "winTweenX", function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") return winTweenX(tag, targetX, duration, ease));
-        Lua_helper.add_callback(lua, "winTweenY", function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") return winTweenY(tag, targetY, duration, ease));
-		Lua_helper.add_callback(lua, "resizeGame", function(width:Int, height:Int) {
-			FlxG.resizeGame(width, height);
-		});
-		Lua_helper.add_callback(lua, "setTextWin", function(text:String, animated:Bool = false, duration:Float = 1) {
-            setTextWin(text, animated, duration);
-        });
+
+		Lua_helper.add_callback(lua, "winTweenSize", function(width:Int, height:Int, duration:Float = 1, ease:String = "linear") WindowTweens.winTweenSize(width, height, duration, ease));
+		Lua_helper.add_callback(lua, "winTweenX", function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenX(tag, targetX, duration, ease));
+		Lua_helper.add_callback(lua, "winTweenY", function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenY(tag, targetY, duration, ease));
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
@@ -1930,82 +1923,6 @@ class FunkinLua {
         stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
     else
         stage.displayState = StageDisplayState.NORMAL;
-}
-	
-public static function tweenWindowSize(targetWidth:Int, targetHeight:Int, duration:Float = 1, ease:String = "linear") {
-    #if windows
-    var window = Lib.current.stage.window;
-    var startW = window.width;
-    var startH = window.height;
-    FlxTween.num(0, 1, duration, {ease: LuaUtils.getTweenEaseByString(ease)}, function(t:Float) {
-        window.resize(
-            Std.int(FlxMath.lerp(startW, targetWidth, t)),
-            Std.int(FlxMath.lerp(startH, targetHeight, t))
-        );
-    });
-    #end
-}
-
-public static function winTweenX(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") {
-    #if windows
-    var window = Lib.current.stage.window;
-    var startX = window.x;
-    var variables = MusicBeatState.getVariables();
-    if(tag != null) {
-        var originalTag:String = tag;
-        tag = LuaUtils.formatVariable('wintween_$tag');
-        variables.set(tag, FlxTween.num(startX, targetX, duration, {
-            ease: LuaUtils.getTweenEaseByString(ease),
-            onUpdate: function(tween:FlxTween) {
-                window.x = Std.int(FlxMath.lerp(startX, targetX, tween.percent));
-            },
-            onComplete: function(_) {
-                variables.remove(tag);
-                if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [originalTag, 'window.x']);
-            }
-        }));
-        return tag;
-    } else {
-        FlxTween.num(startX, targetX, duration, {
-            ease: LuaUtils.getTweenEaseByString(ease),
-            onUpdate: function(tween:FlxTween) {
-                window.x = Std.int(FlxMath.lerp(startX, targetX, tween.percent));
-            }
-        });
     }
-    #end
-    return null;
-}
-
-public static function winTweenY(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") {
-    #if windows
-    var window = Lib.current.stage.window;
-    var startY = window.y;
-    var variables = MusicBeatState.getVariables();
-    if(tag != null) {
-        var originalTag:String = tag;
-        tag = LuaUtils.formatVariable('wintween_$tag');
-        variables.set(tag, FlxTween.num(startY, targetY, duration, {
-            ease: LuaUtils.getTweenEaseByString(ease),
-            onUpdate: function(tween:FlxTween) {
-                window.y = Std.int(FlxMath.lerp(startY, targetY, tween.percent));
-            },
-            onComplete: function(_) {
-                variables.remove(tag);
-                if(PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [originalTag, 'window.y']);
-            }
-        }));
-        return tag;
-    } else {
-        FlxTween.num(startY, targetY, duration, {
-            ease: LuaUtils.getTweenEaseByString(ease),
-            onUpdate: function(tween:FlxTween) {
-                window.y = Std.int(FlxMath.lerp(startY, targetY, tween.percent));
-            }
-        });
-    }
-    #end
-    return null;
-}
 }
 #end

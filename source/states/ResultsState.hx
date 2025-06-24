@@ -270,9 +270,9 @@ class ResultsState extends FlxState
         FlxG.sound.music.stop();
         FlxG.sound.music.volume = 1;
         var tried = false;
-        var path = isMod ? 'mods/$modFolder/music/freakyMenu' : 'assets/music/freakyMenu';
-        if (Assets.exists(path + ".ogg")) {
-            FlxG.sound.playMusic(path + ".ogg", 1, true);
+        var path = isMod ? 'mods/$modFolder/music/freakyMenu.ogg' : 'assets/music/freakyMenu.ogg';
+        if (Assets.exists(path)) {
+            FlxG.sound.playMusic(path, 1, true);
             tried = true;
         }
         if (!tried && Assets.exists("assets/shared/music/freakyMenu.ogg")) {

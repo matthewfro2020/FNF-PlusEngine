@@ -29,7 +29,7 @@ class OutdatedSubState extends MusicBeatSubstate
                 [MainMenuState.plusEngineVersion, updateVersion]
         ),
         32);
-		warnText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
+		warnText.setFormat(Paths.defaultFont(), 32, FlxColor.WHITE, CENTER);
 		warnText.scrollFactor.set();
 		warnText.screenCenter(Y);
 		warnText.alpha = 0.0;

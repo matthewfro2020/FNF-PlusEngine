@@ -26,6 +26,7 @@ import states.TitleState;
 	public var hideHud:Bool = false;
 	public var judgementCounter:Bool = true;
 	public var comboInGame:Bool = false;
+	public var useFreakyFont:Bool = false;
 	public var showStateInFPS:Bool = true;
 	public var showEndCountdown:Bool = false; // Activa/desactiva la cuenta regresiva
     public var endCountdownSeconds:Int = 10;  // Segundos de cuenta regresiva (10-30)

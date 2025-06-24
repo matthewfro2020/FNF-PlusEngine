@@ -34,6 +34,9 @@ class Paths
 			dumpExclusions.push(key);
 	}
 
+	inline static public function defaultFont():String
+    return font(ClientPrefs.data.useFreakyFont ? "freaky.ttf" : "vcr.ttf");
+
 	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
 	// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()

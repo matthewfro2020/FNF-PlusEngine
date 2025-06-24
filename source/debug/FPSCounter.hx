@@ -36,7 +36,7 @@ class FPSCounter extends TextField
 		mouseEnabled = false;
 
 		// Usa la fuente VCR del juego
-		var vcrFont = Paths.font("vcr.ttf");
+		var vcrFont = Paths.defaultFont();
 		defaultTextFormat = new TextFormat(vcrFont, 14, color);
 
 		autoSize = LEFT;

@@ -13,15 +13,6 @@ function onCreate()
     --Display Plus Engine version 
     --Mostrar la versión de Plus Engine
     makeLuaText('testverplus', PlusVersion, 100, 0, 0) 
-    --
-    
-    --Display time
-    --Mostrar la hora
-    makeLuaText('timetest', time, 100, 0, 0)--not work in "onUpdate()"
-    
-    --Display date
-    --Mostrar la fecha
-    makeLuaText('datetest', date, 100, 0, 0) 
 end
 
 --Ignore this function =p
@@ -37,7 +28,7 @@ function onStepHit()
 
         --Cambiar tamaño de la ventana
         --Change window size
-        tweenWindowSize(1280, 720, 1.5, "quadInOut")
+        winTweenSize(1280, 720, 1.5, "quadInOut")
         --[[Donde:
             --> 1280 = ancho
             --> 720 = alto
