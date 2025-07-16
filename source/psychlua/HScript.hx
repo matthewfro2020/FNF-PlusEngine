@@ -9,6 +9,10 @@ import psychlua.CustomSubstate;
 import psychlua.FunkinLua;
 #end
 
+#if hxvlc
+import hxvlc.flixel.FlxVideoSprite;
+#end
+
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
 import crowplexus.iris.IrisConfig;
@@ -179,7 +183,10 @@ class HScript extends Iris
 		#if flxanimate
 		set('FlxAnimate', FlxAnimate);
 		#end
-
+		#if (hxvlc)
+		set('VideoSprite', objects.VideoSprite);
+		set('FlxVideoSprite', hxvlc.flixel.FlxVideoSprite);
+		#end
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(name, value);

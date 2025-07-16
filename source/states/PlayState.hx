@@ -1801,6 +1801,25 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	function lerpColor(color1:Int, color2:Int, t:Float):Int {
+		var a1 = (color1 >> 24) & 0xFF;
+		var r1 = (color1 >> 16) & 0xFF;
+		var g1 = (color1 >> 8) & 0xFF;
+		var b1 = color1 & 0xFF;
+	
+		var a2 = (color2 >> 24) & 0xFF;
+		var r2 = (color2 >> 16) & 0xFF;
+		var g2 = (color2 >> 8) & 0xFF;
+		var b2 = color2 & 0xFF;
+	
+		var a = Std.int(a1 + (a2 - a1) * t);
+		var r = Std.int(r1 + (r2 - r1) * t);
+		var g = Std.int(g1 + (g2 - g1) * t);
+		var b = Std.int(b1 + (b2 - b1) * t);
+	
+		return (a << 24) | (r << 16) | (g << 8) | b;
+	}
+
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
@@ -1911,40 +1930,58 @@ class PlayState extends MusicBeatState
 	
 	// Velocidad
 	if (curSpeed != lastSpeed) {
-		var diff = Math.round((curSpeed - lastSpeed) * 100) / 100; // Más precisión
-		var sign = diff > 0 ? "+" : "";
-		speedText.text = "Speed: " + Std.string(Math.round(curSpeed * 10) / 10) + "x";
-		var flashColor = (diff > 0) ? FlxColor.RED : (diff < 0 ? FlxColor.LIME : FlxColor.WHITE);
-		speedText.color = flashColor;
+		var exclam = "";
+		var color = 0xFFFFFFFF;
+		var minSpeed = 2.0;
+		var maxSpeed = 4.0;
+		if (curSpeed >= minSpeed) {
+			var t = Math.min((curSpeed - minSpeed) / (maxSpeed - minSpeed), 1);
+			color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+			if (t > 0.66) exclam = "!!!";
+			else if (t > 0.33) exclam = "!!";
+			else exclam = "!";
+		}
+		speedText.text = "Speed: " + Std.string(Math.round(curSpeed * 10) / 10) + "x" + exclam;
+		speedText.color = color;
 		speedText.visible = ClientPrefs.data.debugData;
-		speedText.alpha = 0.6;
-		FlxTween.color(speedText, 0.4, flashColor, FlxColor.WHITE);
 		lastSpeed = curSpeed;
 	}
 	
 	// BPM
 	if (curBPM != lastBPM) {
-		var diff = curBPM - lastBPM;
-		var sign = diff > 0 ? "+" : "";
-		bpmText.text = "BPM: " + Std.string(curBPM);
-		var flashColor = (diff > 0) ? FlxColor.RED : FlxColor.LIME;
-		bpmText.color = flashColor;
+		var exclam = "";
+		var color = 0xFFFFFFFF;
+		var minBPM = 150.0;
+		var maxBPM = 300.0;
+		if (curBPM >= minBPM) {
+			var t = Math.min((curBPM - minBPM) / (maxBPM - minBPM), 1);
+			color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+			if (t > 0.66) exclam = "!!!";
+			else if (t > 0.33) exclam = "!!";
+			else exclam = "!";
+		}
+		bpmText.text = "BPM: " + Std.string(curBPM) + exclam;
+		bpmText.color = color;
 		bpmText.visible = ClientPrefs.data.debugData;
-		bpmText.alpha = 0.6;
-		FlxTween.color(bpmText, 0.4, flashColor, FlxColor.WHITE);
 		lastBPM = curBPM;
 	}
 	
 	// Salud
 	if (curHealth != lastHealth) {
-		var diff = Math.floor((curHealth - lastHealth) / 2 * 100);
-		var sign = diff > 0 ? "+" : "";
-		healthText.text = "Health: " + healthPercent + "%";
-		var flashColor = (diff > 0) ? FlxColor.LIME : FlxColor.RED;
-		healthText.color = flashColor;
+		var exclam = "";
+		var color = 0xFFFFFFFF;
+		var minHealth = 0.0;
+		var maxHealth = 25.0;
+		if (healthPercent <= maxHealth) {
+			var t = Math.min((maxHealth - healthPercent) / (maxHealth - minHealth), 1);
+			color = lerpColor(0xFFFFFFFF, 0xFFFF8080, t);
+			if (t > 0.66) exclam = "!!!";
+			else if (t > 0.33) exclam = "!!";
+			else exclam = "!";
+		}
+		healthText.text = "Health: " + healthPercent + "%" + exclam;
+		healthText.color = color;
 		healthText.visible = ClientPrefs.data.debugData;
-		healthText.alpha = 0.6;
-		FlxTween.color(healthText, 0.4, flashColor, FlxColor.WHITE);
 		lastHealth = curHealth;
 	}
 

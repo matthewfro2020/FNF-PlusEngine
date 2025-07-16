@@ -2,6 +2,8 @@ package objects;
 
 import flixel.addons.display.FlxPieDial;
 import psychlua.LuaUtils;
+import flixel.FlxCamera;
+import psychlua.LuaUtils;
 
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
@@ -28,12 +30,15 @@ class VideoSprite extends FlxSpriteGroup {
 
 		this.videoName = videoName;
 		scrollFactor.set();
-		switch(camera.toLowerCase()) {
-            case "hud": cameras = [FlxG.cameras.list[1]]; // camHUD normalmente es la segunda
-            case "game": cameras = [FlxG.cameras.list[0]]; // camGame normalmente es la primera
-            case "other": cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]]; // camOther suele ser la última
-            default: cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-        }
+
+		var cam:FlxCamera = null;
+		if (camera == null || camera.trim() == "") {
+			// Usa la última cámara de la lista (por defecto)
+			cam = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+		} else {
+			cam = LuaUtils.cameraFromString(camera);
+		}
+		cameras = [cam];
 
 		waiting = isWaiting;
 		if(!waiting)
