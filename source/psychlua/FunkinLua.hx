@@ -92,7 +92,10 @@ class FunkinLua {
 		set('Function_Continue', LuaUtils.Function_Continue);
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
+
 		set('PsychVersion', MainMenuState.psychEngineVersion.trim());
+		set('version', MainMenuState.psychEngineVersion.trim());
+		
 		set('PlusVersion', MainMenuState.plusEngineVersion.trim());
 		set('modFolder', this.modFolder);
 

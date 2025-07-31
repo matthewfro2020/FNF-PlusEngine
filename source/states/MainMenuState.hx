@@ -17,7 +17,7 @@ enum MainMenuColumn {
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '1.0.4'; // This is also used for Discord RPC
-    public static var plusEngineVersion:String = '0.6.1'; // Nothing interesting =)
+    public static var plusEngineVersion:String = '0.6.2'; // Nothing interesting =)
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
 	var allowMouse:Bool = true; //Turn this off to block mouse movement in menus
@@ -128,23 +128,26 @@ class MainMenuState extends MusicBeatState
 		Achievements.reloadList();
 		#end
 		#end
-
+		
 		#if CHECK_FOR_UPDATES
-        if (showOutdatedWarning && ClientPrefs.data.checkForUpdates) {
-            // Verificar actualizaciones de forma asíncrona
-            var updateVersion = CoolUtil.checkForUpdates();
-            
-            // Pequeño delay para que la verificación HTTP tenga tiempo de ejecutarse
-            new FlxTimer().start(0.1, function(tmr:FlxTimer) {
-                if (CoolUtil.hasUpdate && CoolUtil.latestVersion != plusEngineVersion) {
-                    substates.OutdatedSubState.updateVersion = CoolUtil.latestVersion;
-                    persistentUpdate = false;
-                    showOutdatedWarning = false;
-                    openSubState(new substates.OutdatedSubState());
-                }
-            });
-        }
-        #end
+		if (showOutdatedWarning && ClientPrefs.data.checkForUpdates) {
+			// Verificación inmediata sin delays
+			try {
+				var updateVersion = CoolUtil.checkForUpdates();
+						
+				// Verificar inmediatamente después de la llamada
+				if (CoolUtil.hasUpdate && CoolUtil.latestVersion != plusEngineVersion) {
+					substates.OutdatedSubState.updateVersion = CoolUtil.latestVersion;
+					persistentUpdate = false;
+					showOutdatedWarning = false;
+					openSubState(new substates.OutdatedSubState());
+				}
+			} catch (e:Dynamic) {
+				trace('Error checking for updates: ' + e);
+				// No hacer nada si falla la verificación
+			}
+		}
+		#end
 
 		FlxG.camera.follow(camFollow, null, 0.15);
 	}
@@ -369,12 +372,6 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
 			#end
-		}
-
-		// Crash de prueba: presiona F8 para lanzar un error y probar el CrashHandler
-		if (FlxG.keys.justPressed.F8)
-		{
-			throw "Crash de prueba: ¡El CrashHandler funciona!";
 		}
 
 		super.update(elapsed);

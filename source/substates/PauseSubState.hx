@@ -180,9 +180,31 @@ class PauseSubState extends MusicBeatSubstate
 		//The time and date live yippee
 		if (dateTimeText != null) {
             var now:Date = Date.now();
-            var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            var monthNames = ["January", "February", "March", "April", "May", "June", 
-                              "July", "August", "September", "October", "November", "December"];
+            
+            // ← USAR TRADUCCIONES PARA DÍAS Y MESES
+            var dayNames = [
+                Language.getPhrase("day_sunday", "Sunday"),
+                Language.getPhrase("day_monday", "Monday"), 
+                Language.getPhrase("day_tuesday", "Tuesday"),
+                Language.getPhrase("day_wednesday", "Wednesday"),
+                Language.getPhrase("day_thursday", "Thursday"),
+                Language.getPhrase("day_friday", "Friday"),
+                Language.getPhrase("day_saturday", "Saturday")
+            ];
+            var monthNames = [
+                Language.getPhrase("month_january", "January"),
+                Language.getPhrase("month_february", "February"),
+                Language.getPhrase("month_march", "March"),
+                Language.getPhrase("month_april", "April"),
+                Language.getPhrase("month_may", "May"),
+                Language.getPhrase("month_june", "June"),
+                Language.getPhrase("month_july", "July"),
+                Language.getPhrase("month_august", "August"),
+                Language.getPhrase("month_september", "September"),
+                Language.getPhrase("month_october", "October"),
+                Language.getPhrase("month_november", "November"),
+                Language.getPhrase("month_december", "December")
+            ];
             
             var dayName = dayNames[now.getDay()];
             var monthName = monthNames[now.getMonth()];

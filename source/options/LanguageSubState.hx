@@ -20,8 +20,16 @@ class LanguageSubState extends MusicBeatSubstate
 		add(bg);
 		add(grpLanguages);
 
-		languages.push(ClientPrefs.defaultData.language); //English (US)
-		displayLanguages.set(ClientPrefs.defaultData.language, Language.defaultLangName);
+		// ← NUEVO: Cargar idiomas hardcodeados primero
+		var hardcodedLanguages = Language.getAvailableLanguages();
+		for (lang in hardcodedLanguages) {
+			if (!languages.contains(lang.code)) {
+				languages.push(lang.code);
+				displayLanguages.set(lang.code, lang.name);
+			}
+		}
+
+		// ← MANTENER: Cargar idiomas desde archivos .lang como fallback
 		var directories:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'data/');
 		for (directory in directories)
 		{

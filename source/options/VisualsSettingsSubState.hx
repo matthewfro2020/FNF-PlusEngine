@@ -110,18 +110,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 		
-		var option:Option = new Option(
-			'Abbreviate Score',
+		var option:Option = new Option('Abbreviate Score',
 			'If enabled, the score will be abbreviated (e.g. 10.00K, 1.00M).',
 			'abbreviateScore',
-			BOOL
-		);
-		addOption(option);
-
-		var option:Option = new Option(
-			'Use Freaky Font',
-			'Enable to use the freaky.ttf font instead of vcr.ttf.',
-			'useFreakyFont',
 			BOOL
 		);
 		addOption(option);

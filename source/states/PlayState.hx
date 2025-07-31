@@ -36,6 +36,7 @@ import openfl.filters.ShaderFilter;
 import shaders.ErrorHandledShader;
 
 import objects.VideoSprite;
+import objects.JudCounter;
 import objects.Note.EventNote;
 import objects.*;
 import states.stages.*;
@@ -89,6 +90,23 @@ class PlayState extends MusicBeatState
 		['Epic!!', 1], //From 95% to 99%
 		['Perfect!!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
+
+	// ← NUEVA FUNCIÓN PARA OBTENER RATINGS TRADUCIDOS
+	public static function getRatingStuff():Array<Dynamic> {
+		return [
+			[Language.getPhrase('rating_you_suck', 'You Suck!'), 0.2],
+			[Language.getPhrase('rating_shit', 'Shit'), 0.4],
+			[Language.getPhrase('rating_bad', 'Bad'), 0.5],
+			[Language.getPhrase('rating_bruh', 'Bruh'), 0.6],
+			[Language.getPhrase('rating_meh', 'Meh'), 0.69],
+			[Language.getPhrase('rating_nice', 'Nice'), 0.7],
+			[Language.getPhrase('rating_good', 'Good'), 0.8],
+			[Language.getPhrase('rating_great', 'Great'), 0.9],
+			[Language.getPhrase('rating_sick', 'Sick!'), 0.95],
+			[Language.getPhrase('rating_epic', 'Epic!!'), 1],
+			[Language.getPhrase('rating_perfect', 'Perfect!!!'), 1]
+		];
+	}
 
 	//event variables
 	private var isCameraOnForcedPos:Bool = false;
@@ -223,7 +241,7 @@ class PlayState extends MusicBeatState
 	var timeTxt:FlxText;
 	var scoreTxtTween:FlxTween;
     var timeTxtTween:FlxTween;
-    var judgementCounterText:FlxText;
+    var judgementCounter:JudCounter;
 	var ghostJText:FlxText;
 	var popupTimer:FlxTimer = null;
     var popupVisible:Bool = false;
@@ -516,14 +534,9 @@ class PlayState extends MusicBeatState
 		add(noteGroup);
 
 		// Counter
-	    judgementCounterText = new FlxText(10, (FlxG.height / 2) - 100, 0, "", 20); // Más grande y centrado vertical
-		judgementCounterText.setFormat(Paths.defaultFont(), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		judgementCounterText.scrollFactor.set();
-		judgementCounterText.alpha = 1;
-		judgementCounterText.borderSize = 2;
-		judgementCounterText.cameras = [camHUD];
-		//judgementCounterText.allowMarkup = true; // No work
-		add(judgementCounterText);
+	    judgementCounter = new JudCounter(10, (FlxG.height / 2) - 100);
+        judgementCounter.setCameras([camHUD]);
+        add(judgementCounter);
 
 		ghostJText = new FlxText(18, FlxG.height - 100, 0, "None\nx0", 22);
         ghostJText.setFormat(Paths.defaultFont(), 22, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -570,12 +583,35 @@ class PlayState extends MusicBeatState
         var now = Date.now();
         var hourStr = StringTools.lpad(Std.string(now.getHours()), "0", 2);
         var minStr = StringTools.lpad(Std.string(now.getMinutes()), "0", 2);
-        var timeStr = hourStr + ":" + minStr + "HRS";
+        var timeStr = hourStr + ":" + minStr + Language.getPhrase("time_hours", "HRS");
 
-        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        var dayName = days[now.getDay()];
-        var monthName = months[now.getMonth()];
+        // ← USAR TRADUCCIONES PARA DÍAS Y MESES
+        var dayNames = [
+            Language.getPhrase("day_sunday", "Sunday"),
+            Language.getPhrase("day_monday", "Monday"), 
+            Language.getPhrase("day_tuesday", "Tuesday"),
+            Language.getPhrase("day_wednesday", "Wednesday"),
+            Language.getPhrase("day_thursday", "Thursday"),
+            Language.getPhrase("day_friday", "Friday"),
+            Language.getPhrase("day_saturday", "Saturday")
+        ];
+        var monthNames = [
+            Language.getPhrase("month_january", "January"),
+            Language.getPhrase("month_february", "February"),
+            Language.getPhrase("month_march", "March"),
+            Language.getPhrase("month_april", "April"),
+            Language.getPhrase("month_may", "May"),
+            Language.getPhrase("month_june", "June"),
+            Language.getPhrase("month_july", "July"),
+            Language.getPhrase("month_august", "August"),
+            Language.getPhrase("month_september", "September"),
+            Language.getPhrase("month_october", "October"),
+            Language.getPhrase("month_november", "November"),
+            Language.getPhrase("month_december", "December")
+        ];
+        
+        var dayName = dayNames[now.getDay()];
+        var monthName = monthNames[now.getMonth()];
         var dateStr = dayName + " - " + monthName + " " + now.getDate() + ", " + now.getFullYear();
 
         var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + Difficulty.getString() + ")";
@@ -1303,16 +1339,17 @@ class PlayState extends MusicBeatState
 		ratingFC = "";
 		if(songMisses == 0)
 		{
-			if (shits > 0) ratingFC = 'FC';
-			else if (bads > 0) ratingFC = 'BFC';
-			else if (goods > 0) ratingFC = 'GFC';
-			else if (sicks > 0) ratingFC = 'SFC';
-			else if (epics > 0) ratingFC = 'EFC';
+			// ← USAR TRADUCCIONES PARA FC RATINGS
+			if (shits > 0) ratingFC = Language.getPhrase('rating_fc', 'FC');
+			else if (bads > 0) ratingFC = Language.getPhrase('rating_bfc', 'BFC');
+			else if (goods > 0) ratingFC = Language.getPhrase('rating_gfc', 'GFC');
+			else if (sicks > 0) ratingFC = Language.getPhrase('rating_sfc', 'SFC');
+			else if (epics > 0) ratingFC = Language.getPhrase('rating_efc', 'EFC');
 		} else {
-			if (songMisses < 2) ratingFC = 'SMC';
-			else if (songMisses < 5) ratingFC = 'LMC';
-			else if (songMisses < 10) ratingFC = 'MMC';
-			else ratingFC = 'HMC';
+			if (songMisses < 2) ratingFC = Language.getPhrase('rating_smc', 'SMC');
+			else if (songMisses < 5) ratingFC = Language.getPhrase('rating_lmc', 'LMC');
+			else if (songMisses < 10) ratingFC = Language.getPhrase('rating_mmc', 'MMC');
+			else ratingFC = Language.getPhrase('rating_hmc', 'HMC');
 		}
 	}
 
@@ -1929,19 +1966,47 @@ class PlayState extends MusicBeatState
 			}
 		}
     if (versionText != null)
-    {
-        var now = Date.now();
-        var hourStr = StringTools.lpad(Std.string(now.getHours()), "0", 2);
-        var minStr = StringTools.lpad(Std.string(now.getMinutes()), "0", 2);
-        var timeStr = hourStr + ":" + minStr + "HRS";
-        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        var dayName = days[now.getDay()];
-        var monthName = months[now.getMonth()];
-        var dateStr = dayName + " - " + monthName + " " + now.getDate() + ", " + now.getFullYear();
-        var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + Difficulty.getString() + ")";
-        versionText.text = timeStr + "\n" + dateStr + "\n" + versionStr;
-    }
+	{
+    var now = Date.now();
+    var hourStr = StringTools.lpad(Std.string(now.getHours()), "0", 2);
+    var minStr = StringTools.lpad(Std.string(now.getMinutes()), "0", 2);
+    var timeStr = hourStr + ":" + minStr + Language.getPhrase("time_hrs", "HRS");
+    
+    // ← USAR TRADUCCIONES PARA DÍAS Y MESES
+    var dayNames = [
+        Language.getPhrase("day_sunday", "Sunday"),
+        Language.getPhrase("day_monday", "Monday"), 
+        Language.getPhrase("day_tuesday", "Tuesday"),
+        Language.getPhrase("day_wednesday", "Wednesday"),
+        Language.getPhrase("day_thursday", "Thursday"),
+        Language.getPhrase("day_friday", "Friday"),
+        Language.getPhrase("day_saturday", "Saturday")
+    ];
+    var monthNames = [
+        Language.getPhrase("month_january", "January"),
+        Language.getPhrase("month_february", "February"),
+        Language.getPhrase("month_march", "March"),
+        Language.getPhrase("month_april", "April"),
+        Language.getPhrase("month_may", "May"),
+        Language.getPhrase("month_june", "June"),
+        Language.getPhrase("month_july", "July"),
+        Language.getPhrase("month_august", "August"),
+        Language.getPhrase("month_september", "September"),
+        Language.getPhrase("month_october", "October"),
+        Language.getPhrase("month_november", "November"),
+        Language.getPhrase("month_december", "December")
+    ];
+    
+    var dayName = dayNames[now.getDay()];
+    var monthName = monthNames[now.getMonth()];
+    var dateStr = dayName + " - " + monthName + " " + now.getDate() + ", " + now.getFullYear();
+    
+    // ← TRADUCIR TAMBIÉN EL TEXTO DE VERSIÓN Y DIFICULTAD
+    var difficultyText = Language.getPhrase("difficulty_" + Difficulty.getString().toLowerCase(), Difficulty.getString());
+    var versionStr = Language.getPhrase("plus_engine_version", "Plus Engine v") + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + difficultyText + ")";
+    
+    versionText.text = timeStr + "\n" + dateStr + "\n" + versionStr;
+}
 	if (ghostJText != null) {
 		ghostJText.text = capitalizeFirst(lastJudName) + "\nx" + combo;
 		ghostJText.visible = ClientPrefs.data.debugData;
@@ -1971,7 +2036,7 @@ class PlayState extends MusicBeatState
 			else if (t > 0.33) exclam = "!!";
 			else exclam = "!";
 		}
-		speedText.text = "Speed: " + Std.string(Math.round(curSpeed * 10) / 10) + "x" + exclam;
+		speedText.text = Language.getPhrase("debug_speed", "Speed") + ": " + Std.string(Math.round(curSpeed * 10) / 10) + "x" + exclam;
 		speedText.color = color;
 		speedText.visible = ClientPrefs.data.debugData;
 		lastSpeed = curSpeed;
@@ -2009,34 +2074,16 @@ class PlayState extends MusicBeatState
 			else if (t > 0.33) exclam = "!!";
 			else exclam = "!";
 		}
-		healthText.text = "Health: " + healthPercent + "%" + exclam;
+		healthText.text = Language.getPhrase("debug_health", "Health") + ": " + Std.string(Math.round(healthPercent)) + "%" + exclam;
 		healthText.color = color;
 		healthText.visible = ClientPrefs.data.debugData;
 		lastHealth = curHealth;
 	}
 
-		if (judgementCounterText != null)
-		{
-			if (ClientPrefs.judgementCounter)
-			{
-				var comboActual:Int = combo;
-				var comboMaximo:Int = maxCombo;
-				judgementCounterText.visible = true;
-				judgementCounterText.text =
-					Language.getPhrase('judgement_eps', 'Epics') + ' :  ' + ratingsData[0].hits + '\n' +
-					Language.getPhrase('judgement_sks', 'Sicks') + ' :  ' + ratingsData[1].hits + '\n' +
-					Language.getPhrase('judgement_gds', 'Goods') + ' :  ' + ratingsData[2].hits + '\n' +
-					Language.getPhrase('judgement_bds', 'Bads') + '  :  ' + ratingsData[3].hits + '\n' +
-					Language.getPhrase('judgement_shs', 'Shits') + ' :  ' + ratingsData[4].hits + '\n' +
-					Language.getPhrase('judgement_mis', 'Misses') + ':  ' + songMisses + '\n' +
-					'R. Combo: ' + comboActual + '\n' +
-					'M. Combo: ' + comboMaximo;
-			}
-			else
-			{
-				judgementCounterText.visible = false;
-			}
-		}
+		if (judgementCounter != null)
+        {
+            judgementCounter.updateCounter(ratingsData, songMisses, combo, maxCombo);
+        }
 		if (startingSong)
 		{
 			if (startedCountdown && Conductor.songPosition >= Conductor.offset)
@@ -2803,26 +2850,29 @@ class PlayState extends MusicBeatState
 			playbackRate = 1;
 
 		if (!chartingMode && !cpuControlled && !isStoryMode) {
-			MusicBeatState.switchState(new ResultsState({
-				score: songScore,
-				prevHighScore: Highscore.getScore(Song.loadedSongName, storyDifficulty),
-				accuracy: ratingPercent,
-				epics: ratingsData[0].hits,
-				sicks: ratingsData[1].hits,
-				goods: ratingsData[2].hits,
-				bads: ratingsData[3].hits,
-				shits: ratingsData[4].hits,
-				misses: songMisses,
-				maxCombo: maxCombo,
-				totalNotes: totalNotes,
-				songName: SONG.song,
-				difficulty: Difficulty.getString(),
-				isMod: Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0,
-				modFolder: Mods.currentModDirectory,
-				isPractice: practiceMode,
-				ratingName: ratingName,
-				ratingFC: ratingFC
-			}));
+                // INICIAR FREAKYMENU ANTES DE IR A RESULTSSTATE
+                FlxG.sound.playMusic(Paths.music('freakyMenu'), 0.7, true);
+                
+                MusicBeatState.switchState(new ResultsState({
+                    score: songScore,
+                    prevHighScore: Highscore.getScore(Song.loadedSongName, storyDifficulty),
+                    accuracy: ratingPercent,
+                    epics: ratingsData[0].hits,
+                    sicks: ratingsData[1].hits,
+                    goods: ratingsData[2].hits,
+                    bads: ratingsData[3].hits,
+                    shits: ratingsData[4].hits,
+                    misses: songMisses,
+                    maxCombo: maxCombo,
+                    totalNotes: totalNotes,
+                    songName: SONG.song,
+                    difficulty: Difficulty.getString(),
+                    isMod: Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0,
+                    modFolder: Mods.currentModDirectory,
+                    isPractice: practiceMode,
+                    ratingName: ratingName,
+                    ratingFC: ratingFC
+                }));
 			transitioning = true;
 			return true;
 		}
@@ -2963,6 +3013,21 @@ class PlayState extends MusicBeatState
 	
 		if(daRating.noteSplash && !note.noteSplashData.disabled)
 			spawnNoteSplashOnNote(note);
+
+		if (judgementCounter != null) {
+            // Determinar el índice del rating basado en el nombre
+            var ratingIndex = -1;
+            for (i in 0...ratingsData.length) {
+                if (ratingsData[i] == daRating) {
+                    ratingIndex = i;
+                    break;
+                }
+            }
+            
+            if (ratingIndex >= 0) {
+                judgementCounter.doBump(ratingIndex);
+            }
+        }
 	
 		if(!cpuControlled) {
 			songScore += score;
@@ -2972,6 +3037,15 @@ class PlayState extends MusicBeatState
 				totalPlayed++;
 				RecalculateRating(false);
 			}
+
+			if (judgementCounter != null) {
+                judgementCounter.doComboBump();
+                
+                // Si es un nuevo máximo combo
+                if (combo > maxCombo) {
+                    judgementCounter.doMaxComboBump();
+                }
+            }
 		}
 
 		var uiFolder:String = "";
@@ -3446,6 +3520,10 @@ class PlayState extends MusicBeatState
 		if(!endingSong) songMisses++;
 		totalPlayed++;
 		RecalculateRating(true);
+
+		if (judgementCounter != null) {
+            judgementCounter.doMissBump();
+        }
 
 		// play character anims
 		var char:Character = boyfriend;
@@ -4032,13 +4110,14 @@ class PlayState extends MusicBeatState
 				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
 				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
 
-				// Rating Name
-				ratingName = ratingStuff[ratingStuff.length-1][0]; //Uses last string
+				// Rating Name - ← USAR FUNCIÓN TRADUCIDA
+				var translatedRatingStuff = getRatingStuff();
+				ratingName = translatedRatingStuff[translatedRatingStuff.length-1][0]; //Uses last string
 				if(ratingPercent < 1)
-					for (i in 0...ratingStuff.length-1)
-						if(ratingPercent < ratingStuff[i][1])
+					for (i in 0...translatedRatingStuff.length-1)
+						if(ratingPercent < translatedRatingStuff[i][1])
 						{
-							ratingName = ratingStuff[i][0];
+							ratingName = translatedRatingStuff[i][0];
 							break;
 						}
 			}
