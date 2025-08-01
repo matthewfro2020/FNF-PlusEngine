@@ -1675,14 +1675,14 @@ class FunkinLua {
 	// Llama esto desde onPause y onResume
 	public function pauseLuaVideos() {
 		for (video in luaVideos) {
-			if (video != null && video.videoSprite != null && video.videoSprite.bitmap != null)
-				video.videoSprite.bitmap.pause();
+			if (video != null && video.videoSprite != null)
+				video.videoSprite.pause();
 		}
 	}
 	public function resumeLuaVideos() {
 		for (video in luaVideos) {
-			if (video != null && video.videoSprite != null && video.videoSprite.bitmap != null)
-				video.videoSprite.bitmap.play();
+			if (video != null && video.videoSprite != null)
+				video.videoSprite.resume();
 		}
 	}
 

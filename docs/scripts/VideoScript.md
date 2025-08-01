@@ -9,7 +9,7 @@ This guide will help you play videos in your charts using **Haxe**.
 ## 🎬 Basic Implementation
 
 ```haxe
-import hxvlc.flixel.FlxVideoSprite;
+import hxcodec.flixel.FlxVideoSprite;
 import flixel.FlxCamera;
 import backend.Conductor;
 import Main;
@@ -23,7 +23,7 @@ function onCreate()
     FlxG.autoPause = false;
 
     myVideo = new FlxVideoSprite();
-    myVideo.load(Paths.video('videoName')); // No extension
+    myVideo.play(Paths.video('videoName'), false); // videoName without extension, shouldLoop
 
     videoArray = [myVideo];
     
@@ -40,7 +40,7 @@ function onCreatePost()
 {
     for (i in videoArray)
     {
-        i.play();
+        // Note: Video starts automatically when loaded, no need to call play again
         new FlxTimer().start(0.0001, function(tmr) {
             i.pause();
             i.bitmap.time = 0;
@@ -165,13 +165,13 @@ function onCreate()
     // ... base code ...
     
     video1 = new FlxVideoSprite();
-    video1.load(Paths.video('intro'));
+    video1.play(Paths.video('intro'), false);
     
     video2 = new FlxVideoSprite();
-    video2.load(Paths.video('drop'));
+    video2.play(Paths.video('drop'), false);
     
     video3 = new FlxVideoSprite();
-    video3.load(Paths.video('outro'));
+    video3.play(Paths.video('outro'), false);
 
     videoArray = [video1, video2, video3];
     

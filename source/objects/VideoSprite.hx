@@ -5,8 +5,8 @@ import psychlua.LuaUtils;
 import flixel.FlxCamera;
 import psychlua.LuaUtils;
 
-#if hxvlc
-import hxvlc.flixel.FlxVideoSprite;
+#if hxcodec
+import hxcodec.flixel.FlxVideoSprite;
 #end
 
 class VideoSprite extends FlxSpriteGroup {
@@ -59,12 +59,12 @@ class VideoSprite extends FlxSpriteGroup {
 		// callbacks
 		if(!shouldLoop) videoSprite.bitmap.onEndReached.add(finishVideo);
 
-		videoSprite.bitmap.onFormatSetup.add(function()
+		videoSprite.bitmap.onTextureSetup.add(function()
 		{
 			/*
-			#if hxvlc
-			var wd:Int = videoSprite.bitmap.formatWidth;
-			var hg:Int = videoSprite.bitmap.formatHeight;
+			#if hxcodec
+			var wd:Int = videoSprite.bitmap.width;
+			var hg:Int = videoSprite.bitmap.height;
 			trace('Video Resolution: ${wd}x${hg}');
 			videoSprite.scale.set(FlxG.width / wd, FlxG.height / hg);
 			#end
@@ -75,8 +75,8 @@ class VideoSprite extends FlxSpriteGroup {
 		});
 
 		// start video and adjust resolution to screen size
-		videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null);
-		videoSprite.bitmap.onFormatSetup.add(function() {
+		videoSprite.play(videoName, shouldLoop);
+		videoSprite.bitmap.onTextureSetup.add(function() {
 		});
 		videoSprite.bitmap.onEndReached.add(function() {
 		});
@@ -178,7 +178,7 @@ class VideoSprite extends FlxSpriteGroup {
 		skipSprite.alpha = FlxMath.remapToRange(skipSprite.amount, 0.025, 1, 0, 1);
 	}
 
-	public function play() videoSprite?.play();
+	public function play() videoSprite?.resume();
 	public function resume() videoSprite?.resume();
 	public function pause() videoSprite?.pause();
 	

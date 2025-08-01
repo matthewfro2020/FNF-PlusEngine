@@ -82,7 +82,8 @@ class Main extends Sprite
 		Sys.setCwd(lime.system.System.applicationStorageDirectory);
 		#end
 		#if VIDEOS_ALLOWED
-		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
+		// hxcodec doesn't require initialization like hxvlc did
+		// hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
 
 		#if LUA_ALLOWED
@@ -264,22 +265,6 @@ class Main extends Sprite
 
 	function onGlobalKeyDown(e:openfl.events.KeyboardEvent):Void
 	{
-	    // Captura de pantalla con C
-	    if (e.keyCode == 67) // 67 = C
-    	{
-        	var bmp = new openfl.display.BitmapData(Std.int(Lib.current.stage.stageWidth), Std.int(Lib.current.stage.stageHeight));
-        	bmp.draw(Lib.current.stage);
-        	var folder = "./screenshots/";
-        	var fileName = folder + 'screenshot_' + Date.now().getTime() + '.png';
-        	#if sys
-        	if (!sys.FileSystem.exists(folder))
-            	sys.FileSystem.createDirectory(folder);
-        	var bytes = bmp.encode(bmp.rect, new openfl.display.PNGEncoderOptions());
-        	sys.io.File.saveBytes(fileName, bytes);
-        	#end
-        	trace('Screenshot saved as ' + fileName);
-    	}
-
 	    // Alternar fullscreen con F11
 	    if (e.keyCode == 122) // 122 = F11
 	    {

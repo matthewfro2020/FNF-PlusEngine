@@ -44,7 +44,7 @@ Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), 
 * Keoiki - Note Splash Animations and Latin Alphabet.
 * SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform.
 * EliteMasterEric - Runtime Shaders support and Other PRs.
-* MAJigsaw77 - .MP4 Video Loader Library (hxvlc).
+* polybiusproxy - .MP4 Video Loader Library (hxcodec).
 * iFlicky - Composer of Psync, Tea Time and some sound effects.
 * KadeDev - Fixed some issues on Chart Editor and Other PRs.
 * superpowers04 - LUA JIT Fork.
