@@ -87,6 +87,7 @@ class TitleState extends MusicBeatState
 			}
 			persistentUpdate = true;
 			persistentDraw = true;
+			MobileData.init();
 		}
 
 		if (FlxG.save.data.weekCompleted != null)
@@ -102,6 +103,7 @@ class TitleState extends MusicBeatState
 		#else
 		if(FlxG.save.data.flashing == null && !FlashingState.leftState)
 		{
+			controls.isInSubstate = false; //idfk what's wrong
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new FlashingState());
@@ -326,17 +328,7 @@ class TitleState extends MusicBeatState
 			Conductor.songPosition = FlxG.sound.music.time;
 		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
 
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
-
-		#if mobile
-		for (touch in FlxG.touches.list)
-		{
-			if (touch.justPressed)
-			{
-				pressedEnter = true;
-			}
-		}
-		#end
+		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT || TouchUtil.justPressed;
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
@@ -565,7 +557,7 @@ class TitleState extends MusicBeatState
 	{
 		if (!skippedIntro)
 		{
-			
+			#if TITLE_SCREEN_EASTER_EGG
 			if (playJingle) //Ignore deez
 			{
 				playJingle = false;
@@ -622,7 +614,7 @@ class TitleState extends MusicBeatState
 					};
 				}
 			}
-			else  //Default! Edit this one!!
+			else #end //Default! Edit this one!!
 			{
 				remove(ngSpr);
 				remove(credGroup);
@@ -631,7 +623,7 @@ class TitleState extends MusicBeatState
 				var easteregg:String = FlxG.save.data.psychDevsEasterEgg;
 				if (easteregg == null) easteregg = '';
 				easteregg = easteregg.toUpperCase();
-				
+				#if TITLE_SCREEN_EASTER_EGG
 				if(easteregg == 'SHADOW')
 				{
 					FlxG.sound.music.fadeOut();
@@ -640,7 +632,7 @@ class TitleState extends MusicBeatState
 						FreeplayState.vocals.fadeOut();
 					}
 				}
-				
+				#end
 			}
 			skippedIntro = true;
 		}

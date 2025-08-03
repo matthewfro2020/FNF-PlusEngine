@@ -15,8 +15,10 @@ import hxcodec.flixel.FlxVideoSprite;
  * Wrapper de compatibilidad para VideoHandler de hxcodec 2.6.0
  * Emula la API original usando FlxVideoSprite internamente
  */
+
 class VideoHandler extends FlxSprite
 {
+	#if VIDEOS_ALLOWED
 	public var canSkip:Bool = true;
 	public var canUseSound:Bool = true;
 	public var canUseAutoResize:Bool = true;
@@ -477,4 +479,5 @@ class VideoHandler extends FlxSprite
 		// El script lua puede llamar FlxG.stage.removeEventListener("enterFrame", video.update)
 		// pero esto no afecta nuestro funcionamiento interno ya que usamos updateListener
 	}
+	#end
 }

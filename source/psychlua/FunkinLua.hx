@@ -48,6 +48,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 
 import haxe.Json;
+import mobile.psychlua.Functions;
 
 class FunkinLua {
 	public var lua:State = null;
@@ -55,7 +56,6 @@ class FunkinLua {
 	public var scriptName:String = '';
 	public var modFolder:String = null;
 	public var closed:Bool = false;
-	public var luaVideos:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
@@ -63,7 +63,6 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
-	public static var originalWindowTitle:String = null;
 
 	public function new(scriptName:String) {
 		lua = LuaL.newstate();
@@ -746,11 +745,6 @@ class FunkinLua {
 			return true;
 		});
 		Lua_helper.add_callback(lua, "endSong", function() {
-			
-			#if windows
-            var window = Lib.application.window;
-            if (FunkinLua.originalWindowTitle != null) window.title = FunkinLua.originalWindowTitle;
-            #end
 			game.KillNotes();
 			game.endSong();
 			return true;
@@ -1313,6 +1307,7 @@ class FunkinLua {
 				luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
 			}
 			return false;
+
 			#else
 			PlayState.instance.inCutscene = true;
 			new FlxTimer().start(0.1, function(tmr:FlxTimer)
@@ -1590,6 +1585,8 @@ class FunkinLua {
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
 		DeprecatedFunctions.implement(this);
+		MobileFunctions.implement(this);
+		#if android AndroidFunctions.implement(this); #end
 
 		for (name => func in customFunctions)
 		{
@@ -1608,8 +1605,8 @@ class FunkinLua {
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
 				trace(resultStr);
-				#if windows
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				#if (desktop || mobile)
+				CoolUtil.showPopUp(resultStr, 'Error on lua script!');
 				#else
 				luaTrace('$scriptName\n$resultStr', true, false, FlxColor.RED);
 				#end
@@ -1670,20 +1667,6 @@ class FunkinLua {
 			trace(e);
 		}
 		return LuaUtils.Function_Continue;
-	}
-
-	// Llama esto desde onPause y onResume
-	public function pauseLuaVideos() {
-		for (video in luaVideos) {
-			if (video != null && video.videoSprite != null)
-				video.videoSprite.pause();
-		}
-	}
-	public function resumeLuaVideos() {
-		for (video in luaVideos) {
-			if (video != null && video.videoSprite != null)
-				video.videoSprite.resume();
-		}
 	}
 
 	public function set(variable:String, data:Dynamic) {
