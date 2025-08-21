@@ -176,13 +176,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option(
-            'Show current state',
-            'If enabled, the FPS counter will show the current State.',
-            'showStateInFPS',
-            BOOL);
-        addOption(option);
-
-		var option:Option = new Option(
             'Combo and Rating in camGame',
             'If enabled, Combo and Ratings will be rendered in the camGame layer instead of camHUD.',
             'comboInGame',

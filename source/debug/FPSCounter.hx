@@ -120,17 +120,9 @@ class FPSCounter extends TextField
 		var fpsNumber = '$currentFPS';
 		var fpsLabel = ' FPS';
 		var memoryText = '\n${currentMemoryStr} / ${peakMemoryStr}';
-		
-		var stateText = '';
-		if (ClientPrefs.data.showStateInFPS) {
-			var stateName = "";
-			if (FlxG.state != null)
-				stateName = Type.getClassName(Type.getClass(FlxG.state));
-			stateText = '\n$stateName';
-		}
-		
+
 		// Construir texto completo
-		text = fpsNumber + fpsLabel + memoryText + stateText;
+		text = fpsNumber + fpsLabel + memoryText;
 		
 		// Aplicar formato al número del FPS (solo los primeros caracteres)
 		setTextFormat(fpsNumberFormat, 0, fpsNumber.length);

@@ -13,6 +13,8 @@ import haxe.io.Path;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.Sprite;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
@@ -39,6 +41,7 @@ import haxe.io.Path;
 #end
 
 import backend.Highscore;
+import objects.Watermark;
 
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
 #if (linux && !debug)
@@ -59,6 +62,9 @@ class Main extends Sprite
 	};
 
 	public static var fpsVar:FPSCounter;
+
+	public static var watermarkSprite:Sprite = null;
+	public static var watermark:Bitmap = null;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -83,7 +89,7 @@ class Main extends Sprite
 		#end
 		#if VIDEOS_ALLOWED
 		// hxcodec doesn't require initialization like hxvlc did
-		// hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
+		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
 
 		#if LUA_ALLOWED
@@ -202,6 +208,7 @@ class Main extends Sprite
 			resetSpriteCache(FlxG.game);
 		});
 
+		setupGame();
 
 		Lib.current.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onGlobalKeyDown);
 	}
@@ -269,7 +276,61 @@ class Main extends Sprite
 	    if (e.keyCode == 122) // 122 = F11
 	    {
 	        var window = Lib.application.window;
-	        window.fullscreen = !window.fullscreen;
-	    }
+	        window.fullscreen = !window.fullscreen;}
+	}
+
+	private function setupGame():Void
+	{
+		// --- Marca de agua global ---
+		var flxGraphic = backend.Paths.image("marca");
+		if (flxGraphic != null) {
+			var bmpData:openfl.display.BitmapData = flxGraphic.bitmap;
+			if (watermarkSprite != null && watermarkSprite.parent != null) {
+				watermarkSprite.parent.removeChild(watermarkSprite);
+			}
+			watermark = new openfl.display.Bitmap(bmpData);
+			watermark.smoothing = true;
+			watermarkSprite = new openfl.display.Sprite();
+			watermarkSprite.addChild(watermark);
+			var scale:Float = 0.85;
+			watermark.scaleX = scale;
+			watermark.scaleY = scale;
+			var marginX = 10;
+			var marginY = 10;
+			var stageW = openfl.Lib.current.stage.stageWidth;
+			var stageH = openfl.Lib.current.stage.stageHeight;
+			watermarkSprite.x = stageW - watermark.width * scale - marginX;
+			watermarkSprite.y = marginY;
+			watermarkSprite.alpha = 0.5;
+			watermarkSprite.visible = true;
+			openfl.Lib.current.stage.addChild(watermarkSprite);
+		} else {
+			trace('No se pudo cargar la marca de agua con backend.Paths.image("marca").');
+		}
+		// --- Fin marca de agua ---
+		// --- Marca de agua global estilo ejemplo ---
+		var imagePath = backend.Paths.getPath('images/marca.png', IMAGE);
+		if (sys.FileSystem.exists(imagePath)) {
+		    if (watermark != null && watermark.parent != null)
+		        removeChild(watermark);
+			var bmpData = openfl.display.BitmapData.fromFile(imagePath);
+			watermark = new openfl.display.Bitmap(bmpData);
+			var scale = 0.85;
+			watermark.scaleX = -scale; // Flip horizontal
+			watermark.scaleY = scale;
+			watermark.alpha = 0.5;
+			addChild(watermark);
+			// Función para posicionar correctamente
+			function positionWatermark() {
+				watermark.x = Lib.current.stage.stageWidth - watermark.width * Math.abs(watermark.scaleX) + 110;
+				watermark.y = Lib.current.stage.stageHeight - watermark.height * scale - 30;
+			}
+			positionWatermark();
+			Lib.current.stage.addEventListener(openfl.events.Event.RESIZE, function(_) positionWatermark());
+		}
+		if (watermark != null) {
+		    watermark.visible = true;
+		}
+		// --- Fin marca de agua ---
 	}
 }
