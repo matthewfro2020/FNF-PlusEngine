@@ -1,101 +1,61 @@
 --Mmmmm XD
 
---Ignore this function =p
---Ignorar esta función =p
-function onCreate() 
-    --Variable "version" has been deleted. This changed:
-    --La variable "version" ha sido eliminada. Esto cambió:
+-- Solo para Windows (Animaciones de la ventana)
+-- Only Windows (Window animation)
 
-    --Display Psych Engine version 
-    --Mostrar la versión de Psych Engine
-    makeLuaText('testverpsych', PsychVersion, 100, 0, 0) 
+-- Tweens con animaciones
+-- Tween animations
+winTweenX(tag, targetX, duration, ease)        -- Animar posición X | Animate X position
+winTweenY(tag, targetY, duration, ease)        -- Animar posición Y | Animate Y position
+winTweenSize(width, height, duration, ease)    -- Animar tamaño | Animate size
 
-    --Display Plus Engine version 
-    --Mostrar la versión de Plus Engine
-    makeLuaText('testverplus', PlusVersion, 100, 0, 0) 
-end
+-- Cambios instantáneos sin animación
+-- Instant changes without animation
+setWindowX(x)                    -- Establecer X inmediatamente | Set X immediately
+setWindowY(y)                    -- Establecer Y inmediatamente | Set Y immediately
+setWindowSize(width, height)     -- Cambiar tamaño inmediatamente | Set size immediately
+centerWindow()                   -- Centrar ventana en pantalla | Center window on screen
 
---Ignore this function =p
---Ignorar esta función =p
-function onStepHit()
-    if curStep == 1 then
-    --Window functions =p
-    --Funciones de la ventana =p
+-- Obtener datos de la ventana
+-- Get window data
+getWindowX()                     -- Posición X actual | Current X position
+getWindowY()                     -- Posición Y actual | Current Y position
+getWindowWidth()                 -- Ancho actual | Current width
+getWindowHeight()                -- Alto actual | Current height
+getWindowTitle()                 -- Título actual | Current title
 
-        --Alternar fullscreen
-        --Toggle fullscreen
-        setWinFSC(true)
+-- Estados de ventana
+-- Window states
+setWindowFullscreen(enable)      -- Pantalla completa | Fullscreen
+isWindowFullscreen()             -- ¿Está en pantalla completa? | Is fullscreen?
 
-        --Cambiar tamaño de la ventana
-        --Change window size
-        winTweenSize(1280, 720, 1.5, "quadInOut")
-        --[[Donde:
-            --> 1280 = ancho
-            --> 720 = alto
-            --> 1.5 = tiempo
-            --> "quadInOut" = tipo de interpolación
-            ------
-            Where:
-            --> 1280 = width
-            --> 720 = height
-            --> 1.5 = time
-            --> "quadInOut" = type of interpolation]]
+-- Cambiar propiedades
+-- Change properties
+setWindowTitle(title)            -- Cambiar título | Change title
+setWindowIcon(iconPath)          -- Cambiar icono | Change icon
+setWindowResizable(enable)       -- Permitir redimensionar | Resizable
+setWindowOpacity(opacity)        -- Transparencia (0.0-1.0) | Opacity (0.0-1.0)
+hideWindowBorder(enable)            -- Ocultar bordes (legacy) | Hide borders (legacy)
+setWinRCenter(width, height, animate) -- Nothing :v | animate: false; no animate: true
 
-        --Reescalar la ventana al centro
-        --Resize the window to the center
-        setWinRCenter(1280, 720, false)
-        --[[Donde:
-            --> 1280 = ancho
-            --> 720 = alto
-            --> false = Si quieres animadamente reescalarlo
-            ------
-            Where:
-            --> 1280 = width
-            --> 720 = height
-            --> false = If you want to resize it animatedly]]
+-- Efectos visuales
+-- Visual effects
+shakeWindow(intensity, duration)                                 -- Shake de ventana | Shake window
+bounceWindow(bounces, height, duration)                         -- Efecto rebote | Bounce effect
+orbitWindow(centerX, centerY, radius, speed, duration)         -- Orbitar punto | Orbit point
+pulseWindow(minScale, maxScale, pulseSpeed, duration)          -- Pulsación | Pulse
+spinWindow(rotations, duration)                                 -- Girar ventana | Spin window
+randomizeWindowPosition(minX, maxX, minY, maxY)                -- Posición aleatoria | Random position
 
-        --Mover la ventana en el eje X
-        --Move the window on the X axis
-        winTweenX("moveX", 100, 1.2, "quadInOut")
-        --[[Donde:
-            --> moveX = nombre de Tween
-            --> 100 = Se movera 100 respecto al borde izquierdo en el eje X "0 = pegado al lado izquierdo"
-            --> 1.2 = tiempo
-            --> "quadInOut" = tipo de interpolación
-            ------
-            Where:
-            --> moveX = name of Tween
-            --> 100 = It will move 100 from the left edge on the X axis "0 = stuck to the left side"
-            --> 1.2 = time
-            --> "quadInOut" = type of interpolation]]
+-- Datos del monitor
+-- Monitor data
+getScreenWidth()                 -- Ancho de pantalla | Screen width
+getScreenHeight()                -- Alto de pantalla | Screen height
+getScreenResolution()            -- {width: X, height: Y}
+getMonitorCount()                -- Número de monitores | Monitor count
+moveWindowToMonitor(index)       -- Mover a monitor específico | Move to specific monitor
 
-        --Mover la ventana en el eje Y
-        --Move the window on the Y axis
-        winTweenY("moveY", 200, 1.5, "linear") 
-        --[[Donde:
-            --> moveY = nombre de Tween
-            --> 200 = Se movera 200 respecto al borde superior en el eje Y "0 = pegado al lado superior"
-            --> 1.5 = tiempo
-            --> "linear" = tipo de interpolación
-            ------
-            Where:
-            --> moveY = name of Tween
-            --> 200 = It will move 200 from the top edge on the Y axis "0 = stuck to the top side"
-            --> 1.5 = time
-            --> "linear" = type of interpolation]]
-
-            -- Video
-
-        -- si usaras para cutcenes de tu nivel
-        -- if you use for your level cutscenes
-        startVideo("yourvideoname", true, false, false, true)
-        -- sin cam
-        -- without cam
-
-        -- pero si usaras para introducirlo al camHUD o camGame
-        -- if you use for your level introduction to camHUD or camGame
-        startVideo("yourvideoname", false, false, false, true, "cam")
-        -- no cambies the >false, false, false, true< Solo cam (hud o game)
-        -- don't change the >false, false, false, true< Only cam (hud or game)
-    end
-end
+-- Guardar/cargar configuración
+-- Save/load configuration
+saveWindowState()                -- Guardar estado como JSON | Save state as JSON
+loadWindowState(jsonString)      -- Cargar estado desde JSON | Load state from JSON

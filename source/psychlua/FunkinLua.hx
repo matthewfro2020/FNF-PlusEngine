@@ -1571,12 +1571,62 @@ class FunkinLua {
 			return closed;
 		});
 
+		// Window Tween Functions
 		Lua_helper.add_callback(lua, "winTweenSize", function(width:Int, height:Int, duration:Float = 1, ease:String = "linear") WindowTweens.winTweenSize(width, height, duration, ease));
 		Lua_helper.add_callback(lua, "winTweenX", function(tag:String, targetX:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenX(tag, targetX, duration, ease));
 		Lua_helper.add_callback(lua, "winTweenY", function(tag:String, targetY:Int, duration:Float = 1, ease:String = "linear") return WindowTweens.winTweenY(tag, targetY, duration, ease));
 
-		Lua_helper.add_callback(lua, "setWinFSC", function(enable:Bool) setFullscreen(enable));
-		Lua_helper.add_callback(lua, "hideWinBorder", function(enable:Bool) WindowTweens.setWindowBorderless(enable));
+		// Window Position Functions (Immediate)
+		Lua_helper.add_callback(lua, "setWindowX", function(x:Int) WindowTweens.setWindowX(x));
+		Lua_helper.add_callback(lua, "setWindowY", function(y:Int) WindowTweens.setWindowY(y));
+		Lua_helper.add_callback(lua, "setWindowSize", function(width:Int, height:Int) WindowTweens.setWindowSize(width, height));
+		
+		// Window Information Functions
+		Lua_helper.add_callback(lua, "getWindowX", function() return WindowTweens.getWindowX());
+		Lua_helper.add_callback(lua, "getWindowY", function() return WindowTweens.getWindowY());
+		Lua_helper.add_callback(lua, "getWindowWidth", function() return WindowTweens.getWindowWidth());
+		Lua_helper.add_callback(lua, "getWindowHeight", function() return WindowTweens.getWindowHeight());
+		
+		// Window State Control Functions
+		Lua_helper.add_callback(lua, "centerWindow", function() WindowTweens.centerWindow());
+		Lua_helper.add_callback(lua, "maximizeWindow", function() WindowTweens.maximizeWindow());
+		Lua_helper.add_callback(lua, "minimizeWindow", function() WindowTweens.minimizeWindow());
+		Lua_helper.add_callback(lua, "restoreWindow", function() WindowTweens.restoreWindow());
+		
+		// Window Properties Functions
+		Lua_helper.add_callback(lua, "setWindowTitle", function(title:String) WindowTweens.setWindowTitle(title));
+		Lua_helper.add_callback(lua, "getWindowTitle", function() return WindowTweens.getWindowTitle());
+		Lua_helper.add_callback(lua, "setWindowIcon", function(iconPath:String) WindowTweens.setWindowIcon(iconPath));
+		Lua_helper.add_callback(lua, "setWindowAlwaysOnTop", function(enable:Bool) WindowTweens.setWindowAlwaysOnTop(enable));
+		Lua_helper.add_callback(lua, "setWindowResizable", function(enable:Bool) WindowTweens.setWindowResizable(enable));
+		Lua_helper.add_callback(lua, "setWindowOpacity", function(opacity:Float) WindowTweens.setWindowOpacity(opacity));
+		
+		// Window Effects Functions
+		Lua_helper.add_callback(lua, "flashWindow", function() WindowTweens.flashWindow());
+		Lua_helper.add_callback(lua, "shakeWindow", function(?intensity:Float = 5.0, ?duration:Float = 0.5) WindowTweens.shakeWindow(intensity, duration));
+		Lua_helper.add_callback(lua, "bounceWindow", function(?bounces:Int = 3, ?height:Float = 50.0, ?duration:Float = 1.0) WindowTweens.bounceWindow(bounces, height, duration));
+		Lua_helper.add_callback(lua, "orbitWindow", function(centerX:Int, centerY:Int, ?radius:Float = 100.0, ?speed:Float = 1.0, ?duration:Float = 5.0) WindowTweens.orbitWindow(centerX, centerY, radius, speed, duration));
+		Lua_helper.add_callback(lua, "pulseWindow", function(?minScale:Float = 0.8, ?maxScale:Float = 1.2, ?pulseSpeed:Float = 2.0, ?duration:Float = 3.0) WindowTweens.pulseWindow(minScale, maxScale, pulseSpeed, duration));
+		Lua_helper.add_callback(lua, "spinWindow", function(?rotations:Int = 1, ?duration:Float = 2.0) WindowTweens.spinWindow(rotations, duration));
+		Lua_helper.add_callback(lua, "randomizeWindowPosition", function(?minX:Int = 0, ?maxX:Int = -1, ?minY:Int = 0, ?maxY:Int = -1) WindowTweens.randomizeWindowPosition(minX, maxX, minY, maxY));
+		
+		// Screen Information Functions
+		Lua_helper.add_callback(lua, "getScreenWidth", function() return WindowTweens.getScreenResolution().width);
+		Lua_helper.add_callback(lua, "getScreenHeight", function() return WindowTweens.getScreenResolution().height);
+		Lua_helper.add_callback(lua, "getScreenResolution", function() return WindowTweens.getScreenResolution());
+		Lua_helper.add_callback(lua, "getMonitorCount", function() return WindowTweens.getMonitorCount());
+		Lua_helper.add_callback(lua, "moveWindowToMonitor", function(monitorIndex:Int) WindowTweens.moveWindowToMonitor(monitorIndex));
+		
+		// Window Fullscreen Functions
+		Lua_helper.add_callback(lua, "setWindowFullscreen", function(enable:Bool) WindowTweens.setWindowFullscreen(enable));
+		Lua_helper.add_callback(lua, "isWindowFullscreen", function() return WindowTweens.isWindowFullscreen());
+		
+		// Window State Management Functions
+		Lua_helper.add_callback(lua, "saveWindowState", function() return WindowTweens.saveWindowState());
+		Lua_helper.add_callback(lua, "loadWindowState", function(stateJson:String) WindowTweens.loadWindowState(stateJson));
+		
+		// Legacy/Compatibility Functions
+		Lua_helper.add_callback(lua, "hideWindowBorder", function(enable:Bool) WindowTweens.setWindowBorderless(enable));
 		Lua_helper.add_callback(lua, "setWinRCenter", WindowTweens.winResizeCenter);
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
