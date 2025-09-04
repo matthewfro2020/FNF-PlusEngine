@@ -49,6 +49,10 @@ import psychlua.LuaUtils;
 import psychlua.HScript;
 #end
 
+#if LUA_ALLOWED
+import modchart.Manager;
+#end
+
 #if HSCRIPT_ALLOWED
 import psychlua.HScript.HScriptInfos;
 import crowplexus.iris.Iris;
@@ -800,6 +804,7 @@ class PlayState extends MusicBeatState
 
 		stagesFunc(function(stage:BaseStage) stage.createPost());
 		callOnScripts('onCreatePost');
+		callOnScripts('onModchart');
 		
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
@@ -3836,6 +3841,14 @@ class PlayState extends MusicBeatState
 		backend.NoteTypesConfig.clearNoteTypesData();
 
 		NoteSplash.configs.clear();
+		
+		// Limpiar Manager de modchart
+		#if LUA_ALLOWED
+		if (modchart.Manager.instance != null) {
+			modchart.Manager.instance = null;
+		}
+		#end
+		
 		instance = null;
 		super.destroy();
 	}
