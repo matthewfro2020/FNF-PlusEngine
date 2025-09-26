@@ -13,6 +13,7 @@ import openfl.display.Graphics;
 import openfl.display.Shape;
 import haxe.Http;
 import haxe.Json;
+import states.MainMenuState;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -50,6 +51,11 @@ class FPSCounter extends TextField
 	public var debugLevel:Int = 0;
 
 	/**
+		Mod author text that can be set from Lua scripts
+	**/
+	public var modAuthor:String = "";
+
+	/**
 		Background shape for debug mode
 	**/
 	private var bgShape:Shape;
@@ -60,21 +66,25 @@ class FPSCounter extends TextField
 	private var lastCommit:String = "Loading...";
 
 	/**
-		CPU and GPU usage tracking
+		CPU and GPU usage tracking - ELIMINADO para optimización
 	**/
-	private var cpuUsage:Float = 0.0;
-	private var gpuUsage:Float = 0.0;
+	// Variables eliminadas para mejor rendimiento
 
 	/**
-		Note and sprite counters
+		Note and sprite counters - ELIMINADO para optimización  
 	**/
-	private var noteCount:Int = 0;
-	private var spriteCount:Int = 0;
+	// Variables eliminadas para mejor rendimiento
 
 	/**
 		Runtime tracking
 	**/
 	private var startTime:Float = 0.0;
+
+	/**
+		Cached values for minimal operations
+	**/
+	private var cachedCurrentState:String = "Unknown";
+	private var lastCacheUpdateTime:Float = 0.0;
 
 	@:noCompletion private var times:Array<Float>;
 	@:noCompletion private var lastFramerateUpdateTime:Float;
@@ -88,7 +98,7 @@ class FPSCounter extends TextField
 	{
 		super();
 
-		#if !officialBuild
+		#if officialBuild
 		if (LimeSystem.platformName == LimeSystem.platformVersion || LimeSystem.platformVersion == null)
 			os = '\nOS: ${LimeSystem.platformName}' #if cpp + ' ${getArch() != 'Unknown' ? getArch() : ''}' #end;
 		else
@@ -134,6 +144,10 @@ class FPSCounter extends TextField
 
 		// Obtener información de rendimiento
 		startTime = haxe.Timer.stamp();
+		lastCacheUpdateTime = startTime;
+		
+		// Inicializar cache mínimo
+		cachedCurrentState = "Unknown";
 	}
 
 	// Función para interpolar entre dos colores ARGB
@@ -188,9 +202,9 @@ class FPSCounter extends TextField
 			colorHex = "#" + StringTools.hex(interpolatedColor & 0xFFFFFF, 6);
 		}
 
-		// Actualizar contadores para modo debug extendido
+		// Actualizar contadores para modo debug extendido (optimizado)
 		if (debugLevel == 2) {
-			updateCounters();
+			updateCountersOptimized();
 		}
 
 		var displayText:String = "";
@@ -201,6 +215,11 @@ class FPSCounter extends TextField
 				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
 						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + currentMemoryStr + ' / ' + peakMemoryStr + '</font>';
+				
+				// Agregar texto del autor del mod si está disponible
+				if (modAuthor != null && modAuthor.length > 0) {
+					displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + modAuthor + '</font>';
+				}
 			
 			case 1:
 				// Modo debug básico - con fondo y datos básicos (fuentes más grandes)
@@ -208,30 +227,25 @@ class FPSCounter extends TextField
 						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
+						   '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
 			
 			case 2:
-				// Modo debug extendido - todos los datos (fuentes más grandes)
+				// Modo debug extendido - datos esenciales solamente
 				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
 						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
+						   '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
 				
-				// Agregar líneas extra por separado para evitar problemas de parsing
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">CPU Usage: ' + cpuUsage + '%</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">GPU Usage: ' + gpuUsage + '%</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Note count: ' + noteCount + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Sprites: ' + spriteCount + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
+				// Solo datos esenciales y rápidos de obtener
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
 				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Target FPS: ' + targetFPS + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Draw Calls: ' + getDrawCalls() + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">GC Memory: ' + getGCStats() + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + getCurrentState() + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Language: ' + getCurrentLanguage() + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+
+				displayText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
 		}
 
 		// Usar htmlText para diferentes tamaños de fuente
@@ -244,11 +258,15 @@ class FPSCounter extends TextField
 		#if flash
 		var fallbackText = switch (debugLevel) {
 			case 0:
-				'FPS: $currentFPS\nMemory: ${currentMemoryStr} / ${peakMemoryStr}';
+				var baseText = 'FPS: $currentFPS\nMemory: ${currentMemoryStr} / ${peakMemoryStr}';
+				if (modAuthor != null && modAuthor.length > 0) {
+					baseText += '\n$modAuthor';
+				}
+				baseText;
 			case 1:
 				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}';
 			case 2:
-				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}\nCPU Usage: ${cpuUsage}%\nGPU Usage: ${gpuUsage}%\nNotes: ${noteCount}\nSprites: ${spriteCount}\nObjects: ${FlxG.state.members.length}\nUptime: ${getUptime()}\nTarget FPS: ${targetFPS}\nDraw Calls: ${getDrawCalls()}\nGC Memory: ${getGCStats()}\nState: ${getCurrentState()}\nLanguage: ${getCurrentLanguage()}';
+				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}\nObjects: ${FlxG.state.members.length}\nUptime: ${getUptime()}\nState: ${cachedCurrentState}';
 		}
 		text = fallbackText;
 		
@@ -344,22 +362,22 @@ class FPSCounter extends TextField
 
 			// Calcular el tamaño del fondo basado en el texto
 			var lines = switch (debugLevel) {
-				case 1: 5; // FPS, Memory, Peak, OS, Commit
-				case 2: 16; // Todo lo anterior + más datos de debug (agregamos 3 líneas más)
+				case 1: 6; // FPS, Memory, Peak, espacio, OS, Commit
+				case 2: 13.5; // Lo anterior + espacio + Objects, Uptime, State
 				default: 0;
 			}
 			
-			var bgWidth = 400; // Ancho suficiente
+			var bgWidth = 325; // Ancho suficiente
 			var bgHeight = lines * 18 + 20; // Altura calculada + padding
 
 			// Dibujar fondo semi-transparente negro
 			g.beginFill(0x000000, 0.7);
-			g.drawRect(x - 5, y - 5, bgWidth, bgHeight);
+			g.drawRect(x - 10, y, bgWidth, bgHeight);
 			g.endFill();
 
 			// Borde para mejor visibilidad
 			g.lineStyle(1, 0x666666, 0.8);
-			g.drawRect(x - 5, y - 5, bgWidth, bgHeight);
+			g.drawRect(x - 10, y, bgWidth, bgHeight);
 		} else {
 			// Remover el fondo si no se necesita
 			if (bgShape.parent != null) {
@@ -487,52 +505,19 @@ class FPSCounter extends TextField
 		#end
 	}
 
-	// Función para actualizar contadores de rendimiento
-	private function updateCounters():Void {
-		// Actualizar uso de CPU (simulado por ahora, requiere implementación específica por plataforma)
-		#if cpp
-		#if windows
-		// Esto es una aproximación, en un caso real necesitarías usar WMI o performance counters
-		cpuUsage = Math.round(Math.random() * 15 + 5); // Simulado entre 5-20%
-		gpuUsage = Math.round(Math.random() * 20 + 10); // Simulado entre 10-30%
-		#else
-		cpuUsage = 0;
-		gpuUsage = 0;
-		#end
-		#end
-
-		// Contar objetos en el juego
-		spriteCount = 0;
-		noteCount = 0;
-
-		// Contar sprites y notas si estamos en PlayState
-		if (FlxG.state != null) {
-			try {
-				var state = Type.getClass(FlxG.state);
-				var stateName = Type.getClassName(state);
-				
-				if (stateName == "states.PlayState") {
-					// Intentar acceder a los arrays de notas y sprites del PlayState
-					var playState = FlxG.state;
-					var fields = Reflect.fields(playState);
-					
-					for (field in fields) {
-						var value = Reflect.field(playState, field);
-						if (Std.isOfType(value, Array)) {
-							var array:Array<Dynamic> = cast value;
-							if (field.toLowerCase().indexOf('note') != -1) {
-								noteCount += array.length;
-							}
-						}
-					}
-				}
-			} catch (e:Dynamic) {
-				// Fallar silenciosamente si no podemos acceder al estado
-			}
-			
-			spriteCount = FlxG.state.members.length;
+	// Función para actualizar contadores de rendimiento (ultra-optimizada)
+	private function updateCountersOptimized():Void {
+		var currentTime = haxe.Timer.stamp();
+		
+		// Actualizar cache de datos mínimos cada 0.5 segundos para mejor respuesta
+		if (currentTime - lastCacheUpdateTime >= 0.5) {
+			lastCacheUpdateTime = currentTime;
+			cachedCurrentState = getCurrentState();
 		}
 	}
+
+	// Función optimizada para contar notas sin reflection costosa
+	// ELIMINADA - Ya no se usa para mejor rendimiento
 
 	inline function get_memoryMegas():Float
 		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
@@ -559,6 +544,12 @@ class FPSCounter extends TextField
 			bgShape.parent.removeChild(bgShape);
 		}
 	}
+
+	// Funciones para obtener uso real de CPU y GPU
+	// ELIMINADAS - Ya no se usan para mejor rendimiento
+
+	// Funciones de estimación como fallback  
+	// ELIMINADAS - Ya no se usan para mejor rendimiento
 
 	#if cpp
 	#if windows

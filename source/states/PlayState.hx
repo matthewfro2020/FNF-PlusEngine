@@ -3801,6 +3801,10 @@ class PlayState extends MusicBeatState
 			modchart.Manager.instance = null;
 		}
 		#end
+
+		if (Main.fpsVar != null) {
+			Main.fpsVar.modAuthor = "";
+		}
 		
 		instance = null;
 		shutdownThread = true;
