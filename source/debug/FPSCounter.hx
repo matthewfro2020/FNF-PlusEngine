@@ -389,31 +389,45 @@ class FPSCounter extends TextField
 	// Función para obtener información del último commit
 	private function getLastCommit():Void {
 		#if sys
-		try {
-			var process = new sys.io.Process('git', ['log', '--oneline', '-n', '1']);
-			var output = process.stdout.readAll().toString().trim();
-			process.close();
-			
-			if (output.length > 0) {
-				var parts = output.split(' ');
-				if (parts.length > 0) {
-					var shortHash:String = parts[0].substring(0, Std.int(Math.min(7, parts[0].length)));
-					var message = parts.slice(1).join(' ');
+		// Intentar obtener información desde la API de GitHub
+		var http = new Http('https://api.github.com/repos/LeninAsto/FNF-PlusEngine/commits?per_page=1');
+		http.addHeader('User-Agent', 'FNF-PlusEngine');
+		
+		http.onData = function(data:String) {
+			try {
+				var commits:Array<Dynamic> = Json.parse(data);
+				if (commits != null && commits.length > 0) {
+					var latestCommit = commits[0];
+					var sha:String = latestCommit.sha.substr(0, 7);
+					var message:String = latestCommit.commit.message;
+					
+					// Tomar solo la primera línea del mensaje
+					if (message.indexOf('\n') != -1) {
+						message = message.substr(0, message.indexOf('\n'));
+					}
+					
+					// Limitar longitud del mensaje
 					if (message.length > 30) {
 						message = message.substring(0, 30) + "...";
 					}
-					lastCommit = shortHash + " " + message;
+					
+					lastCommit = sha + " " + message;
 				} else {
-					lastCommit = "Invalid commit format";
+					lastCommit = "Build version";
 				}
-			} else {
-				lastCommit = "No commits found";
+			} catch (e:Dynamic) {
+				lastCommit = "Build version";
 			}
-		} catch (e:Dynamic) {
-			lastCommit = "Git not available";
-		}
+		};
+		
+		http.onError = function(error:String) {
+			lastCommit = "Build version";
+		};
+		
+		http.request(false);
+		
 		#else
-		lastCommit = "Not available";
+		lastCommit = "Build version";
 		#end
 	}
 

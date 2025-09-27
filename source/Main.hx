@@ -1,6 +1,7 @@
 package;
 
 import debug.FPSCounter;
+import debug.TraceDisplay;
 import backend.Highscore;
 import flixel.FlxGame;
 import openfl.Lib;
@@ -46,6 +47,7 @@ class Main extends Sprite
 	};
 
 	public static var fpsVar:FPSCounter;
+	public static var traceDisplay:TraceDisplay;
 
 	public static final platform:String = #if mobile "Phones" #else "PCs" #end;
 	public static var watermarkSprite:Sprite = null;
@@ -160,6 +162,11 @@ class Main extends Sprite
 
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
+		
+		traceDisplay = new TraceDisplay(10, 100, 0xFFFFFF);
+		addChild(traceDisplay);
+		traceDisplay.setupBackground();
+		
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		if(fpsVar != null) {
