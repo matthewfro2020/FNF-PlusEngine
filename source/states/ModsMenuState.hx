@@ -31,6 +31,9 @@ class ModsMenuState extends MusicBeatState
 	var buttonDisableAll:MenuButton;
 	var buttons:Array<MenuButton> = [];
 	var settingsButton:MenuButton;
+	
+	var buttonToggleMainY:Float = 0; // Posición Y principal para los botones toggle
+	var buttonToggleSecondY:Float = 0; // Posición Y secundaria para el botón oculto
 
 	var bgTitle:FlxSprite;
 	var bgDescription:FlxSprite;
@@ -111,8 +114,11 @@ class ModsMenuState extends MusicBeatState
 		buttonReload = new MenuButton(buttonX, bgList.y + bgList.height + daY, buttonWidth, buttonHeight, Language.getPhrase('reload_button', 'RELOAD'), reload);
 		add(buttonReload);
 		
-		var myY = buttonReload.y + buttonReload.bg.height + 20;
-		/*buttonModFolder = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, "MODS FOLDER", function() {
+		// Establecer posiciones para los botones toggle
+		buttonToggleMainY = buttonReload.y + buttonReload.bg.height + 20;
+		buttonToggleSecondY = buttonToggleMainY + buttonHeight + 20;
+		
+		/*buttonModFolder = new MenuButton(buttonX, buttonToggleMainY, buttonWidth, buttonHeight, "MODS FOLDER", function() {
 			var modFolder = Paths.mods();
 			if(!FileSystem.exists(modFolder))
 			{
@@ -123,7 +129,7 @@ class ModsMenuState extends MusicBeatState
 		});
 		add(buttonModFolder);*/
 
-		buttonEnableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('enable_all_button', 'ENABLE ALL'), function() {
+		buttonEnableAll = new MenuButton(buttonX, buttonToggleMainY, buttonWidth, buttonHeight, Language.getPhrase('enable_all_button', 'ENABLE ALL'), function() {
 			buttonEnableAll.ignoreCheck = false;
 			for (mod in modsGroup.members)
 			{
@@ -141,10 +147,9 @@ class ModsMenuState extends MusicBeatState
 		});
 		buttonEnableAll.bg.color = FlxColor.GREEN;
 		buttonEnableAll.focusChangeCallback = function(focus:Bool) if(!focus) buttonEnableAll.bg.color = FlxColor.GREEN;
-		if(!controls.mobileC)
-			add(buttonEnableAll);
+		add(buttonEnableAll);
 
-		buttonDisableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('disable_all_button', 'DISABLE ALL'), function() {
+		buttonDisableAll = new MenuButton(buttonX, buttonToggleSecondY, buttonWidth, buttonHeight, Language.getPhrase('disable_all_button', 'DISABLE ALL'), function() {
 			buttonDisableAll.ignoreCheck = false;
 			for (mod in modsGroup.members)
 			{
@@ -162,8 +167,7 @@ class ModsMenuState extends MusicBeatState
 		});
 		buttonDisableAll.bg.color = 0xFFFF6666;
 		buttonDisableAll.focusChangeCallback = function(focus:Bool) if(!focus) buttonDisableAll.bg.color = 0xFFFF6666;
-		if(!controls.mobileC)
-			add(buttonDisableAll);
+		add(buttonDisableAll);
 		checkToggleButtons();
 
 		if(modsList.all.length < 1)
@@ -786,8 +790,28 @@ class ModsMenuState extends MusicBeatState
 
 	function checkToggleButtons()
 	{
-		buttonEnableAll.visible = buttonEnableAll.enabled = buttonEnableAll.active = modsList.disabled.length > 0;
-		buttonDisableAll.visible = buttonDisableAll.enabled = buttonDisableAll.active = modsList.enabled.length > 0;
+		var hasDisabledMods = modsList.disabled.length > 0;
+		var hasEnabledMods = modsList.enabled.length > 0;
+		
+		// Enable All button - siempre en posición principal
+		buttonEnableAll.y = buttonToggleMainY;
+		if (hasDisabledMods) {
+			buttonEnableAll.alpha = 1;
+			buttonEnableAll.visible = buttonEnableAll.enabled = buttonEnableAll.active = true;
+		} else {
+			buttonEnableAll.alpha = 0;
+			buttonEnableAll.visible = buttonEnableAll.enabled = buttonEnableAll.active = false;
+		}
+		
+		// Disable All button - siempre en posición secundaria
+		buttonDisableAll.y = buttonToggleSecondY;
+		if (hasEnabledMods) {
+			buttonDisableAll.alpha = 1;
+			buttonDisableAll.visible = buttonDisableAll.enabled = buttonDisableAll.active = true;
+		} else {
+			buttonDisableAll.alpha = 0;
+			buttonDisableAll.visible = buttonDisableAll.enabled = buttonDisableAll.active = false;
+		}
 	}
 
 	function reload()
