@@ -787,7 +787,7 @@ class ModsMenuState extends MusicBeatState
 	function checkToggleButtons()
 	{
 		buttonEnableAll.visible = buttonEnableAll.enabled = buttonEnableAll.active = modsList.disabled.length > 0;
-		buttonDisableAll.visible = buttonDisableAll.enabled = buttonDisableAll.active = !buttonEnableAll.visible;
+		buttonDisableAll.visible = buttonDisableAll.enabled = buttonDisableAll.active = modsList.enabled.length > 0;
 	}
 
 	function reload()
