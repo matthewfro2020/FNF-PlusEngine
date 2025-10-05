@@ -1,0 +1,58 @@
+package modchart.modifiers.psych_noteTween;
+
+import states.PlayState;
+import objects.StrumNote;
+import modchart.Modifier;
+import modchart.core.util.Constants.RenderParams;
+import modchart.core.util.Constants.Visuals;
+
+/**
+ * Modifier que actúa como puente entre noteTweenAngle del engine y el sistema de modcharts.
+ * Lee el valor angle actual del StrumNote (modificado por noteTweenAngle) y lo aplica 
+ * como rotación visual (angleZ) a los receptores.
+ */
+class NoteTweenAngle extends Modifier {
+	
+	override public function visuals(data:Visuals, params:RenderParams):Visuals {
+		var player = params.player;
+		var lane = params.lane;
+		
+		// Solo aplicar a receptores (StrumNotes), no a notas que se mueven
+		if (params.isTapArrow) return data;
+		
+		// Obtener el StrumNote específico para este lane y player
+		var strumNote:StrumNote = getStrumFromInfo(lane, player);
+		
+		if (strumNote != null) {
+			// Leer el angle actual del StrumNote (modificado por noteTweenAngle)
+			var currentAngle = strumNote.angle;
+			
+			// Aplicar al sistema de visuals del modchart como rotación visual
+			data.angleZ += currentAngle;
+		}
+		
+		return data;
+	}
+	
+	override public function shouldRun(params:RenderParams):Bool {
+		// Solo ejecutar en receptores (StrumNotes)
+		return !params.isTapArrow;
+	}
+	
+	// Función helper para obtener el StrumNote específico
+	private function getStrumFromInfo(lane:Int, player:Int):StrumNote {
+		if (PlayState.instance == null) return null;
+		
+		var group = player == 0 ? PlayState.instance.opponentStrums : PlayState.instance.playerStrums;
+		var strum:StrumNote = null;
+		
+		group.forEach(str -> {
+			@:privateAccess
+			if (str.noteData == lane) {
+				strum = str;
+			}
+		});
+		
+		return strum;
+	}
+}

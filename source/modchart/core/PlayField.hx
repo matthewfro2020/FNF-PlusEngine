@@ -49,6 +49,13 @@ class PlayField extends FlxBasic {
 		addModifier('stealth');
 		addModifier('skew');
 		addModifier('zoom');
+		
+		// PsychEngine noteTween bridge modifiers
+		registerModifier('noteTweenDirection', modchart.modifiers.psych_noteTween.NoteTweenDirection);
+		addModifier('noteTweenDirection');
+		
+		registerModifier('noteTweenAngle', modchart.modifiers.psych_noteTween.NoteTweenAngle);
+		addModifier('noteTweenAngle');
 
 		setPercent('arrowPathAlpha', 1, -1);
 		setPercent('arrowPathThickness', 1, -1);
