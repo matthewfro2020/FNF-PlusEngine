@@ -36,6 +36,7 @@ interface IAdapter {
 	// Options section
 	public function getHoldSubdivisions():Int; // Hold resolution
 	public function getDownscroll():Bool; // Get if it is downscroll
+	public function isModchartingEnabled():Bool; // Check if modcharting is enabled by user
 
 	/**
 	 * Get the every arrow/lane indexed by player.

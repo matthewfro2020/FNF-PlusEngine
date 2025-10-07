@@ -43,6 +43,8 @@ import states.TitleState;
 	public var showStateInFPS:Bool = true;
 	public var showEndCountdown:Bool = false; // Activa/desactiva la cuenta regresiva
     public var endCountdownSeconds:Int = 10;  // Segundos de cuenta regresiva (10-30)
+	public var enableModcharting:Bool = false; // Habilita/deshabilita el sistema de modcharting
+	public var holdSubdivisions:Int = 4; // Subdivisiones para las notas hold (1-32)
 	public var debugData:Bool = false;
 	public var noteOffset:Int = 0;
 	public var arrowRGB:Array<Array<FlxColor>> = [

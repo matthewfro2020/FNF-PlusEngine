@@ -46,6 +46,15 @@ final class Manager extends FlxBasic {
 		instance = this;
 
 		Adapter.init();
+		
+		// Verificar si el modcharting está habilitado
+		if (!Adapter.instance.isModchartingEnabled()) {
+			trace("Modcharting is disabled, Manager will not initialize fully");
+			visible = false;
+			active = false;
+			return;
+		}
+		
 		Adapter.instance.onModchartingInitialization();
 
 		addPlayfield();

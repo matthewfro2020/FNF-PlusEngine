@@ -83,6 +83,8 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		super(instance);
 
 		instance.setPercent('dizzyHolds', 1, -1);
+		instance.setPercent('longHolds', 1, -1);
+		instance.setPercent('shortHolds', 0, -1);
 	}
 
 	inline private function __rotateTail(pos:Vector3D) {
@@ -138,8 +140,11 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 			unit.normalize();
 		}
 
-		var quad0 = new Vector3D(-unit.y * size, unit.x * size);
-		var quad1 = new Vector3D(unit.y * size, -unit.x * size);
+		var isDownscroll = Adapter.instance.getDownscroll();
+		var directionFactor = isDownscroll ? -1 : 1;
+
+		var quad0 = new Vector3D(-unit.y * size * directionFactor, unit.x * size);
+		var quad1 = new Vector3D(unit.y * size * directionFactor, -unit.x * size);
 
 		final visuals = origin.visuals;
 		@:privateAccess
@@ -193,6 +198,7 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	}
 
 	private var __long:Float = 0.0;
+	private var __lastLong:Float = 0.0;
 	private var __straightAmount:Float = 0.0;
 	private var __calculatingSegments:Bool = false;
 	private var __rotateX:Float = 0;
@@ -202,6 +208,7 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	private var __parentOutput:ModifierOutput;
 	private var __centered2:Float = 0;
 	private var basePos:Vector3D;
+	var __lastPlayer:Int = -9999;
 
 	/*
 		private function getStraightHoldSegment(hold:FlxSprite, basePos:Vector3D, params:ArrowData):Array<Dynamic> {
@@ -297,8 +304,10 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		var depthApplied = false;
 		var alphaTotal:Float = 0.;
 
+		var canUseLast = __lastPlayer == player;
+
 		// refresh global mods percents
-		__long = instance.getPercent('longHolds', player) - instance.getPercent('shortHolds', player) + 1;
+		__long = canUseLast ? __lastLong : (__lastLong = instance.getPercent('longHolds', player) - instance.getPercent('shortHolds', player));
 		__centered2 = instance.getPercent('centered2', player);
 		__dizzy = instance.getPercent('dizzyHolds', player);
 
@@ -368,8 +377,7 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 		newInstruction.colorData = transfTotal;
 		newInstruction.extra = [alphaTotal];
 
-		queue[count] = newInstruction;
-		count++;
+		queue[count++] = newInstruction;
 
 		__lastHoldSubs = Adapter.instance.getHoldSubdivisions();
 	}
@@ -388,8 +396,9 @@ class ModchartHoldRenderer extends ModchartRenderer<FlxSprite> {
 	}
 
 	private function __drawInstruction(instruction:FMDrawInstruction) {
-		if (instruction == null)
+		if (instruction == null || instruction.alreadyLoaded)
 			return;
+		instruction.alreadyLoaded = true;
 		final item:FlxSprite = instruction.item;
 
 		var cameras = item._cameras != null ? item._cameras : Adapter.instance.getArrowCamera();
@@ -804,6 +813,7 @@ class FMDrawInstruction {
 
 	var extra:Array<Dynamic>;
 	var mappedExtra:Map<String, Dynamic>;
+	var alreadyLoaded:Bool = false;
 
 	public function new() {}
 }

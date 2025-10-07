@@ -856,6 +856,12 @@ class PlayState extends MusicBeatState
 	function initModchart()
 	{
 		#if MODCHARTS_NOTITG_ALLOWED
+		// Solo inicializar si el usuario tiene habilitado el modcharting
+		if (!ClientPrefs.data.enableModcharting) {
+			trace("Modcharting disabled by user preferences");
+			return;
+		}
+		
 		try {
 			if (Manager.instance == null) {
 				var manager = new Manager();

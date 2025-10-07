@@ -294,8 +294,9 @@ class PlayField extends FlxBasic {
 			// holds
 			if (holdLength > 0) {
 				for (hold in curItems[2]) {
-					if (!getVisibility(hold))
+					if (!getVisibility(hold)) {
 						continue;
+				    }
 
 					holdRenderer.prepare(hold);
 					queue({
