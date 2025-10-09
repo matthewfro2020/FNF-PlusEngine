@@ -3,17 +3,17 @@
     {
       "name": "hxcpp",
       "type": "git",
-      "url": "https://github.com/kittycathy233/hxcpp"
+      "url": "https://github.com/LeninAsto/hxcpp"
     },
     {
       "name": "lime",
       "type": "git",
-      "url": "https://github.com/kittycathy233/lime"
+      "url": "8.2.2"
     },
     {
       "name": "openfl",
       "type": "haxelib",
-      "version": "9.4.1"
+      "version": "9.4.2"
     },
     {
       "name": "flixel",

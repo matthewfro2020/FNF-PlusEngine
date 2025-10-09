@@ -263,6 +263,10 @@ class PlayState extends MusicBeatState
 	var cameraBopIntensity:Float = 1;
 	var cameraBopEnabled:Bool = false;
 	
+	// Variables para animación de íconos DNB
+	var iconTurnValue:Float = 10;
+	var iconAnimationEnabled:Bool = true;
+	
 	// ← VARIABLES DE OPTIMIZACIÓN
 	var timeUpdateTimer:Float = 0;
 	var TIME_UPDATE_INTERVAL:Float = 1.0; // Actualizar cada segundo
@@ -3868,11 +3872,16 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
-		iconP1.scale.set(1.2, 1.2);
-		iconP2.scale.set(1.2, 1.2);
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
+		// Animación normal de íconos (escalado)
+		if (!iconAnimationEnabled) {
+			iconP1.scale.set(1.2, 1.2);
+			iconP2.scale.set(1.2, 1.2);
+			iconP1.updateHitbox();
+			iconP2.updateHitbox();
+		} else {
+			// Usar animación DNB style
+			animateIcons();
+		}
 
 		characterBopper(curBeat);
 
@@ -3900,6 +3909,60 @@ class PlayState extends MusicBeatState
 			boyfriend.dance();
 		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
 			dad.dance();
+	}
+
+	public function animateIcons():Void
+	{
+		if (!iconAnimationEnabled) return;
+		
+		// Alternar dirección
+		iconTurnValue = -iconTurnValue;
+		
+		// Animar ícono del jugador (iconP1)
+		if (iconP1 != null) {
+			// Cancelar tweens anteriores usando tags únicos
+			FlxTween.cancelTweensOf(iconP1);
+			FlxTween.cancelTweensOf(iconP1.scale);
+			
+			iconP1.angle = iconTurnValue;
+			iconP1.scale.set(1.2, 0.3); // Mantener el bump horizontal, reducir vertical
+			iconP1.updateHitbox();
+			
+			FlxTween.tween(iconP1, {angle: 0}, Conductor.crochet / 1000, {
+				ease: FlxEase.circOut,
+				type: ONESHOT
+			});
+			FlxTween.tween(iconP1.scale, {x: 1, y: 1}, Conductor.crochet / 1000, {
+				ease: FlxEase.circOut,
+				type: ONESHOT,
+				onComplete: function(twn:FlxTween) {
+					iconP1.updateHitbox();
+				}
+			});
+		}
+		
+		// Animar ícono del oponente (iconP2)
+		if (iconP2 != null) {
+			// Cancelar tweens anteriores usando tags únicos
+			FlxTween.cancelTweensOf(iconP2);
+			FlxTween.cancelTweensOf(iconP2.scale);
+			
+			iconP2.angle = iconTurnValue;
+			iconP2.scale.set(1.2, 0.3); // Mantener el bump horizontal, reducir vertical
+			iconP2.updateHitbox();
+			
+			FlxTween.tween(iconP2, {angle: 0}, Conductor.crochet / 1000, {
+				ease: FlxEase.circOut,
+				type: ONESHOT
+			});
+			FlxTween.tween(iconP2.scale, {x: 1, y: 1}, Conductor.crochet / 1000, {
+				ease: FlxEase.circOut,
+				type: ONESHOT,
+				onComplete: function(twn:FlxTween) {
+					iconP2.updateHitbox();
+				}
+			});
+		}
 	}
 
 	public function playerDance():Void
