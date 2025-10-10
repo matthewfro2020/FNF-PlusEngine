@@ -49,8 +49,8 @@ haxelib run hmm install
 You need have:
 
 - Android Build Tools (Android Studio)
-- Android SDK 4.4.4
-- NDK r21e
+- Android SDK 35
+- NDK r27d
 - Java JDK 17
 
 # Psych Team
