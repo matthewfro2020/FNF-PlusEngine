@@ -18,6 +18,7 @@ class OptionsState extends MusicBeatState
 	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
+	var lerpSelected:Float = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 
@@ -82,8 +83,8 @@ class OptionsState extends MusicBeatState
 		for (num => option in options)
 		{
 			var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
-			optionText.screenCenter();
-			optionText.y += (92 * (num - (options.length / 2))) + 45;
+			optionText.targetY = num;
+			optionText.isMenuItem = true;
 			grpOptions.add(optionText);
 		}
 
@@ -92,6 +93,7 @@ class OptionsState extends MusicBeatState
 		selectorRight = new Alphabet(0, 0, '<', true);
 		add(selectorRight);
 
+		lerpSelected = curSelected;
 		changeSelection();
 		ClientPrefs.saveSettings();
 
@@ -116,6 +118,25 @@ class OptionsState extends MusicBeatState
 	var exiting = false;
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
+
+		for (num => item in grpOptions.members)
+		{
+			var targetY:Float = item.targetY - lerpSelected;
+			item.screenCenter(X);
+			item.y = FlxMath.lerp((FlxG.height * 0.2) + (targetY * 50), item.y, Math.exp(-elapsed * 10.2));
+			
+			item.alpha = 0.6;
+			if (item.targetY == curSelected)
+			{
+				item.alpha = 1;
+				selectorLeft.x = item.x - 63;
+				selectorLeft.y = item.y;
+				selectorRight.x = item.x + item.width + 15;
+				selectorRight.y = item.y;
+			}
+		}
 
 		if(!exiting) {
 			if (controls.UI_UP_P)
@@ -151,18 +172,10 @@ class OptionsState extends MusicBeatState
 
 		for (num => item in grpOptions.members)
 		{
-			item.targetY = num - curSelected;
-			item.alpha = 0.6;
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				selectorLeft.x = item.x - 63;
-				selectorLeft.y = item.y;
-				selectorRight.x = item.x + item.width + 15;
-				selectorRight.y = item.y;
-			}
+			item.targetY = num;
 		}
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		
+		if(change != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
 	override function destroy()
