@@ -255,6 +255,15 @@ class PlayState extends MusicBeatState
 	var timeTxtTween:FlxTween;
 	var judgementCounter:JudCounter;
 	var ghostJText:FlxText;
+
+	// TPS/NPS System
+	var notesHitArray:Array<Date> = [];
+	public var nps:Int = 0;
+	public var maxNPS:Int = 0;
+	var npsCheck:Int = 0;
+
+	// Key Viewer System
+	public var keyViewer:objects.KeyViewer;
 	var popupTimer:FlxTimer = null;
 	var popupVisible:Bool = false;
 	var turnValue:Int = 10;
@@ -386,6 +395,12 @@ class PlayState extends MusicBeatState
 			'note_up',
 			'note_right'
 		];
+
+		// Initialize TPS/NPS system
+		notesHitArray = [];
+		nps = 0;
+		maxNPS = 0;
+		npsCheck = 0;
 
 		if(FlxG.sound.music != null)
 			FlxG.sound.music.stop();
@@ -755,6 +770,13 @@ class PlayState extends MusicBeatState
 		uiGroup.add(botplayTxt);
 		if(ClientPrefs.data.downScroll)
 			botplayTxt.y = healthBar.y + 70;
+
+		// Key Viewer
+		if(ClientPrefs.data.showKeyViewer) {
+			keyViewer = new objects.KeyViewer(0, 0); // Las coordenadas no importan, se centra automáticamente
+			keyViewer.visible = !ClientPrefs.data.hideHud;
+			uiGroup.add(keyViewer);
+		}
 
 		uiGroup.cameras = [camHUD];
 		noteGroup.cameras = [camHUD];
@@ -1405,9 +1427,9 @@ class PlayState extends MusicBeatState
 
 		var tempScore:String;
 		if(!instakillOnMiss)
-			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [scoreStr, songMisses, str]);
+			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3} | TPS: {4}/{5}', [scoreStr, songMisses, str, nps, maxNPS]);
 		else
-			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [scoreStr, str]);
+			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2} | TPS: {3}/{4}', [scoreStr, str, nps, maxNPS]);
 		scoreTxt.text = tempScore;
 	}
 
@@ -2192,45 +2214,71 @@ class PlayState extends MusicBeatState
 
 			if(ClientPrefs.data.timeBarType != 'Song Name')
 				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-		
-					// --- INICIO: Lógica de cuenta regresiva al final ---
-					if (ClientPrefs.data.showEndCountdown)
+
+			// --- INICIO: Lógica de cuenta regresiva al final ---
+			if (ClientPrefs.data.showEndCountdown)
+			{
+				var countdownSeconds = ClientPrefs.data.endCountdownSeconds;
+				var timeLeft = Math.floor((songLength - curTime) / 1000);
+				if (timeLeft <= countdownSeconds && timeLeft > 0)
+				{
+					if (endCountdownText == null)
 					{
-						var countdownSeconds = ClientPrefs.data.endCountdownSeconds;
-						var timeLeft = Math.floor((songLength - curTime) / 1000);
-						if (timeLeft <= countdownSeconds && timeLeft > 0)
-						{
-							if (endCountdownText == null)
-							{
-								endCountdownText = new FlxText(0, 0, 0, "", 40);
-								endCountdownText.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-								endCountdownText.cameras = [camOther];
-								endCountdownText.scrollFactor.set();
-								endCountdownText.alpha = 1;
-								endCountdownText.borderSize = 3;
-								endCountdownText.x = FlxG.width / 2 - endCountdownText.width / 2;
-								endCountdownText.y = FlxG.height / 2 - 150; // Un poco más arriba del centro
-								add(endCountdownText);
-							}
-							endCountdownText.visible = true;
-							endCountdownText.text = Std.string(timeLeft);
-		
-							// Animación tipo "bump" cada segundo
-							if (lastEndCountdown != timeLeft)
-							{
-								endCountdownText.scale.set(2, 2);
-								FlxTween.tween(endCountdownText.scale, {x: 1, y: 1}, 0.25, {ease: FlxEase.circOut});
-								lastEndCountdown = timeLeft;
-							}
-						}
-						else if (endCountdownText != null)
-						{
-							endCountdownText.visible = false;
-							lastEndCountdown = -1;
-						}
+						endCountdownText = new FlxText(0, 0, 0, "", 40);
+						endCountdownText.setFormat(Paths.font("vcr.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+						endCountdownText.cameras = [camOther];
+						endCountdownText.scrollFactor.set();
+						endCountdownText.alpha = 1;
+						endCountdownText.borderSize = 3;
+						endCountdownText.x = FlxG.width / 2 - endCountdownText.width / 2;
+						endCountdownText.y = FlxG.height / 2 - 150;
+						
+						add(endCountdownText);
 					}
-					// --- FIN: Lógica de cuenta regresiva al final ---
+					
+					endCountdownText.text = Std.string(timeLeft);
+					
+					// Animación tipo "bump" cada segundo
+					if (lastEndCountdown != timeLeft)
+					{
+						endCountdownText.scale.set(2, 2);
+						FlxTween.tween(endCountdownText.scale, {x: 1, y: 1}, 0.25, {ease: FlxEase.circOut});
+						lastEndCountdown = timeLeft;
+					}
 				}
+				else if (endCountdownText != null)
+				{
+					endCountdownText.destroy();
+					endCountdownText = null;
+				}
+			}
+		}
+
+		// TPS/NPS System Update
+		{
+			var i = notesHitArray.length - 1;
+			while (i >= 0)
+			{
+				var time:Date = notesHitArray[i];
+				if (time != null && time.getTime() + 1000 < Date.now().getTime())
+					notesHitArray.remove(time);
+				else
+					i = -1; // break the loop
+				i--;
+			}
+			nps = notesHitArray.length;
+			if (nps > maxNPS)
+				maxNPS = nps;
+
+			setOnScripts('nps', nps);
+			setOnScripts('maxNPS', maxNPS);
+
+			if (npsCheck != nps)
+			{
+				npsCheck = nps;
+				updateScoreText();
+			}
+		}
 		
 
 		if (camZooming)
@@ -3331,6 +3379,11 @@ class PlayState extends MusicBeatState
 	{
 		if(cpuControlled || paused || inCutscene || key < 0 || key >= playerStrums.length || !generatedMusic || endingSong || boyfriend.stunned) return;
 
+		// Key Viewer
+		if(keyViewer != null) {
+			keyViewer.keyPressed(key);
+		}
+
 		var ret:Dynamic = callOnScripts('onKeyPressPre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
 
@@ -3347,6 +3400,9 @@ class PlayState extends MusicBeatState
 
 		if (plrInputNotes.length != 0) { // slightly faster than doing `> 0` lol
 			var funnyNote:Note = plrInputNotes[0]; // front note
+			
+			// Register note hit for TPS/NPS calculation
+			notesHitArray.unshift(Date.now());
 
 			if (plrInputNotes.length > 1) {
 				var doubleNote:Note = plrInputNotes[1];
@@ -3408,6 +3464,11 @@ class PlayState extends MusicBeatState
 	private function keyReleased(key:Int)
 	{
 		if(cpuControlled || !startedCountdown || paused || key < 0 || key >= playerStrums.length) return;
+
+		// Key Viewer
+		if(keyViewer != null) {
+			keyViewer.keyReleased(key);
+		}
 
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;

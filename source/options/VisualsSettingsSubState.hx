@@ -84,6 +84,20 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			'hideHud',
 			BOOL);
 		addOption(option);
+
+		var option:Option = new Option('Show Key Viewer',
+			'If checked, shows a key viewer displaying which keys are being pressed.',
+			'showKeyViewer',
+			BOOL);
+		addOption(option);
+
+		var option:Option = new Option('Key Viewer Color:',
+			'Select the color for the key viewer buttons.',
+			'keyViewerColor',
+			STRING,
+			['Gray', 'Red', 'Blue', 'Green', 'Purple', 'Orange', 'Pink', 'Cyan', 'White', 'Black']);
+		addOption(option);
+		option.onChange = onChangeKeyViewerColor;
 		
 		var option:Option = new Option('Time Bar:',
 			"What should the Time Bar display?",
@@ -327,6 +341,15 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	{
 		if(Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
+	}
+
+	function onChangeKeyViewerColor()
+	{
+		// Si estamos en PlayState, actualizar el color del keyViewer
+		if(PlayState.instance != null && PlayState.instance.keyViewer != null)
+		{
+			PlayState.instance.keyViewer.updateKeyColors();
+		}
 	}
 
 	/*#if native

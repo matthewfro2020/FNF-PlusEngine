@@ -14,8 +14,8 @@ class EsLA
         "changelog_error" => "Error al cargar el registro de cambios: {1}",
 
         // Gameplay
-        "score_text" => "Puntuación: {1} | Perdidas: {2} | Clasificación: {3}",
-        "score_text_instakill" => "Puntuación: {1} | Clasificación: {2}",
+        "score_text" => "Puntuación: {1} | Fallas: {2} | Clasificación: {3} | TPS: {4}/{5}",
+        "score_text_instakill" => "Fallas: {1} | Clasificación: {2} | TPS: {3}/{4}",
         "botplay" => "Automático",
 
         // Ratings
@@ -146,6 +146,9 @@ class EsLA
         "combo_rating_offset" => "Posición de la Calificación:",
         "combo_numbers_offset" => "Posición de los Números:",
         "combo_offset" => "Posición de Combos",
+        "keyviewer_offset" => "Posición del Visor de Teclas",
+        "keyviewer_position_offset" => "Posición del Visor de Teclas:",
+        "keyviewer_color_setting" => "Color del Visor de Teclas:",
         "note_delay" => "Retardo de notas",
         "switch_on_accept" => "(Presione ACEPTAR para cambiar)",
         "switch_on_start" => "(Presione ACEPTAR para cambiar)",
@@ -227,6 +230,10 @@ class EsLA
         "description_time_bar" => "¿Qué debería mostrar la barra de tiempo?",
         "setting_flashing_lights" => "Luces Intermitentes",
         "description_flashing_lights" => "¡¡Desmarca esto si eres sensible a las luces intermitentes!!",
+        "setting_show_key_viewer" => "Mostrar Visor de Teclas",
+        "description_show_key_viewer" => "Si está activado, muestra un visor de teclas que indica qué teclas están siendo presionadas.",
+        "setting_key_viewer_color" => "Color del Visor de Teclas:",
+        "description_key_viewer_color" => "Selecciona el color para los botones del visor de teclas.",
         "setting_camera_zooms" => "Zoom de la cámara",
         "description_camera_zooms" => "Si no está marcada, la cámara no hará zoom al ritmo.",
         "setting_score_text_grow_on_hit" => "Bop de Score al pulsar",

@@ -14,8 +14,8 @@ class EnUS
         "changelog_error" => "Error loading changelog: {1}",
 
         // Gameplay
-        "score_text" => "Score: {1} | Misses: {2} | Rating: {3}",
-        "score_text_instakill" => "Score: {1} | Rating: {2}",
+        "score_text" => "Score: {1} | Misses: {2} | Rating: {3} | TPS: {4}/{5}",
+        "score_text_instakill" => "Score: {1} | Rating: {2} | TPS: {3}/{4}",
         "botplay" => "Botplay",
 
         // Ratings
@@ -148,7 +148,10 @@ class EnUS
         "delay_beat_hit" => "Beat Hit!",
         "delay_current_offset" => "Current offset: {1} ms",
         "combo_rating_offset" => "Rating Offset:",
-        "combo_numbers_offset" => "Numbers Offset:",
+        "combo_number_offset" => "Number Offset:",
+        "keyviewer_offset" => "KeyViewer Offset",
+        "keyviewer_position_offset" => "KeyViewer Position:",
+        "keyviewer_color_setting" => "KeyViewer Color:",
         "combo_offset" => "Combo Offset",
         "note_delay" => "Note/Beat Delay",
         "switch_on_accept" => "(Press Accept to Switch)",
@@ -223,6 +226,10 @@ class EnUS
         "description_time_bar" => "What should the Time Bar display?",
         "setting_flashing_lights" => "Flashing Lights",
         "description_flashing_lights" => "Uncheck this if you're sensitive to flashing lights!",
+        "setting_show_key_viewer" => "Show Key Viewer",
+        "description_show_key_viewer" => "If checked, shows a key viewer displaying which keys are being pressed.",
+        "setting_key_viewer_color" => "Key Viewer Color:",
+        "description_key_viewer_color" => "Select the color for the key viewer buttons.",
         "setting_camera_zooms" => "Camera Zooms",
         "description_camera_zooms" => "If unchecked, the camera won't zoom in on a beat hit.",
         "setting_score_text_grow_on_hit" => "Score Text Grow on Hit",

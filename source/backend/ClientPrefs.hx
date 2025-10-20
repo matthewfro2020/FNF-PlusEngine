@@ -42,6 +42,7 @@ import states.TitleState;
 	public var framerate:Int = 60;
 	public var camZooms:Bool = true;
 	public var hideHud:Bool = false;
+	public var showKeyViewer:Bool = false;
 	public var judgementCounter:Bool = true;
 	public var comboInGame:Bool = false;
 	public var useFreakyFont:Bool = false;
@@ -95,6 +96,8 @@ import states.TitleState;
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
+	public var keyViewerOffset:Array<Int> = [0, 0]; // X, Y offset for key viewer
+	public var keyViewerColor:String = 'Gray'; // Color name for key viewer
 	public var ratingOffset:Int = 0;
 	public var epicWindow:Float = 20.0;
 	public var sickWindow:Float = 45.0;
