@@ -270,11 +270,17 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	function changeNoteSkin(note:StrumNote)
 	{
 		var skin:String = Note.defaultNoteSkin;
-		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
+		var postfix:String = Note.getNoteSkinPostfix();
+		
+		// Si hay un postfix (significa que el usuario seleccionó un skin personalizado)
+		if(postfix.length > 0)
+		{
+			var customSkin:String = skin + postfix;
+			if(Paths.fileExists('images/$customSkin.png', IMAGE)) 
+				skin = customSkin;
+		}
 
-		note.texture = skin; //Load texture and anims
-		note.reloadNote();
+		note.texture = skin; //Load texture and anims (setter calls reloadNote automatically)
 		note.playAnim('static');
 	}
 
