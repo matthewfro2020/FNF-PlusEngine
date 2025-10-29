@@ -282,6 +282,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 		note.texture = skin; //Load texture and anims (setter calls reloadNote automatically)
 		note.playAnim('static');
+		
+		// Verificar si el skin es NotITG
+		note.checkNotITGSkin();
 	}
 
 	function onChangeSplashSkin()

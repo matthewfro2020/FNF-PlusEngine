@@ -422,6 +422,23 @@ class Note extends FlxSprite
 
 		if(animName != null)
 			animation.play(animName, true);
+		
+		// Detectar si es NotITG y bloquear el shader
+		if(skin != null && skin.toLowerCase().contains('notitg'))
+		{
+			if(rgbShader != null)
+			{
+				rgbShader.forceDisabled = true;
+				rgbShader.enabled = false;
+			}
+			shader = null;
+		}
+		else
+		{
+			// Desbloquear shader para skins normales
+			if(rgbShader != null)
+				rgbShader.forceDisabled = false;
+		}
 	}
 
 	public static function getNoteSkinPostfix()

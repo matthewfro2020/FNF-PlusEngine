@@ -4006,6 +4006,9 @@ class PlayState extends MusicBeatState
 		characterBopper(curBeat);
 
 		doTimeBump();
+		
+		// Animar flechas NotITG en el beat
+		animateNotITGArrows();
 
 		super.beatHit();
 
@@ -4029,6 +4032,18 @@ class PlayState extends MusicBeatState
 			boyfriend.dance();
 		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
 			dad.dance();
+	}
+	
+	public function animateNotITGArrows():Void
+	{
+		// Animar las flechas NotITG en el beat
+		strumLineNotes.forEachAlive(function(strum:StrumNote) {
+			if(strum.animateOnBeat && strum.animation.curAnim != null && strum.animation.curAnim.name == 'static')
+			{
+				// Reproducir la animación estática de nuevo para crear el efecto de "flash"
+				strum.playAnim('static', true);
+			}
+		});
 	}
 
 	public function animateIcons():Void

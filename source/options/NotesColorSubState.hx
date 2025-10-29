@@ -46,6 +46,9 @@ class NotesColorSubState extends MusicBeatSubstate
 	var controllerPointer:FlxSprite;
 	var _lastControllerMode:Bool = false;
 	var tipTxt:FlxText;
+	
+	// NotITG warning message
+	var notITGWarningText:FlxText;
 
 	public function new() {
 		super();
@@ -140,6 +143,14 @@ class NotesColorSubState extends MusicBeatSubstate
 		hexTypeLine = new FlxSprite(0, 20).makeGraphic(5, 62, FlxColor.WHITE);
 		hexTypeLine.visible = false;
 		add(hexTypeLine);
+		
+		// NotITG warning text - MUST be created BEFORE spawnNotes() is called
+		notITGWarningText = new FlxText(0, 5, FlxG.width, '', 26);
+		notITGWarningText.setFormat(Paths.font("vcr.ttf"), 26, FlxColor.RED, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		notITGWarningText.borderSize = 3;
+		notITGWarningText.visible = false;
+		notITGWarningText.scrollFactor.set();
+		add(notITGWarningText);
 
 		spawnNotes();
 		updateNotes(true);
@@ -653,6 +664,8 @@ class NotesColorSubState extends MusicBeatSubstate
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();
 			newNote.ID = i;
+			// Re-check NotITG skin to apply proper settings
+			newNote.checkNotITGSkin();
 			myNotes.add(newNote);
 		}
 
@@ -686,6 +699,46 @@ class NotesColorSubState extends MusicBeatSubstate
 		}
 		bigNote.animation.play('note$curSelectedNote', true);
 		updateColors();
+		updateNotITGWarning(); // Check if NotITG is being used
+	}
+	
+	function updateNotITGWarning()
+	{
+		// Verificar que el texto de advertencia exista
+		if(notITGWarningText == null) return;
+		
+		// Check if the current note skin is NotITG
+		var isNotITG:Bool = false;
+		var skin:String = Note.defaultNoteSkin;
+		var postfix:String = Note.getNoteSkinPostfix();
+		
+		if(postfix != null && postfix.length > 0)
+		{
+			var customSkin:String = skin + postfix;
+			if(Paths.fileExists('images/$customSkin.png', IMAGE)) 
+				skin = customSkin;
+		}
+		
+		if(skin != null)
+			isNotITG = skin.toLowerCase().contains('notitg');
+		
+		if(isNotITG)
+		{
+			notITGWarningText.text = "RGB SHADERS DISABLED - NotITG skin preserves original colors";
+			notITGWarningText.visible = true;
+			// Hacer que el texto parpadee
+			FlxTween.cancelTweensOf(notITGWarningText);
+			FlxTween.tween(notITGWarningText, {alpha: 0}, 0.5, {
+				type: PINGPONG,
+				ease: FlxEase.sineInOut
+			});
+		}
+		else
+		{
+			FlxTween.cancelTweensOf(notITGWarningText);
+			notITGWarningText.visible = false;
+			notITGWarningText.alpha = 1;
+		}
 	}
 
 	function updateColors(specific:Null<FlxColor> = null)
@@ -726,6 +779,10 @@ class NotesColorSubState extends MusicBeatSubstate
 
 	override function destroy()
 	{
+		// Cancelar el tween del texto de advertencia
+		if(notITGWarningText != null)
+			FlxTween.cancelTweensOf(notITGWarningText);
+		
 		Note.globalRgbShaders = [];
 		super.destroy();
 	}
