@@ -49,8 +49,14 @@ import states.TitleState;
 	public var showStateInFPS:Bool = true;
 	public var showEndCountdown:Bool = false; // Activa/desactiva la cuenta regresiva
     public var endCountdownSeconds:Int = 10;  // Segundos de cuenta regresiva (10-30)
-	public var enableModcharting:Bool = false; // Habilita/deshabilita el sistema de modcharting
 	public var holdSubdivisions:Int = 4; // Subdivisiones para las notas hold (1-32)
+	// Modchart Config Options
+	public var camera3dEnabled:Bool = true; // Habilita/deshabilita cámaras 3D
+	public var optimizeHolds:Bool = false; // Optimiza el renderizado de holds (puede verse mal con modcharts complejos)
+	public var zScale:Float = 1.0; // Escala del eje Z (profundidad)
+	public var renderArrowPaths:Bool = false; // Renderiza las líneas de trayectoria de las flechas
+	public var styledArrowPaths:Bool = false; // Aplica estilos visuales a las trayectorias
+	public var holdEndScale:Float = 1.0; // Escala del final de los holds
 	public var debugData:Bool = false;
 	public var noteOffset:Int = 0;
 	public var arrowRGB:Array<Array<FlxColor>> = [

@@ -295,8 +295,7 @@ class EsES
         "description_end_countdown_seconds" => "Cuántos segundos debe durar la cuenta atrás al final de la canción.\n(10 - 30)",
 
         // Modchart Settings
-        "setting_enable_modcharting" => "Activar manager de F. Modchart",
-        "description_enable_modcharting" => "Activa el sistema de Funkin Modchart.\nAlgunas funciones relacionadas con las notas, ya sean playerStrums u opponentStrums, y sus variables pueden no ser válidas mientras esto esté activo, solo funcionarán los \"noteTween*\".",
+        // Nota: El Modchart Manager ahora se activa automáticamente cuando detecta la función onInitModchart()
         "setting_hold_subdivisions" => "Subdiv. de las hold notes",
         "description_hold_subdivisions" => "Subdivide las hold notes para obtener visuales más suaves.\nLos valores más altos mejoran la calidad pero pueden afectar al rendimiento.\n(Recomendado: 4-8)",
 

@@ -1,5 +1,11 @@
 package modchart;
 
+#if (FM_ENGINE_VERSION == "1.0" || FM_ENGINE_VERSION == "0.7")
+import backend.ClientPrefs;
+#else
+import ClientPrefs;
+#end
+
 /**
  * Configuration settings for modchart behavior.
  * 
@@ -16,7 +22,14 @@ class Config {
 	 * 
 	 * Default: `true` (3D cameras enabled).
 	 */
-	public static var CAMERA3D_ENABLED:Bool = true;
+	public static var CAMERA3D_ENABLED(get, never):Bool;
+	static inline function get_CAMERA3D_ENABLED():Bool {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.camera3dEnabled;
+		#else
+		return ClientPrefs.camera3dEnabled;
+		#end
+	}
 
 	/**
 	 * Defines the order of rotation axes.
@@ -37,7 +50,14 @@ class Config {
 	 * 
 	  	 * Default: `false` (Regular hold rendering using the unit circle).
 	 */
-	public static var OPTIMIZE_HOLDS:Bool = false;
+	public static var OPTIMIZE_HOLDS(get, never):Bool;
+	static inline function get_OPTIMIZE_HOLDS():Bool {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.optimizeHolds;
+		#else
+		return ClientPrefs.optimizeHolds;
+		#end
+	}
 
 	/**
 	 * Scales the Z-axis values.
@@ -47,7 +67,14 @@ class Config {
 	 * 
 	 * Default: `1` (No scaling applied).
 	 */
-	public static var Z_SCALE:Float = 1;
+	public static var Z_SCALE(get, never):Float;
+	static inline function get_Z_SCALE():Float {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.zScale;
+		#else
+		return ClientPrefs.zScale;
+		#end
+	}
 
 	/**
 	 * Ignores or renders the arrow path lines.
@@ -55,7 +82,14 @@ class Config {
 	 * When enabled, performance will be affected
 	 * due to path computation. (and Cairo graphics :sob::sob::sob:)
 	 */
-	public static var RENDER_ARROW_PATHS:Bool = false;
+	public static var RENDER_ARROW_PATHS(get, never):Bool;
+	static inline function get_RENDER_ARROW_PATHS():Bool {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.renderArrowPaths;
+		#else
+		return ClientPrefs.renderArrowPaths;
+		#end
+	}
 
 	/**
 	 * Applies the `visuals` function from modifiers to
@@ -64,10 +98,24 @@ class Config {
 	 * NOTE: Arrow paths also have thickness and color properties,
 	 * but they are not affected by the arrow's alpha and color.
 	 */
-	public static var STYLED_ARROW_PATHS:Bool = false;
+	public static var STYLED_ARROW_PATHS(get, never):Bool;
+	static inline function get_STYLED_ARROW_PATHS():Bool {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.styledArrowPaths;
+		#else
+		return ClientPrefs.styledArrowPaths;
+		#end
+	}
 
 	/**
 	 * Scales the hold end size.
 	 */
-	public static var HOLD_END_SCALE:Float = 1;
+	public static var HOLD_END_SCALE(get, never):Float;
+	static inline function get_HOLD_END_SCALE():Float {
+		#if (FM_ENGINE_VERSION >= "0.7")
+		return ClientPrefs.data.holdEndScale;
+		#else
+		return ClientPrefs.holdEndScale;
+		#end
+	}
 }

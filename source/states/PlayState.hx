@@ -882,11 +882,44 @@ class PlayState extends MusicBeatState
 	function initModchart()
 	{
 		#if MODCHARTS_NOTITG_ALLOWED
-		// Solo inicializar si el usuario tiene habilitado el modcharting
-		if (!ClientPrefs.data.enableModcharting) {
-			trace("Modcharting disabled by user preferences");
+		// Verificar si algún script tiene la función onInitModchart
+		var hasModchartFunction:Bool = false;
+		
+		#if LUA_ALLOWED
+		for (script in luaArray) {
+			if (script != null && !script.closed && script.lua != null) {
+				Lua.getglobal(script.lua, 'onInitModchart');
+				var type:Int = Lua.type(script.lua, -1);
+				Lua.pop(script.lua, 1);
+				
+				if (type == Lua.LUA_TFUNCTION) {
+					hasModchartFunction = true;
+					break;
+				}
+			}
+		}
+		#end
+		
+		#if HSCRIPT_ALLOWED
+		if (!hasModchartFunction) {
+			for (script in hscriptArray) {
+				@:privateAccess
+				if (script != null && script.exists('onInitModchart')) {
+					hasModchartFunction = true;
+					break;
+				}
+			}
+		}
+		#end
+		
+		// Si no hay función onInitModchart, no inicializar el manager
+		if (!hasModchartFunction) {
+			trace("No onInitModchart function found - modchart manager not initialized");
 			return;
 		}
+		
+		// Si hay función onInitModchart, activar automáticamente el modcharting
+		trace("onInitModchart function detected - initializing modchart manager");
 		
 		try {
 			if (Manager.instance == null) {

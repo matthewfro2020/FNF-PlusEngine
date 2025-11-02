@@ -296,8 +296,7 @@ class EnUS
         "description_end_countdown_seconds" => "How many seconds should the countdown last at the end of the song.\n(10 - 30)",
 
         // Modchart Settings
-        "setting_enable_modcharting" => "Enable Modchart Manager",
-        "description_enable_modcharting" => "Enables the Funkin Modchart system.\nSome functions that have to do with notes, whether playerStrums or opponentStrums, and their variables may not be valid while this is active, only the \"noteTween*\" will work.",
+        // Note: Modchart Manager is now automatically enabled when onInitModchart() function is detected
         "setting_hold_subdivisions" => "Hold Subdivisions",
         "description_hold_subdivisions" => "Subdivides hold/sustain tails for smoother visuals.\nHigher values improve quality but can hurt performance.\n(Recommended: 4-8)",
 

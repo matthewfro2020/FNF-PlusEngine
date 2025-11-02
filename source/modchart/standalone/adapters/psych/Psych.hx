@@ -145,8 +145,8 @@ class Psych implements IAdapter {
 	}
 
 	public function isModchartingEnabled():Bool {
-		// Return true to enable modcharting by default
-		// You can add a ClientPrefs option later if needed
+		// Always return true - the actual check is done in PlayState.initModchart()
+		// by detecting if onInitModchart() function exists in any script
 		return true;
 	}
 

@@ -3,6 +3,7 @@ package options;
 /**
  * Submenu for modcharting-related options.
  * Allows users to configure settings that affect modchart performance and quality.
+ * Note: Modchart Manager is now automatically enabled when onInitModchart() function is detected.
  */
 class ModchartOptionsSubState extends BaseOptionsMenu
 {
@@ -10,13 +11,6 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 	{
 		title = 'Modchart Settings';
 		rpcTitle = 'Modchart Options Menu'; // for Discord Rich Presence
-
-		// Enable Modchart option
-		var option:Option = new Option('Enable Modchart Manager',
-			'Enables the Funkin Modchart system.\nSome functions that have to do with notes, whether playerStrums or opponentStrums, and their variables may not be valid while this is active, only the "noteTween*" will work.',
-			'enableModcharting',
-			BOOL);
-		addOption(option);
 
 		// Hold Subdivisions option
 		var option:Option = new Option('Hold Subdivisions',
@@ -28,7 +22,58 @@ class ModchartOptionsSubState extends BaseOptionsMenu
 		option.maxValue = 32;
 		option.changeValue = 1;
 		option.decimals = 0;
-		option.showCondition = function() return ClientPrefs.data.enableModcharting;
+		addOption(option);
+
+		// 3D Camera option
+		var option:Option = new Option('Enable 3D Cameras',
+			'Enables or disables 3D camera functionality.\nDisabling this may improve performance by skipping 3D transformations.',
+			'camera3dEnabled',
+			BOOL);
+		addOption(option);
+
+		// Optimize Holds option
+		var option:Option = new Option('Optimize Hold Rendering',
+			'Optimizes hold arrow rendering for better performance.\nNOT recommended for complex modcharts as holds may look incorrect.',
+			'optimizeHolds',
+			BOOL);
+		addOption(option);
+
+		// Z Scale option
+		var option:Option = new Option('Z-Axis Scale',
+			'Scales the Z-axis values to control perceived depth.\nHigher values increase depth, lower values flatten it.',
+			'zScale',
+			FLOAT);
+		option.scrollSpeed = 10;
+		option.minValue = 0.1;
+		option.maxValue = 5.0;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		addOption(option);
+
+		// Render Arrow Paths option
+		var option:Option = new Option('Render Arrow Paths',
+			'Renders the trajectory lines of arrows.\nWARNING: This affects performance due to path computation.',
+			'renderArrowPaths',
+			BOOL);
+		addOption(option);
+
+		// Styled Arrow Paths option
+		var option:Option = new Option('Styled Arrow Paths',
+			'Applies visual styles to arrow paths (color, scale, alpha).\nOnly works when "Render Arrow Paths" is enabled.',
+			'styledArrowPaths',
+			BOOL);
+		addOption(option);
+
+		// Hold End Scale option
+		var option:Option = new Option('Hold End Scale',
+			'Scales the size of hold note endings.\nAdjust for visual preference.',
+			'holdEndScale',
+			FLOAT);
+		option.scrollSpeed = 10;
+		option.minValue = 0.1;
+		option.maxValue = 3.0;
+		option.changeValue = 0.1;
+		option.decimals = 1;
 		addOption(option);
 
 		super();
