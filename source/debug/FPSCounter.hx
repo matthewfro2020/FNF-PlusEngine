@@ -56,6 +56,26 @@ class FPSCounter extends TextField
 	public var modAuthor:String = "";
 
 	/**
+		Charting info from PlayState (Step, Beat, Section)
+	**/
+	public var currentStep:Int = 0;
+	public var currentBeat:Int = 0;
+	public var currentSection:Int = 0;
+
+	/**
+		Debug info from PlayState (Speed, BPM, Health)
+	**/
+	public var songSpeed:Float = 1.0;
+	public var currentBPM:Int = 0;
+	public var playerHealth:Float = 1.0;
+	
+	/**
+		Rating and Combo from PlayState
+	**/
+	public var lastRating:String = "None";
+	public var comboCount:Int = 0;
+
+	/**
 		Background shape for debug mode
 	**/
 	private var bgShape:Shape;
@@ -64,6 +84,7 @@ class FPSCounter extends TextField
 		Last GitHub commit info
 	**/
 	private var lastCommit:String = "Loading...";
+	private var commitTime:String = ""; // Hora del commit
 
 	/**
 		CPU and GPU usage tracking - ELIMINADO para optimización
@@ -111,12 +132,12 @@ class FPSCounter extends TextField
 		selectable = false;
 		mouseEnabled = false;
 		defaultTextFormat = new TextFormat(Paths.font("aller.ttf"), 14, color);
-		width = 600; // Aumentar más el ancho para evitar saltos de línea
-		height = 300; // Asegurar altura suficiente
+		width = 350; // Ancho fijo para evitar reorganización
+		height = 550; // Altura aumentada para acomodar toda la información
 		multiline = true;
 		text = "FPS: ";
 		wordWrap = false; // Evitar que las palabras se corten
-		autoSize = openfl.text.TextFieldAutoSize.LEFT; // Auto-ajustar al contenido
+		autoSize = openfl.text.TextFieldAutoSize.NONE; // Desactivar auto-size para evitar saltos
 
 		// Habilitar formato HTML para diferentes tamaños de texto
 		#if !flash
@@ -239,10 +260,30 @@ class FPSCounter extends TextField
 						   '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
 				
+				// Mostrar la hora del commit si está disponible (ANTES de expandir debug completo)
+				if (commitTime != null && commitTime.length > 0) {
+					displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
+				}
+				
 				// Solo datos esenciales y rápidos de obtener
 				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
 				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
 				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+				
+				// Mostrar información de Step, Beat y Section siempre (CYAN)
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
+				
+				// Mostrar información de debug de PlayState (YELLOW)
+				var healthPercent = Math.floor((playerHealth / 2) * 100);
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
+				
+				// Mostrar Rating y Combo (MAGENTA)
+				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Rating: ' + lastRating + '</font>';
+				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Combo: x' + comboCount + '</font>';
 
 				displayText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
 				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
@@ -266,7 +307,8 @@ class FPSCounter extends TextField
 			case 1:
 				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}';
 			case 2:
-				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}\nObjects: ${FlxG.state.members.length}\nUptime: ${getUptime()}\nState: ${cachedCurrentState}';
+				var healthPercent = Math.floor((playerHealth / 2) * 100);
+				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}\nObjects: ${FlxG.state.members.length}\nUptime: ${getUptime()}\nState: ${cachedCurrentState}\n\nStep: ${currentStep}\nBeat: ${currentBeat}\nSection: ${currentSection}\n\nSpeed: ${formatFloat(songSpeed, 2)}x\nBPM: ${currentBPM}\nHealth: ${healthPercent}%';
 		}
 		text = fallbackText;
 		
@@ -363,7 +405,7 @@ class FPSCounter extends TextField
 			// Calcular el tamaño del fondo basado en el texto
 			var lines = switch (debugLevel) {
 				case 1: 6; // FPS, Memory, Peak, espacio, OS, Commit
-				case 2: 13.5; // Lo anterior + espacio + Objects, Uptime, State
+				case 2: 24.5; // Lo anterior + espacio + Objects, Uptime, State + espacio + Step, Beat, Section + espacio + Speed, BPM, Health
 				default: 0;
 			}
 			
@@ -401,6 +443,9 @@ class FPSCounter extends TextField
 					var sha:String = latestCommit.sha.substr(0, 7);
 					var message:String = latestCommit.commit.message;
 					
+					// Obtener la fecha y hora del commit
+					var commitDate:String = latestCommit.commit.author.date; // Formato ISO 8601
+					
 					// Tomar solo la primera línea del mensaje
 					if (message.indexOf('\n') != -1) {
 						message = message.substr(0, message.indexOf('\n'));
@@ -411,12 +456,23 @@ class FPSCounter extends TextField
 						message = message.substring(0, 30) + "...";
 					}
 					
+					// Formatear la hora del commit
+					if (commitDate != null && commitDate.length > 0) {
+						// Formato: 2024-11-02T15:30:45Z -> extraer hora
+						var timePart = commitDate.split('T')[1]; // "15:30:45Z"
+						if (timePart != null) {
+							commitTime = timePart.substr(0, 5); // "15:30"
+						}
+					}
+					
 					lastCommit = sha + " " + message;
 				} else {
 					lastCommit = "Build version";
+					commitTime = "";
 				}
 			} catch (e:Dynamic) {
 				lastCommit = "Build version";
+				commitTime = "";
 			}
 		};
 		
@@ -445,6 +501,28 @@ class FPSCounter extends TextField
 		} else {
 			return '${seconds}s';
 		}
+	}
+
+	// Función para formatear números flotantes
+	private function formatFloat(value:Float, decimals:Int):String {
+		var multiplier = Math.pow(10, decimals);
+		var rounded = Math.round(value * multiplier) / multiplier;
+		var str = Std.string(rounded);
+		
+		// Asegurar que tenga el número correcto de decimales
+		if (str.indexOf('.') == -1) {
+			str += '.';
+		}
+		
+		var parts = str.split('.');
+		if (parts.length > 1) {
+			while (parts[1].length < decimals) {
+				parts[1] += '0';
+			}
+			return parts[0] + '.' + parts[1];
+		}
+		
+		return str + StringTools.lpad('', '0', decimals);
 	}
 
 	// Función para obtener draw calls aproximados

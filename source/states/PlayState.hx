@@ -254,7 +254,6 @@ class PlayState extends MusicBeatState
 	var scoreTxtTween:FlxTween;
 	var timeTxtTween:FlxTween;
 	var judgementCounter:JudCounter;
-	var ghostJText:FlxText;
 
 	// TPS/NPS System
 	var notesHitArray:Array<Date> = [];
@@ -286,17 +285,6 @@ class PlayState extends MusicBeatState
 	var endCountdownText:FlxText = null;
 	var lastEndCountdown:Int = -1;
 	var lastJudName:String = "None";
-	var speedText:FlxText;
-	var bpmText:FlxText;
-	var healthText:FlxText;
-	var chartingText:FlxText;
-	
-	var lastSpeed:Float = -1;
-	var lastBPM:Int = -1;
-	var lastHealth:Float = -1;
-	var speedAlphaTween:FlxTween = null;
-	var bpmAlphaTween:FlxTween = null;
-	var healthAlphaTween:FlxTween = null;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -597,90 +585,15 @@ class PlayState extends MusicBeatState
 		judgementCounter.setCameras([camHUD]);
 		add(judgementCounter);
 
-		ghostJText = new FlxText(18, FlxG.height - 100, 0, "None\nx0", 22);
-		ghostJText.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		ghostJText.alpha = 0.6;
-		ghostJText.visible = ClientPrefs.data.debugData;
-		ghostJText.scrollFactor.set();
-		ghostJText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(ghostJText);
+		// Versión en la esquina inferior izquierda
+		var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + "\n" + SONG.song + " (" + Difficulty.getString() + ")";
 
-		// Información de charting - arriba de los otros textos
-		chartingText = new FlxText(14, FlxG.height - 240, 0, "Step: 0\nBeat: 0\nSection: 0", 16);
-		chartingText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.CYAN, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		chartingText.visible = chartingMode;
-		chartingText.scrollFactor.set();
-		chartingText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(chartingText);
-
-		speedText = new FlxText(14, FlxG.height - 120, 0, "Speed: 1.0x", 16);
-		speedText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		speedText.visible = ClientPrefs.data.debugData;
-		speedText.scrollFactor.set();
-		speedText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(speedText);
-		
-		bpmText = new FlxText(14, FlxG.height - 140, 0, "BPM: " + Std.string(Std.int(Conductor.bpm)), 16);
-		bpmText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		bpmText.visible = ClientPrefs.data.debugData;
-		bpmText.scrollFactor.set();
-		bpmText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(bpmText);
-		
-		healthText = new FlxText(14, FlxG.height - 160, 0, "Health: 50%", 16);
-		healthText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		healthText.visible = ClientPrefs.data.debugData;
-		healthText.scrollFactor.set();
-		healthText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		add(healthText);
-		
-		lastSpeed = songSpeed;
-		lastBPM = Std.int(Conductor.bpm);
-		lastHealth = health;
-
-		// Hora, fecha y versión en la esquina inferior izquierda
-		var now = Date.now();
-		var hourStr = StringTools.lpad(Std.string(now.getHours()), "0", 2);
-		var minStr = StringTools.lpad(Std.string(now.getMinutes()), "0", 2);
-		var timeStr = hourStr + ":" + minStr + Language.getPhrase("time_hours", "HRS");
-
-		// ← USAR TRADUCCIONES PARA DÍAS Y MESES
-		var dayNames = [
-			Language.getPhrase("day_sunday", "Sunday"),
-			Language.getPhrase("day_monday", "Monday"), 
-			Language.getPhrase("day_tuesday", "Tuesday"),
-			Language.getPhrase("day_wednesday", "Wednesday"),
-			Language.getPhrase("day_thursday", "Thursday"),
-			Language.getPhrase("day_friday", "Friday"),
-			Language.getPhrase("day_saturday", "Saturday")
-		];
-		var monthNames = [
-			Language.getPhrase("month_january", "January"),
-			Language.getPhrase("month_february", "February"),
-			Language.getPhrase("month_march", "March"),
-			Language.getPhrase("month_april", "April"),
-			Language.getPhrase("month_may", "May"),
-			Language.getPhrase("month_june", "June"),
-			Language.getPhrase("month_july", "July"),
-			Language.getPhrase("month_august", "August"),
-			Language.getPhrase("month_september", "September"),
-			Language.getPhrase("month_october", "October"),
-			Language.getPhrase("month_november", "November"),
-			Language.getPhrase("month_december", "December")
-		];
-		
-		var dayName = dayNames[now.getDay()];
-		var monthName = monthNames[now.getMonth()];
-		var dateStr = dayName + " - " + monthName + " " + now.getDate() + ", " + now.getFullYear();
-
-		var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + Difficulty.getString() + ")";
-
-		versionText = new FlxText(10, FlxG.height - 50, FlxG.width,
-			timeStr + "\n" + dateStr + "\n" + versionStr, 16);
+		versionText = new FlxText(10, FlxG.height - 34, FlxG.width, versionStr, 16); // Solo mostrar versión
 		versionText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionText.scrollFactor.set();
 		versionText.alpha = 0.7;
 		versionText.borderSize = 1;
+		versionText.visible = true; // Siempre visible
 		versionText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		add(versionText);
 
@@ -2024,106 +1937,6 @@ class PlayState extends MusicBeatState
 	}
 
 	// ← NUEVAS FUNCIONES DE OPTIMIZACIÓN
-	function updateVersionText():Void {
-		var now = Date.now();
-		var hourStr = StringTools.lpad(Std.string(now.getHours()), "0", 2);
-		var minStr = StringTools.lpad(Std.string(now.getMinutes()), "0", 2);
-		var timeStr = hourStr + ":" + minStr + Language.getPhrase("time_hrs", "HRS");
-		
-		var dayNames = [
-			Language.getPhrase("day_sunday", "Sunday"),
-			Language.getPhrase("day_monday", "Monday"), 
-			Language.getPhrase("day_tuesday", "Tuesday"),
-			Language.getPhrase("day_wednesday", "Wednesday"),
-			Language.getPhrase("day_thursday", "Thursday"),
-			Language.getPhrase("day_friday", "Friday"),
-			Language.getPhrase("day_saturday", "Saturday")
-		];
-		var monthNames = [
-			Language.getPhrase("month_january", "January"),
-			Language.getPhrase("month_february", "February"),
-			Language.getPhrase("month_march", "March"),
-			Language.getPhrase("month_april", "April"),
-			Language.getPhrase("month_may", "May"),
-			Language.getPhrase("month_june", "June"),
-			Language.getPhrase("month_july", "July"),
-			Language.getPhrase("month_august", "August"),
-			Language.getPhrase("month_september", "September"),
-			Language.getPhrase("month_october", "October"),
-			Language.getPhrase("month_november", "November"),
-			Language.getPhrase("month_december", "December")
-		];
-		
-		var dayName = dayNames[now.getDay()];
-		var monthName = monthNames[now.getMonth()];
-		var dateStr = dayName + " - " + monthName + " " + now.getDate() + ", " + now.getFullYear();
-		
-		var difficultyText = Language.getPhrase("difficulty_" + Difficulty.getString().toLowerCase(), Difficulty.getString());
-		var versionStr = Language.getPhrase("plus_engine_version", "Plus Engine v") + MainMenuState.plusEngineVersion + " | " + SONG.song + " (" + difficultyText + ")";
-		
-		versionText.text = timeStr + "\n" + dateStr + "\n" + versionStr;
-	}
-
-	function updateDebugTexts(curSpeed:Float, curBPM:Int, healthPercent:Int):Void {
-		// Velocidad
-		if (curSpeed != lastSpeed) {
-			var exclam = "";
-			var color = 0xFFFFFFFF;
-			var minSpeed = 2.0;
-			var maxSpeed = 4.0;
-			if (curSpeed >= minSpeed) {
-				var t = Math.min((curSpeed - minSpeed) / (maxSpeed - minSpeed), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
-				if (t > 0.66) exclam = "!!!";
-				else if (t > 0.33) exclam = "!!";
-				else exclam = "!";
-			}
-			speedText.text = Language.getPhrase("debug_speed", "Speed") + ": " + Std.string(Math.round(curSpeed * 10) / 10) + "x" + exclam;
-			speedText.color = color;
-			speedText.visible = ClientPrefs.data.debugData;
-			lastSpeed = curSpeed;
-		}
-		
-		// BPM
-		if (curBPM != lastBPM) {
-			var exclam = "";
-			var color = 0xFFFFFFFF;
-			var minBPM = 150.0;
-			var maxBPM = 300.0;
-			if (curBPM >= minBPM) {
-				var t = Math.min((curBPM - minBPM) / (maxBPM - minBPM), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
-				if (t > 0.66) exclam = "!!!";
-				else if (t > 0.33) exclam = "!!";
-				else exclam = "!";
-			}
-			bpmText.text = "BPM: " + Std.string(curBPM) + exclam;
-			bpmText.color = color;
-			bpmText.visible = ClientPrefs.data.debugData;
-			lastBPM = curBPM;
-		}
-		
-		// Salud
-		var curHealth = health;
-		if (curHealth != lastHealth) {
-			var exclam = "";
-			var color = 0xFFFFFFFF;
-			var minHealth = 0.0;
-			var maxHealth = 25.0;
-			if (healthPercent <= maxHealth) {
-				var t = Math.min((maxHealth - healthPercent) / (maxHealth - minHealth), 1);
-				color = lerpColor(0xFFFFFFFF, 0xFFFF0000, t);
-				if (t > 0.66) exclam = "!!!";
-				else if (t > 0.33) exclam = "!!";
-				else exclam = "!";
-			}
-			healthText.text = Language.getPhrase("debug_health", "Health") + ": " + Std.string(Math.round(healthPercent)) + "%" + exclam;
-			healthText.color = color;
-			healthText.visible = ClientPrefs.data.debugData;
-			lastHealth = curHealth;
-		}
-	}
-
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
@@ -2194,34 +2007,18 @@ class PlayState extends MusicBeatState
 
 		// ← OPTIMIZAR ACTUALIZACIÓN DE TIEMPO - Solo cada segundo
 		timeUpdateTimer += elapsed;
-		if (versionText != null && timeUpdateTimer >= TIME_UPDATE_INTERVAL) {
-			timeUpdateTimer = 0;
-			updateVersionText();
+
+		// Actualizar Step, Beat y Section en el FPSCounter
+		if (Main.fpsVar != null) {
+			Main.fpsVar.currentStep = curStep;
+			Main.fpsVar.currentBeat = curBeat;
+			Main.fpsVar.currentSection = curSection;
+			Main.fpsVar.songSpeed = songSpeed;
+			Main.fpsVar.currentBPM = Std.int(Conductor.bpm);
+			Main.fpsVar.playerHealth = health;
+			Main.fpsVar.lastRating = capitalizeFirst(lastJudName);
+			Main.fpsVar.comboCount = combo;
 		}
-		
-		if (ghostJText != null) {
-		ghostJText.text = capitalizeFirst(lastJudName) + "\nx" + combo;
-		ghostJText.visible = ClientPrefs.data.debugData;
-	}
-
-	// Actualizar información de charting
-	if (chartingText != null) {
-		chartingText.text = "Step: " + curStep + "\nBeat: " + curBeat + "\nSection: " + curSection;
-		chartingText.visible = chartingMode;
-	}
-
-	// ← OPTIMIZAR ACTUALIZACIONES DE DEBUG - Solo cada 100ms
-	debugUpdateTimer += elapsed;
-	if (debugUpdateTimer >= DEBUG_UPDATE_INTERVAL) {
-		debugUpdateTimer = 0;
-		
-		var curSpeed = songSpeed;
-		var curBPM = Std.int(Conductor.bpm);
-		var curHealth = health;
-		var healthPercent = Math.floor((curHealth / 2) * 100);
-		
-		updateDebugTexts(curSpeed, curBPM, healthPercent);
-	}
 
 		if (judgementCounter != null)
 		{

@@ -57,7 +57,7 @@ import states.TitleState;
 	public var renderArrowPaths:Bool = false; // Renderiza las líneas de trayectoria de las flechas
 	public var styledArrowPaths:Bool = false; // Aplica estilos visuales a las trayectorias
 	public var holdEndScale:Float = 1.0; // Escala del final de los holds
-	public var debugData:Bool = false;
+	public var showTimeAndDate:Bool = true; // Mostrar hora, fecha y versión en PlayState
 	public var noteOffset:Int = 0;
 	public var arrowRGB:Array<Array<FlxColor>> = [
 		[0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
