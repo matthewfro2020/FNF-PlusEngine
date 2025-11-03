@@ -588,7 +588,7 @@ class PlayState extends MusicBeatState
 		// Versión en la esquina inferior izquierda
 		var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + "\n" + SONG.song + " (" + Difficulty.getString() + ")";
 
-		versionText = new FlxText(10, FlxG.height - 34, FlxG.width, versionStr, 16); // Solo mostrar versión
+		versionText = new FlxText(10, FlxG.height - 38, FlxG.width, versionStr, 16); // Solo mostrar versión
 		versionText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionText.scrollFactor.set();
 		versionText.alpha = 0.7;
@@ -602,7 +602,7 @@ class PlayState extends MusicBeatState
 		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
 		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
+		timeTxt.alpha = 1; // Alpha siempre visible
 		timeTxt.borderSize = 2;
 		timeTxt.visible = updateTime = showTime;
 		if(ClientPrefs.data.downScroll) timeTxt.y = FlxG.height - 44;
@@ -611,7 +611,8 @@ class PlayState extends MusicBeatState
 		timeBar = new Bar(0, timeTxt.y + (timeTxt.height / 4), 'timeBar', function() return songPercent, 0, 1);
 		timeBar.scrollFactor.set();
 		timeBar.screenCenter(X);
-		timeBar.alpha = 0;
+		timeBar.alpha = 1; // Alpha siempre visible
+		timeBar.scale.x = 0; // Inicia con escala X en 0
 		timeBar.visible = showTime;
 		uiGroup.add(timeBar);
 		uiGroup.add(timeTxt);
@@ -653,6 +654,7 @@ class PlayState extends MusicBeatState
 		healthBar.scrollFactor.set();
 		healthBar.visible = !ClientPrefs.data.hideHud;
 		healthBar.alpha = ClientPrefs.data.healthBarAlpha;
+		healthBar.scale.x = 0;
 		reloadHealthBarColors();
 		uiGroup.add(healthBar);
 
@@ -827,12 +829,12 @@ class PlayState extends MusicBeatState
 		
 		// Si no hay función onInitModchart, no inicializar el manager
 		if (!hasModchartFunction) {
-			trace("No onInitModchart function found - modchart manager not initialized");
+			//trace("No onInitModchart function found - modchart manager not initialized");
 			return;
 		}
 		
 		// Si hay función onInitModchart, activar automáticamente el modcharting
-		trace("onInitModchart function detected - initializing modchart manager");
+		//trace("onInitModchart function detected - initializing modchart manager");
 		
 		try {
 			if (Manager.instance == null) {
@@ -1171,6 +1173,8 @@ class PlayState extends MusicBeatState
 			return false;
 		}
 
+		FlxTween.tween(healthBar.scale, {x: 1}, 0.5, {ease: FlxEase.circOut});
+
 		seenCutscene = true;
 		inCutscene = false;
 		var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
@@ -1495,8 +1499,7 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		FlxTween.tween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.tween(timeBar.scale, {x: 1}, 0.5, {ease: FlxEase.circOut});
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
