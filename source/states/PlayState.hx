@@ -621,7 +621,7 @@ class PlayState extends MusicBeatState
 		versionText = new FlxText(0, -50, FlxG.width, versionStr, 16); // Solo mostrar versión
 		versionText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionText.scrollFactor.set();
-		versionText.alpha = 0.6;
+		versionText.alpha = 1.0; // Comienza completamente visible
 		versionText.borderSize = 1;
 		versionText.visible = true; // Siempre visible
 		versionText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
@@ -1417,9 +1417,9 @@ class PlayState extends MusicBeatState
 	}
 
 	public dynamic function updateScoreText()
-		{
-			// Wife3 permite valores fuera del rango 0-100%
-			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
+	{
+		// Wife3 permite valores fuera del rango 0-100%
+		var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
 		
 		// Formateo especial para >100% - El porcentaje base se mantiene en 100%, solo sube el adicional
 		var percentDisplay:String = Std.string(percent) + '%';
@@ -1572,6 +1572,12 @@ class PlayState extends MusicBeatState
 		songLength = FlxG.sound.music.length;
 		FlxTween.tween(timeBar.scale, {x: 1}, 0.5, {ease: FlxEase.circOut});
 		FlxTween.tween(versionText, {y: 5}, 0.5, {ease: FlxEase.circOut});
+		
+		// Después de 5 segundos, cambiar el alpha a 0.6
+		new FlxTimer().start(5.0, function(tmr:FlxTimer)
+		{
+			FlxTween.tween(versionText, {alpha: 0.5}, 1.0, {ease: FlxEase.sineInOut});
+		});
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
