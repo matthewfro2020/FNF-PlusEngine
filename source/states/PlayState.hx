@@ -617,16 +617,19 @@ class PlayState extends MusicBeatState
 		judgementCounter.setCameras([camHUD]);
 		add(judgementCounter);
 
-		// Versión en la esquina inferior izquierda
 		var versionStr = "Plus Engine v" + MainMenuState.plusEngineVersion + "\n" + SONG.song + " (" + Difficulty.getString() + ")";
-
-		versionText = new FlxText(10, -50, FlxG.width, versionStr, 16); // Solo mostrar versión
+		versionText = new FlxText(0, -50, FlxG.width, versionStr, 16); // Solo mostrar versión
 		versionText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionText.scrollFactor.set();
-		versionText.alpha = 0.7;
+		versionText.alpha = 0.6;
 		versionText.borderSize = 1;
 		versionText.visible = true; // Siempre visible
 		versionText.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+		if (ClientPrefs.data.downScroll)
+			versionText.alignment = CENTER;
+	    else
+			versionText.alignment = RIGHT;
+		    versionText.x = -10;
 		add(versionText);
 
 		Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
