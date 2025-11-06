@@ -78,13 +78,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 
-		var option:Option = new Option('Judge Difficulty',
-			'Stepmania-style judge difficulty.\nLower = easier (wider windows), Higher = harder (tighter windows)\nJ4 is standard, JUSTICE is brutal.',
-			'judgeDiff',
-			STRING,
-			['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'JUSTICE']);
-		addOption(option);
-
 		var option:Option = new Option('Rating Offset',
 			'Changes how late/early you have to hit for a "Epic!!"\nHigher values mean you have to hit later.',
 			'ratingOffset',
@@ -147,6 +140,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.minValue = 2;
 		option.maxValue = 10;
 		option.changeValue = 0.1;
+		addOption(option);
+
+		var option:Option = new Option('Accuracy System:',
+			"Choose the accuracy calculation system:\nWife3 - StepMania precision timing\nPsych - Rating mod based\nSimple - Basic hits/total\nosu!mania - Weighted judgement system\nDJMAX - Combo bonus system\nITG - Dance Points system",
+			'accuracySystem',
+			STRING,
+			['Wife3', 'Psych', 'Simple', 'osu!mania', 'DJMAX', 'ITG']);
 		addOption(option);
 
 		super();

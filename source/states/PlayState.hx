@@ -3081,18 +3081,45 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
-	// Sistema de Accuracy
 	public var totalPlayed:Int = 0;
-	public var totalNotesHit:Float = 0.0; // Sistema antiguo (comentado en RecalculateRating)
+	public var totalNotesHit:Float = 0.0;
 
-	// Wife3 Accuracy System ESTÁNDAR (StepMania)
-	// Sistema original sin modificaciones:
-	// - Máximo 2.0 puntos por hit perfecto
-	// - Penalización fija de -8.0 por miss
-	// - Rango de accuracy: 0% a 100% (sin bonus ni negativos)
-	// - Fórmula: wife_score = 2 * (1 - (timing_error / max_boo_window)^2)
+	// Wife3 Accuracy System STANDARD (StepMania)
 	public var wife3Scores:Array<Float> = []; // Guarda el score de cada nota individual
 	public var wife3_maxms:Float = 180.0; // Ventana máxima de timing en milisegundos (boo window)
+
+	// Psych Engine Accuracy System (Original)
+	// Usa totalNotesHit (suma de ratingMod) y totalPlayed
+	
+	// Simple Accuracy System
+	public var notesHitSimple:Int = 0; // Contador simple de notas golpeadas
+	
+	// osu!mania Accuracy System
+	public var osuMania_n300:Int = 0;  // Epic/Sick hits
+	public var osuMania_n200:Int = 0;  // Good hits
+	public var osuMania_n100:Int = 0;  // Bad hits
+	public var osuMania_n50:Int = 0;   // Shit hits
+	public var osuMania_nMiss:Int = 0; // Misses
+	
+	// DJMAX Accuracy System
+	public var djmax_maxPerfect:Int = 0;
+	public var djmax_perfect:Int = 0;
+	public var djmax_great:Int = 0;
+	public var djmax_good:Int = 0;
+	public var djmax_bad:Int = 0;
+	public var djmax_miss:Int = 0;
+	public var djmax_combo:Int = 0;
+	public var djmax_maxCombo:Int = 0;
+	
+	// ITG (Dance Points) System
+	public var itg_FantasticPlus:Int = 0; // W0 - Epic (±15ms)
+	public var itg_Fantastic:Int = 0;     // W1 - Sick (±22.5ms)
+	public var itg_Excellent:Int = 0;     // W2 - Good (±45ms)
+	public var itg_Great:Int = 0;         // W3 - Bad (±90ms)
+	public var itg_Decent:Int = 0;        // W4 - Shit (±135ms)
+	public var itg_WayOff:Int = 0;        // W5 - Boo (±180ms)
+	public var itg_Miss:Int = 0;
+	public var itg_DP:Float = 0.0;        // Dance Points acumulativo
 
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
@@ -3115,17 +3142,11 @@ class PlayState extends MusicBeatState
 			Paths.image(uiFolder + 'num' + i + uiPostfix);
 	}
 
-	// Wife3 Helper: Calcula puntaje usando fórmula estándar de StepMania
-	// Formula: wife_score = 2 * (1 - (ms_offset / max_window)^2)
 	private function calculateWife3Score(timingError:Float):Float
 	{
-		// Normalizar el error de timing
 		var normalizedError:Float = Math.abs(timingError) / wife3_maxms;
-		
-		// Aplicar fórmula Wife3 estándar
 		var wife3Score:Float = 2.0 * (1.0 - Math.pow(normalizedError, 2));
 		
-		// Clampear entre 0 y 2 (estándar no permite negativos en hits)
 		return Math.max(0, Math.min(2.0, wife3Score));
 	}
 
@@ -3154,18 +3175,59 @@ class PlayState extends MusicBeatState
 		lastJudName = daRating.name;
 
 
-		// Sistema antiguo (comentado, ahora usamos Wife3)
 		// totalNotesHit += daRating.ratingMod;
 		
-		// Wife3 Accuracy System ESTÁNDAR (StepMania)
-		// Fórmula: wife_score = 2 * (1 - (ms_offset / max_window)^2)
-		// Máximo: 2.0 puntos por hit perfecto (0ms)
-		// Mínimo: 0.0 puntos por hit en el límite (180ms)
+		// === SISTEMAS DE ACCURACY ===
 		
+		// 1. Wife3 Accuracy System STANDARD (StepMania)
 		var noteDiff_ms:Float = Math.abs(noteDiff / playbackRate);
 		var noteWifeScore:Float = calculateWife3Score(noteDiff_ms);
-
 		wife3Scores.push(noteWifeScore);
+		
+		// 2. Psych Engine Accuracy System (Original)
+		totalNotesHit += daRating.ratingMod;
+		
+		// 3. Simple Accuracy System
+		if (daRating.name == 'epic' || daRating.name == 'sick' || daRating.name == 'good') {
+			notesHitSimple++;
+		}
+		
+		// 4. osu!mania Accuracy System
+		switch(daRating.name) {
+			case 'epic' | 'sick': osuMania_n300++;
+			case 'good': osuMania_n200++;
+			case 'bad': osuMania_n100++;
+			case 'shit': osuMania_n50++;
+		}
+		
+		// 5. DJMAX Accuracy System
+		switch(daRating.name) {
+			case 'epic': djmax_maxPerfect++;
+			case 'sick': djmax_perfect++;
+			case 'good': djmax_great++;
+			case 'bad': djmax_good++;
+			case 'shit': djmax_bad++;
+		}
+		
+		// 6. ITG (Dance Points) System
+		// Mapeo de ratings a ventanas ITG
+		switch(daRating.name) {
+			case 'epic': 
+				itg_FantasticPlus++; // W0
+				itg_DP += 10; // Máximo score
+			case 'sick': 
+				itg_Fantastic++; // W1
+				itg_DP += 10;
+			case 'good': 
+				itg_Excellent++; // W2
+				itg_DP += 9;
+			case 'bad': 
+				itg_Great++; // W3
+				itg_DP += 5;
+			case 'shit': 
+				itg_Decent++; // W4
+				itg_DP += 2;
+		}
 		
 		note.ratingMod = daRating.ratingMod;
 		if(!note.ratingDisabled) daRating.hits++;
@@ -3637,11 +3699,23 @@ class PlayState extends MusicBeatState
 		if(!endingSong) songMisses++;
 		totalPlayed++;
 		
+		// Registrar miss en todos los sistemas de accuracy
+		
 		// Wife3 - Penalización FIJA estándar por miss
 		// StepMania Wife3 usa -8.0 puntos por cada miss
 		var missPenalty:Float = -8.0;
-		
 		wife3Scores.push(missPenalty);
+		
+		// osu!mania - Registrar miss
+		osuMania_nMiss++;
+		
+		// DJMAX - Registrar miss y resetear combo
+		djmax_miss++;
+		djmax_combo = 0;
+		
+		// ITG - Penalización por miss (-12 DP)
+		itg_Miss++;
+		itg_DP -= 12;
 		
 		RecalculateRating(true);		
 		if (judgementCounter != null) {
@@ -3794,6 +3868,11 @@ class PlayState extends MusicBeatState
 				combo++;
 				if(combo > maxCombo) maxCombo = combo;
 				if(combo > 10000000) combo = 10000000;
+				
+				// DJMAX combo tracking
+				djmax_combo++;
+				if(djmax_combo > djmax_maxCombo) djmax_maxCombo = djmax_combo;
+				
 				popUpScore(note);
 			}
 			var gainHealth:Bool = true; // prevent health gain, *if* sustains are treated as a singular note
@@ -4367,32 +4446,117 @@ class PlayState extends MusicBeatState
 		if(ret != LuaUtils.Function_Stop)
 		{
 			ratingName = '?';
-			if(wife3Scores.length > 0)
+			ratingPercent = 0.0; // Inicializar en 0
+			
+			// Seleccionar sistema de accuracy según la preferencia del usuario
+			var selectedSystem:String = ClientPrefs.data.accuracySystem;
+			
+			if(selectedSystem == 'Wife3')
 			{
-				// Wife3 Accuracy System ESTÁNDAR - Cálculo del porcentaje
-				var totalPoints:Float = 0.0;
-				for(score in wife3Scores)
+				// === WIFE3 ACCURACY SYSTEM (STEPMANIA) ===
+				if(wife3Scores.length > 0)
 				{
-					totalPoints += score;
+					var totalPoints:Float = 0.0;
+					for(score in wife3Scores)
+					{
+						totalPoints += score;
+					}
+					
+					var maxPossiblePoints:Float = wife3Scores.length * 2.0;
+					
+					// Calcular porcentaje base
+					var rawPercent:Float = totalPoints / maxPossiblePoints;
+					
+					// CLAMPEAR entre 0% y 100% (estándar Wife3)
+					ratingPercent = Math.max(0.0, Math.min(1.0, rawPercent));
 				}
-				
-				var maxPossiblePoints:Float = wife3Scores.length * 2.0;
-				
-				// Calcular porcentaje base
-				var rawPercent:Float = totalPoints / maxPossiblePoints;
-				
-				// CLAMPEAR entre 0% y 100% (estándar Wife3)
-				// No permite accuracy negativo ni superior a 100%
-				ratingPercent = Math.max(0.0, Math.min(1.0, rawPercent));
+			}
+			else if(selectedSystem == 'Psych')
+			{
+				// === PSYCH ACCURACY SYSTEM (ORIGINAL) ===
+				if(totalPlayed != 0)
+				{
+					// Rating Percent basado en totalNotesHit (suma de ratingMod) / totalPlayed
+					ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
+				}
+			}
+			else if(selectedSystem == 'Simple')
+			{
+				// === SIMPLE ACCURACY SYSTEM ===
+				if(totalPlayed != 0)
+				{
+					// Porcentaje simple: notas golpeadas bien / total de notas
+					ratingPercent = Math.min(1, Math.max(0, notesHitSimple / totalPlayed));
+				}
+			}
+			else if(selectedSystem == 'osu!mania')
+			{
+				// === OSU!MANIA ACCURACY SYSTEM ===
+				var totalHits:Int = osuMania_n300 + osuMania_n200 + osuMania_n100 + osuMania_n50 + osuMania_nMiss;
+				if(totalHits > 0)
+				{
+					// Fórmula osu!mania: (300×n300 + 200×n200 + 100×n100 + 50×n50) / (300×totalNotes)
+					var weightedScore:Float = (300.0 * osuMania_n300) + (200.0 * osuMania_n200) + 
+					                          (100.0 * osuMania_n100) + (50.0 * osuMania_n50);
+					var maxPossibleScore:Float = 300.0 * totalHits;
+					ratingPercent = weightedScore / maxPossibleScore;
+					ratingPercent = Math.min(1, Math.max(0, ratingPercent));
+				}
+			}
+			else if(selectedSystem == 'DJMAX')
+			{
+				// === DJMAX RESPECT ACCURACY SYSTEM ===
+				var totalNotes:Int = djmax_maxPerfect + djmax_perfect + djmax_great + 
+				                     djmax_good + djmax_bad + djmax_miss;
+				if(totalNotes > 0)
+				{
+					// Score base por nota
+					var baseScorePerNote:Float = 1000000.0 / totalNotes;
+					
+					// Calcular score total
+					var totalScore:Float = 0.0;
+					totalScore += djmax_maxPerfect * baseScorePerNote * 1.0;  // 100%
+					totalScore += djmax_perfect * baseScorePerNote * 0.95;    // 95%
+					totalScore += djmax_great * baseScorePerNote * 0.80;      // 80%
+					totalScore += djmax_good * baseScorePerNote * 0.40;       // 40%
+					totalScore += djmax_bad * baseScorePerNote * 0.10;        // 10%
+					// djmax_miss no suma nada
+					
+					// Bonus por combo (hasta 10% adicional)
+					var comboBonus:Float = 0.0;
+					if(totalNotes > 0) {
+						var comboRatio:Float = djmax_maxCombo / totalNotes;
+						comboBonus = comboRatio * 0.10 * 1000000.0;
+					}
+					
+					ratingPercent = (totalScore + comboBonus) / 1100000.0; // 1M base + 100k combo
+					ratingPercent = Math.min(1, Math.max(0, ratingPercent));
+				}
+			}
+			else if(selectedSystem == 'ITG')
+			{
+				// === ITG (DANCE POINTS) SYSTEM ===
+				var totalNotes:Int = itg_FantasticPlus + itg_Fantastic + itg_Excellent + 
+				                     itg_Great + itg_Decent + itg_WayOff + itg_Miss;
+				if(totalNotes > 0)
+				{
+					// Calcular max DP posible (todos Fantastic+)
+					var maxDP:Float = totalNotes * 10.0;
+					
+					// DP actual (ya se va calculando en popUpScore y noteMissCommon)
+					// Asegurar que no sea negativo
+					var currentDP:Float = Math.max(0, itg_DP);
+					
+					// Porcentaje
+					ratingPercent = currentDP / maxDP;
+					ratingPercent = Math.min(1, Math.max(0, ratingPercent));
+				}
+			}
 
-				/* === SISTEMA ANTIGUO (COMENTADO) ===
-				// Rating Percent
-				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
-				*/
-
-				// Rating Name - Incluye ratings negativos y manejo de >100%
-				var translatedRatingStuff = getRatingStuff();
+			// Rating Name
+			var translatedRatingStuff = getRatingStuff();
+			if(ratingPercent >= 0 && totalPlayed > 0)
+			{
 				ratingName = translatedRatingStuff[translatedRatingStuff.length-1][0]; //Uses last string
 				if(ratingPercent < 1)
 					for (i in 0...translatedRatingStuff.length-1)
@@ -4409,7 +4573,111 @@ class PlayState extends MusicBeatState
 		setOnScripts('ratingFC', ratingFC);
 		setOnScripts('totalPlayed', totalPlayed);
 		setOnScripts('totalNotesHit', totalNotesHit);
+		setOnScripts('accuracySystem', ClientPrefs.data.accuracySystem);
+		
+		// Calcular porcentajes individuales para cada sistema
+		var wife3Percent:Float = 0.0;
+		var psychPercent:Float = 0.0;
+		var simplePercent:Float = 0.0;
+		var osuPercent:Float = 0.0;
+		var djmaxPercent:Float = 0.0;
+		var itgPercent:Float = 0.0;
+		
+		// Wife3 Percent
+		if(wife3Scores.length > 0) {
+			var totalPoints:Float = 0.0;
+			for(score in wife3Scores) totalPoints += score;
+			var maxPossiblePoints:Float = wife3Scores.length * 2.0;
+			wife3Percent = Math.max(0.0, Math.min(1.0, totalPoints / maxPossiblePoints));
+		}
+		
+		// Psych Engine Percent
+		if(totalPlayed > 0) {
+			psychPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
+		}
+		
+		// Simple Percent
+		if(totalPlayed > 0) {
+			simplePercent = Math.min(1, Math.max(0, notesHitSimple / totalPlayed));
+		}
+		
+		// osu!mania Percent
+		var totalHitsOsu:Int = osuMania_n300 + osuMania_n200 + osuMania_n100 + osuMania_n50 + osuMania_nMiss;
+		if(totalHitsOsu > 0) {
+			var weightedScore:Float = (300.0 * osuMania_n300) + (200.0 * osuMania_n200) + 
+			                          (100.0 * osuMania_n100) + (50.0 * osuMania_n50);
+			var maxPossibleScore:Float = 300.0 * totalHitsOsu;
+			osuPercent = Math.min(1, Math.max(0, weightedScore / maxPossibleScore));
+		}
+		
+		// DJMAX Percent
+		var totalNotesDJ:Int = djmax_maxPerfect + djmax_perfect + djmax_great + djmax_good + djmax_bad + djmax_miss;
+		if(totalNotesDJ > 0) {
+			var baseScorePerNote:Float = 1000000.0 / totalNotesDJ;
+			var totalScore:Float = 0.0;
+			totalScore += djmax_maxPerfect * baseScorePerNote * 1.0;
+			totalScore += djmax_perfect * baseScorePerNote * 0.95;
+			totalScore += djmax_great * baseScorePerNote * 0.80;
+			totalScore += djmax_good * baseScorePerNote * 0.40;
+			totalScore += djmax_bad * baseScorePerNote * 0.10;
+			var comboBonus:Float = 0.0;
+			if(totalNotesDJ > 0) {
+				var comboRatio:Float = djmax_maxCombo / totalNotesDJ;
+				comboBonus = comboRatio * 0.10 * 1000000.0;
+			}
+			djmaxPercent = Math.min(1, Math.max(0, (totalScore + comboBonus) / 1100000.0));
+		}
+		
+		// ITG Percent
+		var totalNotesITG:Int = itg_FantasticPlus + itg_Fantastic + itg_Excellent + itg_Great + itg_Decent + itg_WayOff + itg_Miss;
+		if(totalNotesITG > 0) {
+			var maxDP:Float = totalNotesITG * 10.0;
+			var currentDP:Float = Math.max(0, itg_DP);
+			itgPercent = Math.min(1, Math.max(0, currentDP / maxDP));
+		}
+		
+		// Wife3 (StepMania) System
+		setOnScripts('ratingWife3', wife3Percent);
 		setOnScripts('wife3Scores', wife3Scores);
+		
+		// Psych Engine System
+		setOnScripts('ratingPsych', psychPercent);
+		setOnScripts('ratingPsychTotal', totalPlayed);
+		
+		// Simple System
+		setOnScripts('ratingSimple', simplePercent);
+		setOnScripts('ratingSimpleTotal', totalPlayed);
+		
+		// osu!mania System
+		setOnScripts('ratingOsu', osuPercent);
+		setOnScripts('osuMania_n300', osuMania_n300);
+		setOnScripts('osuMania_n200', osuMania_n200);
+		setOnScripts('osuMania_n100', osuMania_n100);
+		setOnScripts('osuMania_n50', osuMania_n50);
+		setOnScripts('osuMania_nMiss', osuMania_nMiss);
+		
+		// DJMAX System
+		setOnScripts('ratingDJMAX', djmaxPercent);
+		setOnScripts('djmax_maxPerfect', djmax_maxPerfect);
+		setOnScripts('djmax_perfect', djmax_perfect);
+		setOnScripts('djmax_great', djmax_great);
+		setOnScripts('djmax_good', djmax_good);
+		setOnScripts('djmax_bad', djmax_bad);
+		setOnScripts('djmax_miss', djmax_miss);
+		setOnScripts('djmax_combo', djmax_combo);
+		setOnScripts('djmax_maxCombo', djmax_maxCombo);
+		
+		// ITG (Dance Points) System
+		setOnScripts('ratingITG', itgPercent);
+		setOnScripts('itg_FantasticPlus', itg_FantasticPlus);
+		setOnScripts('itg_Fantastic', itg_Fantastic);
+		setOnScripts('itg_Excellent', itg_Excellent);
+		setOnScripts('itg_Great', itg_Great);
+		setOnScripts('itg_Decent', itg_Decent);
+		setOnScripts('itg_WayOff', itg_WayOff);
+		setOnScripts('itg_Miss', itg_Miss);
+		setOnScripts('itg_DP', itg_DP);
+		
 		updateScore(badHit, scoreBop); // score will only update after rating is calculated, if it's a badHit, it shouldn't bounce
 	}
 

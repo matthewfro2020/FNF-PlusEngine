@@ -21,6 +21,9 @@ import states.TitleState;
 	public var gameOverVibration:Bool = false;
 	public var fpsRework:Bool = false;
 	
+	// Sistema de Accuracy/Rating
+	public var accuracySystem:String = 'Wife3'; // 'Wife3', 'Psych', 'Simple', 'osu!mania', 'DJMAX', 'ITG'
+	
 	// ✅ Mod con permiso para ejecutar custom states
 	// Si es "NONE" o null, no se ejecutarán custom states de ningún mod
 	// Solo el mod especificado aquí podrá ejecutar sus custom states
