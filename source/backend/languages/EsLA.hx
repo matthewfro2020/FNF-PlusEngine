@@ -14,9 +14,11 @@ class EsLA
         "changelog_error" => "Error al cargar el registro de cambios: {1}",
 
         // Gameplay
-        "score_text" => "Puntuación: {1} | Fallas: {2} | Clasificación: {3} | TPS: {4}/{5}",
+        "score_text" => "Puntuación: {1} | {2}: {3} | Clasificación: {4} | TPS: {5}/{6}",
         "score_text_instakill" => "Fallas: {1} | Clasificación: {2} | TPS: {3}/{4}",
         "botplay" => "Automático",
+        "misses" => "Fallas",
+        "combo_breaks" => "Rupturas de Combo",
 
         // Ratings
         "rating_you_suck" => "¡¡¡NI MIERDA SABES!!!",

@@ -24,6 +24,9 @@ import states.TitleState;
 	// Sistema de Accuracy/Rating
 	public var accuracySystem:String = 'Wife3'; // 'Wife3', 'Psych', 'Simple', 'osu!mania', 'DJMAX', 'ITG'
 	
+	// Combo Break Settings
+	public var badShitBreakCombo:Bool = false; // Si está en true, Bad y Shit romperán el combo
+	
 	// ✅ Mod con permiso para ejecutar custom states
 	// Si es "NONE" o null, no se ejecutarán custom states de ningún mod
 	// Solo el mod especificado aquí podrá ejecutar sus custom states

@@ -14,9 +14,11 @@ class EnUS
         "changelog_error" => "Error loading changelog: {1}",
 
         // Gameplay
-        "score_text" => "Score: {1} | Misses: {2} | Rating: {3} | TPS: {4}/{5}",
+        "score_text" => "Score: {1} | {2}: {3} | Rating: {4} | TPS: {5}/{6}",
         "score_text_instakill" => "Score: {1} | Rating: {2} | TPS: {3}/{4}",
         "botplay" => "Botplay",
+        "misses" => "Misses",
+        "combo_breaks" => "Combo Breaks",
 
         // Ratings
         "rating_you_suck" => "You Suck!",

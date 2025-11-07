@@ -14,9 +14,11 @@ class PtBR
         "changelog_error" => "Erro ao carregar registro de mudanças: {1}",
 
         // Gameplay
-        "score_text" => "Pontos: {1} | Erros: {2} | Avaliação: {3}",
+        "score_text" => "Pontos: {1} | {2}: {3} | Avaliação: {4}",
         "score_text_instakill" => "Pontos: {1} | Avaliação: {2}",
         "botplay" => "Automático",
+        "misses" => "Erros",
+        "combo_breaks" => "Quebras de Combo",
 
         // Ratings
         "rating_you_suck" => "Que Horrível!",

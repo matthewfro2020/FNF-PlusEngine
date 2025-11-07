@@ -14,9 +14,11 @@ class EsES
         "changelog_error" => "Error al cargar el registro de cambios: {1}",
 
         // Gameplay
-        "score_text" => "Puntuación: {1} | Fallos: {2} | Clasificación: {3}",
+        "score_text" => "Puntuación: {1} | {2}: {3} | Clasificación: {4}",
         "score_text_instakill" => "Puntuación: {1} | Clasificación: {2}",
         "botplay" => "Automático",
+        "misses" => "Fallos",
+        "combo_breaks" => "Rupturas de Combo",
 
         // Ratings
         "rating_you_suck" => "¡Eres un desastre!",

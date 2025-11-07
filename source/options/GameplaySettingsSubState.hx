@@ -32,6 +32,12 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 		
+		var option:Option = new Option('Bad/Shit Break Combo',
+			"If checked, hitting Bad or Shit notes will break your combo\nand count as Combo Breaks instead of just Misses.",
+			'badShitBreakCombo',
+			BOOL);
+		addOption(option);
+		
 		var option:Option = new Option('Auto Pause',
 			"If checked, the game automatically pauses if the screen isn't on focus.",
 			'autoPause',

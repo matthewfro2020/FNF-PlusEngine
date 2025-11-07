@@ -260,6 +260,7 @@ class PlayState extends MusicBeatState
 	public var songScore:Int = 0;
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
+	public var comboBreaks:Int = 0; // Contador de combo breaks (incluye misses + bad/shit si está activado)
 	public var scoreTxt:FlxText;
 	public var maxCombo:Int = 0;
 	public var totalNotes:Int = 0;
@@ -1495,7 +1496,13 @@ class PlayState extends MusicBeatState
 
 		var tempScore:String;
 		if(!instakillOnMiss)
-			tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3} | TPS: {4}/{5}', [scoreStr, songMisses, str, nps, maxNPS]);
+		{
+			// Determinar qué contador mostrar
+			var missLabel:String = ClientPrefs.data.badShitBreakCombo ? Language.getPhrase('combo_breaks', 'Combo Breaks') : Language.getPhrase('misses', 'Misses');
+			var missCount:Int = ClientPrefs.data.badShitBreakCombo ? comboBreaks : songMisses;
+			
+			tempScore = Language.getPhrase('score_text', 'Score: {1} | {2}: {3} | Rating: {4} | TPS: {5}/{6}', [scoreStr, missLabel, missCount, str, nps, maxNPS]);
+		}
 		else
 			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2} | TPS: {3}/{4}', [scoreStr, str, nps, maxNPS]);
 		scoreTxt.text = tempScore;
@@ -2178,8 +2185,9 @@ class PlayState extends MusicBeatState
 		// ← OPTIMIZAR ACTUALIZACIÓN DE TIEMPO - Solo cada segundo
 		timeUpdateTimer += elapsed;
 
-		// Actualizar Step, Beat y Section en el FPSCounter
-		if (Main.fpsVar != null) {
+		// Actualizar Step, Beat y Section en el FPSCounter (optimizado para reducir lag)
+		// Solo actualizar cada 0.1 segundos en lugar de cada frame
+		if (Main.fpsVar != null && timeUpdateTimer >= 0.1) {
 			Main.fpsVar.currentStep = curStep;
 			Main.fpsVar.currentBeat = curBeat;
 			Main.fpsVar.currentSection = curSection;
@@ -2188,6 +2196,9 @@ class PlayState extends MusicBeatState
 			Main.fpsVar.playerHealth = health;
 			Main.fpsVar.lastRating = capitalizeFirst(lastJudName);
 			Main.fpsVar.comboCount = combo;
+			
+			// Resetear timer después de actualizar
+			timeUpdateTimer = 0;
 		}
 
 		if (judgementCounter != null)
@@ -3333,6 +3344,13 @@ class PlayState extends MusicBeatState
 					doDeathCheck(true);
 				}
 			}
+			
+			// Verificar si Bad o Shit rompen el combo
+			if (ClientPrefs.data.badShitBreakCombo && (daRating.name == 'bad' || daRating.name == 'shit'))
+			{
+				combo = 0;
+				comboBreaks++; // Incrementar contador de combo breaks
+			}
 
 			if (judgementCounter != null) {
 				judgementCounter.doComboBump();
@@ -3762,6 +3780,7 @@ class PlayState extends MusicBeatState
 
 		var lastCombo:Int = combo;
 		combo = 0;
+		comboBreaks++; // Incrementar contador de combo breaks
 
 		health -= subtract * healthLoss;
 		songScore -= 10;
@@ -4028,10 +4047,15 @@ class PlayState extends MusicBeatState
 	override function destroy() {
 		// Restaurar el estado original de la ventana al salir de PlayState
 		if (windowResizedByScript) {
-			// Usar WindowTweens para restaurar la ventana a 1280x720 centrada
-			// El último parámetro 'false' evita que se marque windowResizedByScript nuevamente
-			psychlua.WindowTweens.winResizeCenter(1280, 720, true, false);
-			windowResizedByScript = false; // Resetear la flag
+			#if windows
+			// Restaurar manualmente la ventana a 1280x720 centrada
+			var window = openfl.Lib.application.window;
+			FlxG.resizeWindow(1280, 720);
+			window.y = Math.floor((openfl.system.Capabilities.screenResolutionY / 2) - (720 / 2));
+			window.x = Math.floor((openfl.system.Capabilities.screenResolutionX / 2) - (1280 / 2));
+			// Aplicar FixedScaleMode para evitar recortes al cambiar tamaño de ventana
+			FlxG.scaleMode = new flixel.system.scaleModes.FixedScaleMode();
+			#end
 		}
 
 		if (psychlua.CustomSubstate.instance != null)

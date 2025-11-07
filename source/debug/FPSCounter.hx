@@ -115,6 +115,13 @@ class FPSCounter extends TextField
 	**/
 	private var cachedCurrentState:String = "Unknown";
 	private var lastCacheUpdateTime:Float = 0.0;
+	
+	/**
+		Control de actualización de texto para reducir lag en modo debug
+	**/
+	private var lastTextUpdateTime:Float = 0.0;
+	private var textUpdateInterval:Float = 0.5; // Actualizar texto estático cada 500ms
+	private var cachedStaticText:String = ""; // Cache del texto estático (OS, commit, etc.)
 
 	@:noCompletion private var times:Array<Float>;
 	@:noCompletion private var lastFramerateUpdateTime:Float;
@@ -232,7 +239,7 @@ class FPSCounter extends TextField
 			colorHex = "#" + StringTools.hex(interpolatedColor & 0xFFFFFF, 6);
 		}
 
-		// Actualizar contadores para modo debug extendido (optimizado)
+		// Actualizar contadores para modo debug extendido (siempre, sin intervalo)
 		if (debugLevel == 2) {
 			updateCountersOptimized();
 		}
@@ -261,53 +268,66 @@ class FPSCounter extends TextField
 						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
 			
 			case 2:
-			// Modo debug extendido - datos esenciales solamente
+			// Modo debug extendido - optimizado para mejor rendimiento
+			var currentTime = Timer.stamp();
+			
+			// Actualizar texto estático solo cada textUpdateInterval segundos
+			if (cachedStaticText == "" || (currentTime - lastTextUpdateTime) >= textUpdateInterval) {
+				lastTextUpdateTime = currentTime;
+				
+				// Construir texto estático (que no cambia frecuentemente)
+				cachedStaticText = '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
+								 '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Last Commit: ' + lastCommit + '</font>';
+				
+				// Mostrar la fecha y hora del commit si están disponibles
+				if (commitDate != null && commitDate.length > 0) {
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Date: ' + commitDate + '</font>';
+				}
+				if (commitTime != null && commitTime.length > 0) {
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
+				}
+				
+				cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
+				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
+				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+				
+				// Información de scripts (se actualiza poco)
+				var totalScripts = luaScriptsLoaded + hscriptsLoaded;
+				var totalFailed = luaScriptsFailed + hscriptsFailed;
+				cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FF00">Scripts: ' + totalScripts + '</font>';
+				if (totalFailed > 0) {
+					cachedStaticText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF8800">(Failed: ' + totalFailed + ')</font>';
+				}
+				if (totalScripts > 0) {
+					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="12" color="#888888">  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded + '</font>';
+				}
+				
+				cachedStaticText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
+				cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
+			}
+			
+			// Construir texto dinámico (actualizado en cada frame para modders)
 			displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
 					   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
 					   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
 					   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-					   '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
-					   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Last Commit: ' + lastCommit + '</font>';
+					   '\n\n' + cachedStaticText;
 			
-			// Mostrar la fecha y hora del commit si están disponibles
-			if (commitDate != null && commitDate.length > 0) {
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Date: ' + commitDate + '</font>';
-			}
-			if (commitTime != null && commitTime.length > 0) {
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
-			}				// Solo datos esenciales y rápidos de obtener
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
-				
-				// Mostrar información de Step, Beat y Section siempre (CYAN)
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
-				
-				// Mostrar información de debug de PlayState (YELLOW)
-				var healthPercent = Math.floor((playerHealth / 2) * 100);
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
-				
-			// Mostrar Rating y Combo (MAGENTA)
+			// Información crítica para modders - SIEMPRE actualizada en tiempo real
+			// Step, Beat y Section (CYAN)
+			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
+			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
+			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
+			
+			// PlayState debug info (YELLOW)
+			var healthPercent = Math.floor((playerHealth / 2) * 100);
+			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
+			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
+			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
+			
+			// Rating y Combo (MAGENTA)
 			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Rating: ' + lastRating + '</font>';
 			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Combo: x' + comboCount + '</font>';
-			
-			// Mostrar estadísticas de scripts (GREEN/ORANGE para éxito/fallo)
-			var totalScripts = luaScriptsLoaded + hscriptsLoaded;
-			var totalFailed = luaScriptsFailed + hscriptsFailed;
-			displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FF00">Scripts: ' + totalScripts + '</font>';
-			if (totalFailed > 0) {
-				displayText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF8800">(Failed: ' + totalFailed + ')</font>';
-			}
-			if (totalScripts > 0) {
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="12" color="#888888">  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded + '</font>';
-			}
-
-			displayText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
-			displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
 		}
 
 		// Usar htmlText para diferentes tamaños de fuente
