@@ -3220,6 +3220,10 @@ class PlayState extends MusicBeatState
 			Paths.image(uiFolder + rating.image + uiPostfix);
 		for (i in 0...10)
 			Paths.image(uiFolder + 'num' + i + uiPostfix);
+		
+		// Cachear sprites de miss y combo broken
+		Paths.image(uiFolder + 'miss' + uiPostfix);
+		Paths.image(uiFolder + 'comboBroken' + uiPostfix);
 	}
 
 	private function calculateWife3Score(timingError:Float):Float
@@ -3350,6 +3354,7 @@ class PlayState extends MusicBeatState
 			{
 				combo = 0;
 				comboBreaks++; // Incrementar contador de combo breaks
+				showComboBreak(); // Mostrar sprite de combo broken
 			}
 
 			if (judgementCounter != null) {
@@ -3481,6 +3486,73 @@ class PlayState extends MusicBeatState
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
 		}
+	}
+
+	private function showComboBreak():Void
+	{
+		if (!ClientPrefs.data.popUpRating) return;
+
+		var uiFolder:String = "";
+		var antialias:Bool = ClientPrefs.data.antialiasing;
+		if (stageUI != "normal")
+		{
+			uiFolder = uiPrefix + "UI/";
+			antialias = !isPixelStage;
+		}
+
+		var placement:Float = FlxG.width * 0.35;
+		var breakSprite:FlxSprite = new FlxSprite();
+		
+		// Determinar qué imagen usar
+		var imageName:String = ClientPrefs.data.badShitBreakCombo ? 'comboBroken' : 'miss';
+		breakSprite.loadGraphic(Paths.image(uiFolder + imageName + uiPostfix));
+		
+		breakSprite.screenCenter();
+		breakSprite.x = placement - 40;
+		breakSprite.y -= 60;
+		breakSprite.acceleration.y = 550 * playbackRate * playbackRate;
+		breakSprite.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
+		breakSprite.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
+		breakSprite.visible = !ClientPrefs.data.hideHud;
+		breakSprite.x += ClientPrefs.data.comboOffset[0];
+		breakSprite.y -= ClientPrefs.data.comboOffset[1];
+		breakSprite.antialiasing = antialias;
+
+		if (!PlayState.isPixelStage)
+		{
+			breakSprite.setGraphicSize(Std.int(breakSprite.width * 0.7));
+		}
+		else
+		{
+			breakSprite.setGraphicSize(Std.int(breakSprite.width * daPixelZoom * 0.85));
+		}
+
+		breakSprite.updateHitbox();
+
+		if (!PlayState.isPixelStage)
+		{
+			breakSprite.scale.set(0.3, 0.3);
+			FlxTween.tween(breakSprite.scale, {x: 0.7, y: 0.7}, 0.08, {
+				ease: FlxEase.circOut
+			});
+		}
+		else
+		{
+			breakSprite.scale.set(1, 1);
+			FlxTween.tween(breakSprite.scale, {x: 4.5, y: 4.5}, 0.08, {
+				ease: FlxEase.circOut
+			});
+		}
+
+		comboGroup.add(breakSprite);
+
+		FlxTween.tween(breakSprite, {alpha: 0}, 0.2 / playbackRate, {
+			onComplete: function(tween:FlxTween)
+			{
+				breakSprite.destroy();
+			},
+			startDelay: Conductor.crochet * 0.002 / playbackRate
+		});
 	}
 
 	public var strumsBlocked:Array<Bool> = [];
@@ -3781,6 +3853,7 @@ class PlayState extends MusicBeatState
 		var lastCombo:Int = combo;
 		combo = 0;
 		comboBreaks++; // Incrementar contador de combo breaks
+		showComboBreak(); // Mostrar sprite de miss/combo broken
 
 		health -= subtract * healthLoss;
 		songScore -= 10;
