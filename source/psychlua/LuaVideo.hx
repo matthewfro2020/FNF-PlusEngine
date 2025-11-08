@@ -9,61 +9,18 @@ class LuaVideo {
     // Mapa para rastrear videos activos
     private static var activeVideos:Map<String, FlxVideoSprite> = new Map();
     
+    // Flags de protección (como MP4Handler)
+    private static var isDestroyed:Map<String, Bool> = new Map();
+    private static var allowDestroy:Map<String, Bool> = new Map();
+    
     public static function implement(funk:FunkinLua) {
         var lua = funk.lua;
         
         #if VIDEOS_ALLOWED
-        // Precargar video sin reproducir
-        Lua_helper.add_callback(lua, "precacheLuaVideo", function(tag:String, path:String) {
-            if(tag == null || tag.trim() == '') {
-                FunkinLua.luaTrace('precacheLuaVideo: tag cannot be empty!', false, false, FlxColor.RED);
-                return false;
-            }
-            
-            if(path == null || path.trim() == '') {
-                FunkinLua.luaTrace('precacheLuaVideo: path cannot be empty!', false, false, FlxColor.RED);
-                return false;
-            }
-            
-            var variables = MusicBeatState.getVariables();
-            
-            // Verificar si ya existe
-            if(variables.get(tag) != null) {
-                FunkinLua.luaTrace('precacheLuaVideo: Video with tag "$tag" already exists!', false, false, FlxColor.YELLOW);
-                return false;
-            }
-            
-            // Crear el video sprite
-            var videoSprite:FlxVideoSprite = new FlxVideoSprite();
-            videoSprite.antialiasing = ClientPrefs.data.antialiasing;
-            videoSprite.visible = false; // Oculto hasta que se reproduzca
-            
-            // Obtener ruta usando backend.Paths
-            var videoPath = backend.Paths.video(path);
-            
-            // Cargar video pero no reproducir
-            try {
-                videoSprite.load(videoPath);
-                videoSprite.pause(); // Pausar inmediatamente
-                
-                // Agregar al estado (pero invisible)
-                PlayState.instance.add(videoSprite);
-                
-                // Guardar en variables
-                variables.set(tag, videoSprite);
-                activeVideos.set(tag, videoSprite);
-                
-                trace('Preloaded video "$tag"');
-                return true;
-            } catch(e:Dynamic) {
-                FunkinLua.luaTrace('precacheLuaVideo: Error loading video: $e', false, false, FlxColor.RED);
-                return false;
-            }
-        });
-        
-        // PlayLuaVideoSprite(tag, path, x, y, camera, volume, front)
+        // PlayLuaVideoSprite(tag, path, duration, x, y, volume, front)
+        // duration: duración del video en segundos (para auto-destrucción)
         // front: true = encima de todo, false = debajo de todo (default)
-        Lua_helper.add_callback(lua, "playLuaVideoSprite", function(tag:String, path:String, ?x:Float = 0, ?y:Float = 0, ?camera:String = 'game', ?volume:Float = 1.0, ?front:Bool = false) {
+        Lua_helper.add_callback(lua, "playLuaVideoSprite", function(tag:String, path:String, duration:Float, ?x:Float = 0, ?y:Float = 0, ?volume:Float = 1.0, ?front:Bool = false) {
             if(tag == null || tag.trim() == '') {
                 FunkinLua.luaTrace('playLuaVideoSprite: tag cannot be empty!', false, false, FlxColor.RED);
                 return;
@@ -74,83 +31,68 @@ class LuaVideo {
                 return;
             }
             
-            // Verificar si ya existe un video precargado con este tag
-            var variables = MusicBeatState.getVariables();
-            var existingVideo = variables.get(tag);
-            
-            // Si existe y es un video, usar el precargado
-            if(existingVideo != null && Std.isOfType(existingVideo, FlxVideoSprite)) {
-                var videoSprite:FlxVideoSprite = cast existingVideo;
-                
-                // Actualizar propiedades
-                videoSprite.x = x;
-                videoSprite.y = y;
-                videoSprite.visible = true;
-                videoSprite.bitmap.volume = Std.int(volume * 100);
-                
-                // Cambiar cámara si es necesaria
-                var targetCamera = LuaUtils.cameraFromString(camera);
-                if(targetCamera != null) {
-                    videoSprite.cameras = [targetCamera];
-                }
-                
-                // Reproducir
-                videoSprite.play();
-                
-                trace('Play video "$tag"');
+            if(duration <= 0) {
+                FunkinLua.luaTrace('playLuaVideoSprite: duration must be greater than 0!', false, false, FlxColor.RED);
                 return;
             }
             
-            // Si existe pero no es video, removerlo
+            // Verificar si ya existe
+            var variables = MusicBeatState.getVariables();
+            var existingVideo = variables.get(tag);
+            
+            // Si existe, removerlo primero
             if(existingVideo != null) {
-                FunkinLua.luaTrace('playLuaVideoSprite: Tag "$tag" exists but is not a video! Removing...', false, false, FlxColor.YELLOW);
                 removeLuaVideo(tag);
             }
+            
+            // Inicializar flags de protección
+            isDestroyed.set(tag, false);
+            allowDestroy.set(tag, false);
             
             // Crear nuevo video sprite
             var videoSprite:FlxVideoSprite = new FlxVideoSprite();
             videoSprite.antialiasing = ClientPrefs.data.antialiasing;
-            
-            // Posición
             videoSprite.x = x;
             videoSprite.y = y;
             
-            // Configurar cámara
-            var targetCamera = LuaUtils.cameraFromString(camera);
-            if(targetCamera != null) {
-                videoSprite.cameras = [targetCamera];
-            }
-            
-            // Callback cuando el video termina
-            videoSprite.bitmap.onEndReached.add(function() {
-                // Llamar callback de Lua si existe
-                funk.call('onVideoFinished', [tag]);
-                
-                // Destruir automáticamente (el trace sale de removeLuaVideo)
-                removeLuaVideo(tag);
-            });
-            
-            // Callback para ajustar tamaño cuando se carga
-            videoSprite.bitmap.onFormatSetup.add(function() {
-                videoSprite.updateHitbox();
-            });
+            // Configurar cámara por defecto en camHUD
+            videoSprite.cameras = [PlayState.instance.camHUD];
             
             // Obtener ruta usando backend.Paths
             var videoPath = backend.Paths.video(path);
             
-            // Cargar y reproducir video
             try {
-                videoSprite.load(videoPath);
+                // Callback que se dispara cuando el video está completamente cargado
+                videoSprite.bitmap.onFormatSetup.add(function() {
+                    videoSprite.updateHitbox();
+                    trace('LuaVideo: "$tag" playing for $duration seconds');
+                    
+                    // Crear timer de auto-destrucción con la duración especificada
+                    new flixel.util.FlxTimer().start(duration, function(tmr:flixel.util.FlxTimer) {
+                        funk.call('onVideoFinished', [tag]);
+                        removeLuaVideo(tag);
+                    });
+                });
+                
+                // Cargar el video
+                videoSprite.load(backend.Paths.video(path), null);
+                
+                // Configurar volumen y reproducir
                 videoSprite.bitmap.volume = Std.int(volume * 100);
                 videoSprite.play();
                 
-                // Guardar en el mapa de variables
+                // Permitir destrucción después de 2 segundos (como MP4Handler)
+                new flixel.util.FlxTimer().start(2.0, function(tmr:flixel.util.FlxTimer) {
+                    allowDestroy.set(tag, true);
+                });
+                
+                // Guardar en mapas
                 variables.set(tag, videoSprite);
                 activeVideos.set(tag, videoSprite);
                 
                 // Agregar al estado (encima o debajo según el parámetro front)
                 if(front) {
-                    PlayState.instance.add(videoSprite); // Encima de todo
+                    PlayState.instance.add(videoSprite);
                 } else {
                     var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
                     if(PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position)
@@ -158,10 +100,8 @@ class LuaVideo {
                     if(PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position)
                         position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
                     
-                    PlayState.instance.insert(position, videoSprite); // Debajo de personajes
+                    PlayState.instance.insert(position, videoSprite);
                 }
-                
-                trace('Play video "$tag"');
             } catch(e:Dynamic) {
                 FunkinLua.luaTrace('playLuaVideoSprite: Error loading video: $e', false, false, FlxColor.RED);
             }
@@ -187,6 +127,14 @@ class LuaVideo {
         
         // Detener y destruir video
         Lua_helper.add_callback(lua, "removeLuaVideo", function(tag:String) {
+            removeLuaVideo(tag);
+        });
+        
+        // Forzar destrucción (como MP4Handler.forceCleanup)
+        Lua_helper.add_callback(lua, "forceRemoveLuaVideo", function(tag:String) {
+            if(allowDestroy.exists(tag)) {
+                allowDestroy.set(tag, true); // Permitir destrucción inmediata
+            }
             removeLuaVideo(tag);
         });
         
@@ -232,7 +180,7 @@ class LuaVideo {
         
         #else
         // Si no hay soporte de videos, crear funciones dummy
-        Lua_helper.add_callback(lua, "playLuaVideoSprite", function(tag:String, path:String, ?x:Float = 0, ?y:Float = 0, ?camera:String = 'game', ?volume:Float = 1.0, ?front:Bool = false) {
+        Lua_helper.add_callback(lua, "playLuaVideoSprite", function(tag:String, path:String, duration:Float, ?x:Float = 0, ?y:Float = 0, ?volume:Float = 1.0, ?front:Bool = false) {
             FunkinLua.luaTrace('playLuaVideoSprite: Video support is not enabled!', false, false, FlxColor.RED);
         });
         #end
@@ -256,32 +204,53 @@ class LuaVideo {
     }
     
     private static function removeLuaVideo(tag:String):Void {
-        var video = getLuaVideo(tag);
-        if(video != null) {
-            // Detener el video
-            video.pause();
-            
-            // Remover del estado
-            if(PlayState.instance.members.contains(video)) {
-                PlayState.instance.remove(video);
-            }
-            
-            // Limpiar callbacks
-            video.bitmap.onEndReached.removeAll();
-            video.bitmap.onFormatSetup.removeAll();
-            
-            // Destruir
-            video.destroy();
-            
-            // Remover del mapa de variables
-            var variables = MusicBeatState.getVariables();
-            variables.remove(tag);
-            
-            // Remover del mapa de videos activos
-            activeVideos.remove(tag);
-            
-            trace('Destroy video "$tag"');
+        // Verificar flags de protección (como MP4Handler)
+        if(isDestroyed.exists(tag) && isDestroyed.get(tag)) {
+            return; // Ya fue destruido
         }
+        
+        if(allowDestroy.exists(tag) && !allowDestroy.get(tag)) {
+            trace('LuaVideo: Cannot destroy "$tag" yet (not ready)');
+            return; // Aún no está listo para destruir
+        }
+        
+        var variables = MusicBeatState.getVariables();
+        var video = variables.get(tag);
+        
+        if(video == null || !Std.isOfType(video, FlxVideoSprite)) {
+            return;
+        }
+        
+        // Marcar como destruido INMEDIATAMENTE (como MP4Handler)
+        isDestroyed.set(tag, true);
+        
+        var videoSprite:FlxVideoSprite = cast video;
+        
+        // Remover de los mapas
+        variables.remove(tag);
+        activeVideos.remove(tag);
+        
+        // Limpiar callbacks
+        if(videoSprite.bitmap != null) {
+            videoSprite.bitmap.onEndReached.removeAll();
+            videoSprite.bitmap.onFormatSetup.removeAll();
+        }
+        
+        // Remover del estado
+        if(PlayState.instance != null && PlayState.instance.members != null) {
+            if(PlayState.instance.members.contains(videoSprite)) {
+                PlayState.instance.remove(videoSprite);
+            }
+        }
+        
+        // Destruir
+        videoSprite.destroy();
+        
+        // Limpiar flags
+        isDestroyed.remove(tag);
+        allowDestroy.remove(tag);
+        
+        trace('LuaVideo: "$tag" destroyed');
     }
     
     // Pausar todos los videos activos (llamado cuando se pausa el juego)
@@ -309,9 +278,15 @@ class LuaVideo {
     // Limpiar todos los videos (llamado al destruir el state)
     public static function clearAll():Void {
         #if VIDEOS_ALLOWED
+        var tags:Array<String> = [];
         for(tag in activeVideos.keys()) {
+            tags.push(tag);
+        }
+        
+        for(tag in tags) {
             removeLuaVideo(tag);
         }
+        
         activeVideos.clear();
         #end
     }

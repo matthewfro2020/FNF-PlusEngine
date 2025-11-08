@@ -4315,8 +4315,8 @@ class PlayState extends MusicBeatState
 			FlxG.resizeWindow(1280, 720);
 			window.y = Math.floor((openfl.system.Capabilities.screenResolutionY / 2) - (720 / 2));
 			window.x = Math.floor((openfl.system.Capabilities.screenResolutionX / 2) - (1280 / 2));
-			// Aplicar FixedScaleMode para evitar recortes al cambiar tamaño de ventana
-			FlxG.scaleMode = new flixel.system.scaleModes.FixedScaleMode();
+			
+			FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
 			#end
 		}
 

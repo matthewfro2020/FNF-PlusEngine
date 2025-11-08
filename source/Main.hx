@@ -328,6 +328,16 @@ class Main extends Sprite
 		// Display simplified system information
 		trace('\n\n' + backend.Native.buildSystemInfo());
 		
+		// Initialize hxvlc for video playback
+		#if hxvlc
+		try {
+			hxvlc.util.Handle.init();
+			trace('hxvlc initialized successfully');
+		} catch(e:Dynamic) {
+			trace('hxvlc initialization failed: $e');
+		}
+		#end
+		
 		// --- Marca de agua global ---
 		var flxGraphic = backend.Paths.image("marca");
 		if (flxGraphic != null) {
