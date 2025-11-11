@@ -103,31 +103,33 @@ class MasterEditorMenu extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (controls.UI_UP_P)
+		super.update(elapsed);
+		
+		if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 		{
 			changeSelection(-1);
 		}
-		if (controls.UI_DOWN_P)
+		if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 		{
 			changeSelection(1);
 		}
 		#if MODS_ALLOWED
-		if(controls.UI_LEFT_P)
+		if(controls.UI_LEFT_P || (touchPad != null && touchPad.buttonLeft.justPressed))
 		{
 			changeDirectory(-1);
 		}
-		if(controls.UI_RIGHT_P)
+		if(controls.UI_RIGHT_P || (touchPad != null && touchPad.buttonRight.justPressed))
 		{
 			changeDirectory(1);
 		}
 		#end
 
-		if (controls.BACK)
+		if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed))
 		{
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
-		if (controls.ACCEPT)
+		if (controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed))
 		{
             // ← SOLUCION: Usar índice en lugar de string traducido
             switch(curSelected) {
@@ -159,15 +161,14 @@ class MasterEditorMenu extends MusicBeatState
 			if (item.targetY == 0)
 				item.alpha = 1;
 		}
-		super.update(elapsed);
 	}
-
+	
 	function changeSelection(change:Int = 0)
 	{
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 	}
-
+	
 	#if MODS_ALLOWED
 	function changeDirectory(change:Int = 0)
 	{

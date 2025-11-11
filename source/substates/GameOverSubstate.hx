@@ -172,15 +172,7 @@ class GameOverSubstate extends MusicBeatSubstate
 				PlayState.seenCutscene = false;
 				PlayState.chartingMode = false;
 	
-				// Limpiar memoria antes de salir (especialmente importante en Android)
-				#if (mobile || android)
-				Paths.aggressiveMemoryClear();
-				#else
-				Paths.clearStoredMemory();
-				Paths.clearUnusedMemory();
-				#end
-	
-				Mods.loadTopMod();
+			// Limpiar memoria se hace en PlayState.destroy() para evitar crashes				Mods.loadTopMod();
 				if (PlayState.isStoryMode)
 				{
 					// Verificar si el mod tiene StoryMenuState o MainMenuState personalizado

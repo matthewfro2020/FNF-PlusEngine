@@ -399,10 +399,8 @@ class EsLA
 
         // UI de juego
         "images/bad" => "images/es-LA/bad",
-        "images/combo" => "images/es-LA/combo",
         "images/go" => "images/es-LA/go",
         "images/good" => "images/es-LA/good",
-        "images/epic" => "images/es-LA/marvelous",
         "images/menu_tracks" => "images/es-LA/Menu_Tracks",
         "images/miss" => "images/es-LA/miss",
         "images/ready" => "images/es-LA/ready",

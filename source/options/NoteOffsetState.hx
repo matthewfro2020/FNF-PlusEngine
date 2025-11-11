@@ -190,6 +190,8 @@ class NoteOffsetState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
+		super.update(elapsed);
+		
 		var addNum:Int = 1;
 		if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
 		{
@@ -384,13 +386,13 @@ class NoteOffsetState extends MusicBeatState
 		}
 		else
 		{
-			if(controls.UI_LEFT_P)
+			if(controls.UI_LEFT_P || (touchPad != null && touchPad.buttonLeft.justPressed))
 			{
 				holdTime = 0;
 				barPercent = Math.max(delayMin, Math.min(ClientPrefs.data.noteOffset - 1, delayMax));
 				updateNoteDelay();
 			}
-			else if(controls.UI_RIGHT_P)
+			else if(controls.UI_RIGHT_P || (touchPad != null && touchPad.buttonRight.justPressed))
 			{
 				holdTime = 0;
 				barPercent = Math.max(delayMin, Math.min(ClientPrefs.data.noteOffset + 1, delayMax));
@@ -398,10 +400,10 @@ class NoteOffsetState extends MusicBeatState
 			}
 
 			var mult:Int = 1;
-			if(controls.UI_LEFT || controls.UI_RIGHT)
+			if(controls.UI_LEFT || controls.UI_RIGHT || (touchPad != null && (touchPad.buttonLeft.pressed || touchPad.buttonRight.pressed)))
 			{
 				holdTime += elapsed;
-				if(controls.UI_LEFT) mult = -1;
+				if(controls.UI_LEFT || (touchPad != null && touchPad.buttonLeft.pressed)) mult = -1;
 			}
 
 			if(holdTime > 0.5)
@@ -441,20 +443,17 @@ class NoteOffsetState extends MusicBeatState
 					FlxG.sound.music.volume = 0;
 			}
 			else FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			FlxG.mouse.visible = false;
-		}
-
-		Conductor.songPosition = FlxG.sound.music.time;
-		super.update(elapsed);
+		FlxG.mouse.visible = false;
 	}
 
-	var zoomTween:FlxTween;
-	var lastBeatHit:Int = -1;
-	override public function beatHit()
-	{
-		super.beatHit();
+	Conductor.songPosition = FlxG.sound.music.time;
+}
 
-		if(lastBeatHit == curBeat)
+var zoomTween:FlxTween;
+var lastBeatHit:Int = -1;
+override public function beatHit()
+{
+	super.beatHit();		if(lastBeatHit == curBeat)
 		{
 			return;
 		}

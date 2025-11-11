@@ -3919,11 +3919,43 @@ class PlayState extends MusicBeatState
 		var holdArray:Array<Bool> = [];
 		var pressArray:Array<Bool> = [];
 		var releaseArray:Array<Bool> = [];
-		for (key in keysArray)
+		for (i in 0...keysArray.length)
 		{
-			holdArray.push(controls.pressed(key));
-			pressArray.push(controls.justPressed(key));
-			releaseArray.push(controls.justReleased(key));
+			var key:String = keysArray[i];
+			
+			// Fix para Android: Verificar tanto controles de teclado como móviles
+			var isHeld:Bool = controls.pressed(key);
+			var isPressed:Bool = controls.justPressed(key);
+			var isReleased:Bool = controls.justReleased(key);
+			
+			// En Android, también verificar el estado de los botones móviles
+			#if mobile
+			if (mobileControls != null && mobileControls.instance != null)
+			{
+				var mobileButtonID:MobileInputID = switch(i) {
+					case 0: MobileInputID.NOTE_LEFT;
+					case 1: MobileInputID.NOTE_DOWN;
+					case 2: MobileInputID.NOTE_UP;
+					case 3: MobileInputID.NOTE_RIGHT;
+					default: MobileInputID.NONE;
+				};
+				
+				if (mobileButtonID != MobileInputID.NONE)
+				{
+					// Si el botón móvil está presionado, marcar como held
+					if (mobileControls.instance.buttonPressed(mobileButtonID))
+						isHeld = true;
+					if (mobileControls.instance.buttonJustPressed(mobileButtonID))
+						isPressed = true;
+					if (mobileControls.instance.buttonJustReleased(mobileButtonID))
+						isReleased = true;
+				}
+			}
+			#end
+			
+			holdArray.push(isHeld);
+			pressArray.push(isPressed);
+			releaseArray.push(isReleased);
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
@@ -4402,28 +4434,23 @@ class PlayState extends MusicBeatState
 			Main.fpsVar.hscriptsFailed = 0;
 		}
 		
-		// Limpiar botón de pausa
-		if (pauseButton != null) {
-			remove(pauseButton);
-			pauseButton.destroy();
-			pauseButton = null;
-		}
-		
-		// Limpiar memoria de forma agresiva en móviles
-		#if (mobile || android)
-		Paths.aggressiveMemoryClear();
-		#else
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
-		#end
-		
-		instance = null;
-		shutdownThread = true;
-		FlxG.signals.preUpdate.remove(checkForResync);
-		super.destroy();
+	// Limpiar botón de pausa
+	if (pauseButton != null) {
+		remove(pauseButton);
+		pauseButton.destroy();
+		pauseButton = null;
 	}
-
-	var lastStepHit:Int = -1;
+	
+	instance = null;
+	shutdownThread = true;
+	FlxG.signals.preUpdate.remove(checkForResync);
+	
+	// Limpiar memoria AL FINAL del destroy, después de super.destroy()
+	super.destroy();
+	
+	// Ahora sí es seguro limpiar memoria (todos los objetos ya fueron destruidos)
+	Paths.clearUnusedMemory();
+}	var lastStepHit:Int = -1;
 	override function stepHit()
 	{
 		super.stepHit();
