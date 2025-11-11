@@ -4409,6 +4409,14 @@ class PlayState extends MusicBeatState
 			pauseButton = null;
 		}
 		
+		// Limpiar memoria de forma agresiva en móviles
+		#if (mobile || android)
+		Paths.aggressiveMemoryClear();
+		#else
+		Paths.clearStoredMemory();
+		Paths.clearUnusedMemory();
+		#end
+		
 		instance = null;
 		shutdownThread = true;
 		FlxG.signals.preUpdate.remove(checkForResync);

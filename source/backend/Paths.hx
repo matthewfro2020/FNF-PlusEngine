@@ -83,6 +83,56 @@ class Paths
 		#if !html5 openfl.Assets.cache.clear("songs"); #end
 	}
 
+	// Limpieza agresiva de memoria especialmente para Android
+	@:access(flixel.system.frontEnds.BitmapFrontEnd._cache)
+	public static function aggressiveMemoryClear()
+	{
+		// Limpiar toda la caché de bitmaps
+		for (key in FlxG.bitmap._cache.keys())
+		{
+			var obj = FlxG.bitmap._cache.get(key);
+			if (obj != null)
+			{
+				destroyGraphic(obj);
+			}
+		}
+		FlxG.bitmap._cache.clear();
+		
+		// Limpiar caché de sonidos
+		for (key in currentTrackedSounds.keys())
+		{
+			var asset = currentTrackedSounds.get(key);
+			if (asset != null)
+			{
+				openfl.Assets.cache.clear(key);
+			}
+		}
+		currentTrackedSounds.clear();
+		
+		// Limpiar assets de OpenFL
+		openfl.Assets.cache.clear();
+		
+		// Limpiar tracked assets
+		currentTrackedAssets.clear();
+		localTrackedAssets = [];
+		
+		// Forzar múltiples pases de recolección de basura
+		#if cpp
+		for (i in 0...3)
+		{
+			cpp.vm.Gc.run(true);
+		}
+		cpp.vm.Gc.compact();
+		#else
+		for (i in 0...3)
+		{
+			openfl.system.System.gc();
+		}
+		#end
+		
+		trace('Aggressive memory clear completed');
+	}
+
 	public static function freeGraphicsFromMemory()
 	{
 		var protectedGfx:Array<FlxGraphic> = [];

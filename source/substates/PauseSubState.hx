@@ -383,6 +383,15 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.seenCutscene = false;
 
 					PlayState.instance.canResync = false;
+					
+					// Limpiar memoria antes de salir (especialmente importante en Android)
+					#if (mobile || android)
+					Paths.aggressiveMemoryClear();
+					#else
+					Paths.clearStoredMemory();
+					Paths.clearUnusedMemory();
+					#end
+					
 					Mods.loadTopMod();
 					if(PlayState.isStoryMode)
 					{
