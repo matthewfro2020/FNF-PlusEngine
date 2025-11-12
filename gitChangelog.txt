@@ -1,9 +1,14 @@
-- Modcharts are now included in the engine's source code.
-- Fixed the noteTweenAngle and *Direction issue when using modcharts.
-- Added an option to modcharts that allows you to toggle the Manager on and off if desired.
-- The Lua onModchart function was changed to onInitModchart.
-- A bug that caused the "Disable All Mods" option to be incorrectly positioned is being fixed.
-- Improved the Modchart Manager Playfield for Lua.
-- Reverted the setup to the classic "hmm"-free setup from Haxe for programming newbies.
-- Reworked Freeplay State.
-- Introduction to ModState, also known as CustomStates. You can now create states within your Psych Engine mod.
+- Key viewer: will show the keys you press. You can change the position using note offset.
+- Added "callback" and "repeater" to Modchart functions in Lua.
+- Added more options to Modchart settings.
+- Added more debug text to FPSCounter (just press F4 on PC or the D button on Android).
+- New Gameplay Changers (Opponent Mode, No Drop Penalty, Perfect Only).
+- You can choose your default accuracy system. ITG, Psych, DJMax, Wife3, osu!, Simple
+- Added the songs "erect" and "nightmare," BUT without stages and events, only levels
+- Support for NotITG levels (without modifiers) and Stepmania, includes UI
+- Android support
+- Added the "miss" and "combo broken" sprites
+- Added the option for "bad" and "shit" to break the combo
+- New VideoSprite functionality with optimized hxvlc
+- New shader compatibility depending on your graphics card
+- And more!

@@ -18,12 +18,23 @@ Engine based on Psych Engine 1.0.4, with modcharts like NotITG, ModStates and co
 ### Features
 - Variables for window and system management in Lua: Many variables were added, whether to hide the taskbar or window borders, etc.
 - Support ModState
+- Key Viewer
+- Modchart settings.
+- New Gameplay Changers (Opponent Mode, No Drop Penalty, Perfect Only).
+- You can choose your default accuracy system. ITG, Psych, DJMax, Wife3, osu!, Simple
+- Added the songs "erect" and "nightmare," BUT without stages and events, only levels
+- Support for NotITG levels (without modifiers) and Stepmania, includes UI
+- Android support
+- Added the "miss" and "combo broken" sprites
+- Added the option for "bad" and "shit" to break the combo
+- New VideoSprite functionality with optimized hxvlc
+- New shader compatibility depending on your graphics card
 - Judgement Counter.
 - Advanced variables in Lua for the craziest Modcharts.
 - New results State and really cool.
 - Compatible wth hxcodec videos from Psych mods 0.6.3 and 0.7.3.
 - Smooth Health Bar
-- 5 languages ​​available: English, Spanish, Portuguese, Chinese (Simplified) - (Traditional) and Japanese
+- +5 Languages availables
 - New cool transicioning
 - If you are in Charting Mode the step, beat, and section will be displayed in gameplay.
 - FPS Counter rework
