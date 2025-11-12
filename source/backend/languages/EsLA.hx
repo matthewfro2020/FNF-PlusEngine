@@ -443,12 +443,15 @@ class EsLA
         "images/good" => "images/es-LA/good",
         "images/menu_tracks" => "images/es-LA/Menu_Tracks",
         "images/miss" => "images/es-LA/miss",
+        "images/comboBroken" => "images/es-LA/comboBroken",
         "images/ready" => "images/es-LA/ready",
         "images/set" => "images/es-LA/set",
         "images/shit" => "images/es-LA/shit",
         "images/sick" => "images/es-LA/sick",
 
         // UI Pixel
+        "images/pixelUI/comboBroken-pixel" => "images/es-LA/pixelUI/comboBroken-pixel",
+        "images/pixelUI/miss-pixel" => "images/es-LA/pixelUI/miss-pixel",
         "images/pixelUI/bad-pixel" => "images/es-LA/pixelUI/bad-pixel",
         "images/pixelUI/good-pixel" => "images/es-LA/pixelUI/good-pixel",
         "images/pixelUI/ready-pixel" => "images/es-LA/pixelUI/ready-pixel",
