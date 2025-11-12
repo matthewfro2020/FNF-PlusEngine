@@ -1,10 +1,9 @@
 @echo off
 color 0a
 cd ../..
-echo BUILDING GAME
+echo BUILDING WINDOWS 64-BIT
 haxelib run lime build windows -release
 echo.
-echo done.
+echo done - Windows 64-bit build completed!
 pause
 pwd
-explorer.exe export\release\windows\bin
