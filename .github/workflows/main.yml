@@ -136,7 +136,11 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       
       - name: Compile
-        run: haxelib run lime build ios --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+        run: haxelib run lime build ios --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
+        env:
+          CODE_SIGN_IDENTITY: ""
+          CODE_SIGNING_REQUIRED: "NO"
+          CODE_SIGNING_ALLOWED: "NO"
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
