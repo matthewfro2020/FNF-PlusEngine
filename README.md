@@ -1,9 +1,6 @@
 ![Logo Off](docs/img/PlusEngineLogo.png)
 
-[![Windows Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/windows.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/windows.yml)
-[![Linux Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/linux.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/linux.yml)
-[![macOS Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/macos.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/macos.yml)
-[![Android Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/android.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/android.yml)
+[![Build](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/main.yml/badge.svg)](https://github.com/LeninAsto/FNF-PlusEngine/actions/workflows/main.yml)
 
 [![GitHub stars](https://img.shields.io/github/stars/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/LeninAsto/FNF-PlusEngine?style=social)](https://github.com/LeninAsto/FNF-PlusEngine/network/members)
