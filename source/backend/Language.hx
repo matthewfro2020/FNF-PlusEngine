@@ -1,7 +1,18 @@
 package backend;
 
 // Importar todos los idiomas
-import backend.languages.*;
+import backend.languages.EnUS;
+import backend.languages.EsLA;
+import backend.languages.EsES;
+import backend.languages.PtBR;
+import backend.languages.FrFR;
+import backend.languages.ItIT;
+import backend.languages.DeDE;
+import backend.languages.NlNL;
+import backend.languages.ZhCN;
+import backend.languages.ZhHK;
+import backend.languages.JpJP;
+import backend.languages.IdID;
 
 class Language
 {
