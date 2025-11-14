@@ -261,6 +261,11 @@ class PlayState extends MusicBeatState
 	public var luaTpadCam:FlxCamera;
 	public var cameraSpeed:Float = 1;
 
+	// 3D Curve Effect Shaders
+	public var curveEffectGame:shaders.CurveEffect;
+	public var curveEffectHUD:shaders.CurveEffect;
+	public var curveEffectOther:shaders.CurveEffect;
+
 	public var songScore:Int = 0;
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
@@ -487,6 +492,11 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 		FlxG.cameras.add(luaTpadCam, false);
+
+		// Initialize 3D Curve Effect Shaders
+		curveEffectGame = new shaders.CurveEffect();
+		curveEffectHUD = new shaders.CurveEffect();
+		curveEffectOther = new shaders.CurveEffect();
 
 		persistentUpdate = true;
 		persistentDraw = true;
