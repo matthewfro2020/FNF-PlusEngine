@@ -425,11 +425,16 @@ class StateModSubstate extends MusicBeatSubstate
         FlxG.camera.fade(FlxColor.BLACK, 0.3, false, function() {
             // Usar WindowTweens para redimensionar con animación
             var window = openfl.Lib.application.window;
-			FlxG.resizeWindow(targetWidth, targetHeight);
-			window.y = Math.floor((openfl.system.Capabilities.screenResolutionY / 2) - (targetHeight / 2));
-			window.x = Math.floor((openfl.system.Capabilities.screenResolutionX / 2) - (targetWidth / 2));
+            FlxG.resizeWindow(targetWidth, targetHeight);
+            window.y = Math.floor((openfl.system.Capabilities.screenResolutionY / 2) - (targetHeight / 2));
+            window.x = Math.floor((openfl.system.Capabilities.screenResolutionX / 2) - (targetWidth / 2));
             
-			FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
+            FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
+            
+            // Esperar un poco y ejecutar el callback
+            new FlxTimer().start(0.3, function(timer:FlxTimer) {
+                if(onComplete != null) onComplete();
+            });
         });
         #else
         // En otras plataformas, ejecutar inmediatamente
