@@ -4235,8 +4235,12 @@ class PlayState extends MusicBeatState
 
 		spawnHoldSplashOnNote(note);
 
-		// Invalidar la nota inmediatamente (tanto sustains como notas normales)
-		invalidateNote(note);
+		// Marcar como buena para permitir el clip/aplanado de sustains
+		note.wasGoodHit = true;
+
+		// No invalida cabezas de sustain inmediatamente para que se achaten visualmente como las del jugador
+		if (!note.isSustainNote)
+			invalidateNote(note);
 	}
 	public function goodNoteHit(note:Note):Void
 	{
