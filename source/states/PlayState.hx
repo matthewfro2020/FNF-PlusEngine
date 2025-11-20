@@ -10,6 +10,7 @@ import backend.Rating;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
+import flixel.math.FlxRect;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
 import flixel.util.FlxSave;
@@ -322,6 +323,10 @@ class PlayState extends MusicBeatState
 	var endCountdownText:FlxText = null;
 	var lastEndCountdown:Int = -1;
 	var lastJudName:String = "None";
+	
+	// Modchart warning variables
+	var modchartWarningShown:Bool = false;
+	var isShowingModchartWarning:Bool = false;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -1016,6 +1021,153 @@ class PlayState extends MusicBeatState
 		if(eventNotes.length < 1) checkEventNote();
 	}
 
+	function hasModchart():Bool
+	{
+		#if MODCHARTS_NOTITG_ALLOWED
+		var hasModchartFunction:Bool = false;
+		
+		#if LUA_ALLOWED
+		for (script in luaArray) {
+			if (script != null && !script.closed && script.lua != null) {
+				Lua.getglobal(script.lua, 'onInitModchart');
+				var type:Int = Lua.type(script.lua, -1);
+				Lua.pop(script.lua, 1);
+				
+				if (type == Lua.LUA_TFUNCTION) {
+					hasModchartFunction = true;
+					break;
+				}
+			}
+		}
+		#end
+		
+		#if HSCRIPT_ALLOWED
+		if (!hasModchartFunction) {
+			for (script in hscriptArray) {
+				@:privateAccess
+				if (script != null && script.exists('onInitModchart')) {
+					hasModchartFunction = true;
+					break;
+				}
+			}
+		}
+		#end
+		
+		return hasModchartFunction;
+		#else
+		return false;
+		#end
+	}
+
+	function showModchartWarning():Void
+	{
+		isShowingModchartWarning = true;
+		
+		// Fondo negro
+		var blackBG:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		blackBG.scrollFactor.set();
+		blackBG.cameras = [camHUD];
+		add(blackBG);
+		
+		// Texto "EVENT MODE" estilo NotITG
+		var warningText:FlxText = new FlxText(0, 0, FlxG.width, "EVENTS MODE!");
+		warningText.setFormat(Paths.font("aller.ttf"), 72, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		warningText.borderSize = 4;
+		warningText.screenCenter();
+		warningText.y -= 100;
+		warningText.scrollFactor.set();
+		warningText.cameras = [camHUD];
+		warningText.alpha = 0;
+		add(warningText);
+		
+		// Texto secundario
+		var subText:FlxText = new FlxText(0, 0, FlxG.width, "Modcharts Enabled");
+		subText.setFormat(Paths.font("aller.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		subText.borderSize = 2;
+		subText.screenCenter();
+		subText.y += 50;
+		subText.scrollFactor.set();
+		subText.cameras = [camHUD];
+		subText.alpha = 0;
+		add(subText);
+		
+		// Sprite de corazón para la explosión - crear con gráfico
+		var heart:FlxSprite = new FlxSprite();
+		heart.makeGraphic(80, 80, FlxColor.TRANSPARENT);
+		// Dibujar un corazón simple
+		heart.pixels.fillRect(new openfl.geom.Rectangle(20, 10, 20, 20), FlxColor.RED);
+		heart.pixels.fillRect(new openfl.geom.Rectangle(40, 10, 20, 20), FlxColor.RED);
+		heart.pixels.fillRect(new openfl.geom.Rectangle(10, 25, 60, 35), FlxColor.RED);
+		heart.pixels.fillRect(new openfl.geom.Rectangle(15, 55, 50, 15), FlxColor.RED);
+		heart.pixels.fillRect(new openfl.geom.Rectangle(25, 65, 30, 5), FlxColor.RED);
+		heart.screenCenter();
+		heart.scrollFactor.set();
+		heart.cameras = [camHUD];
+		heart.alpha = 0;
+		add(heart);
+		
+		// Animación de entrada
+		FlxTween.tween(warningText, {alpha: 1}, 0.3, {ease: FlxEase.cubeOut});
+		
+		FlxTween.tween(subText, {alpha: 1}, 0.4, {ease: FlxEase.cubeOut, startDelay: 0.2});
+		
+		// Animación del corazón (aparece y explota)
+		FlxTween.tween(heart, {alpha: 1}, 0.2, {
+			ease: FlxEase.cubeOut,
+			startDelay: 0.5,
+			onComplete: function(twn:FlxTween) {
+				// Sonido de confirmación
+				FlxG.sound.play(Paths.sound('confirmMenu'));
+				
+				// Cambiar textos a verde
+				warningText.color = FlxColor.LIME;
+				subText.color = FlxColor.LIME;
+				
+				// Explosión del corazón
+				FlxTween.tween(heart.scale, {x: 2.5, y: 2.5}, 0.4, {ease: FlxEase.cubeOut});
+				FlxTween.tween(heart, {alpha: 0}, 0.4, {ease: FlxEase.cubeOut});
+				
+				// Crear partículas de explosión
+				for (i in 0...12) {
+					var angle:Float = (360 / 12) * i;
+					var particle:FlxSprite = new FlxSprite(heart.x + heart.width/2, heart.y + heart.height/2);
+					particle.makeGraphic(8, 8, FlxColor.RED);
+					particle.scrollFactor.set();
+					particle.cameras = [camHUD];
+					add(particle);
+					
+					var targetX:Float = particle.x + Math.cos(angle * Math.PI / 180) * 150;
+					var targetY:Float = particle.y + Math.sin(angle * Math.PI / 180) * 150;
+					
+					FlxTween.tween(particle, {x: targetX, y: targetY, alpha: 0}, 0.6, {
+						ease: FlxEase.cubeOut,
+						onComplete: function(twn:FlxTween) {
+							particle.destroy();
+						}
+					});
+				}
+			}
+		});
+		
+		// Después de 2 segundos, fade out y continuar
+		new FlxTimer().start(2.0, function(tmr:FlxTimer) {
+			FlxTween.tween(blackBG, {alpha: 0}, 0.5, {
+				ease: FlxEase.cubeIn,
+				onComplete: function(twn:FlxTween) {
+					blackBG.destroy();
+					warningText.destroy();
+					subText.destroy();
+					isShowingModchartWarning = false;
+					modchartWarningShown = true;
+					// Iniciar countdown ahora
+					startCountdown();
+				}
+			});
+			FlxTween.tween(warningText, {alpha: 0}, 0.5, {ease: FlxEase.cubeIn});
+			FlxTween.tween(subText, {alpha: 0}, 0.5, {ease: FlxEase.cubeIn});
+		});
+	}
+
 	function initModchart()
 	{
 		#if MODCHARTS_NOTITG_ALLOWED
@@ -1390,6 +1542,12 @@ class PlayState extends MusicBeatState
 
 	public function startCountdown()
 	{
+		// Verificar si hay modchart y no se ha mostrado la advertencia
+		if (!modchartWarningShown && !isShowingModchartWarning && hasModchart()) {
+			showModchartWarning();
+			return false;
+		}
+		
 		if(startedCountdown) {
 			callOnScripts('onStartCountdown');
 			return false;
