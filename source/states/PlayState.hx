@@ -3206,6 +3206,13 @@ class PlayState extends MusicBeatState
 				if(flValue2 == null) flValue2 = 1;
 				FlxG.sound.play(Paths.sound(value1), flValue2);
 
+			case 'Change BPM':
+				if(flValue1 != null && flValue1 > 0) {
+					var newBPM:Float = flValue1;
+					Conductor.bpm = newBPM;
+					trace('BPM changed to: ' + newBPM + ' at time: ' + strumTime);
+				}
+
 						// ...existing code...
 			case "Set Camera Bopping":
 				// Value 1: frecuencia (en beats), Value 2: intensidad (1 = default)

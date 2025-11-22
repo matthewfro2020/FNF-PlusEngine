@@ -120,6 +120,74 @@ class Conductor
 			totalSteps += deltaSteps;
 			totalPos += ((60 / curBPM) * 1000 / 4) * deltaSteps;
 		}
+		
+		// Procesar eventos de cambio de BPM (usado por charts de StepMania)
+		if(song.events != null) {
+			for(event in song.events) {
+				if(event != null && event.length >= 2) {
+					var eventTime:Float = event[0];
+					var eventData:Array<Dynamic> = event[1];
+					
+					if(eventData != null && eventData.length > 0) {
+						for(subEvent in eventData) {
+							if(subEvent != null && subEvent.length >= 2) {
+								var eventName:String = subEvent[0];
+								var eventValue:String = subEvent[1];
+								
+							if(eventName == 'Change BPM') {
+								var newBPM:Float = Std.parseFloat(eventValue);
+								if(!Math.isNaN(newBPM) && newBPM > 0) {
+									// Calcular stepTime basado en el BPM actual hasta este punto
+									// Necesitamos calcular manualmente ya que bpmChangeMap aún se está construyendo
+									var stepTime:Int = 0;
+									var currentTime:Float = 0;
+									var currentBPM:Float = song.bpm;
+									var currentSteps:Int = 0;
+									
+									// Primero procesar las secciones hasta este punto de tiempo
+									for (i in 0...song.notes.length) {
+										var deltaSteps:Int = Math.round(getSectionBeats(song, i) * 4);
+										var sectionDuration:Float = ((60 / currentBPM) * 1000 / 4) * deltaSteps;
+										
+										if (currentTime + sectionDuration > eventTime) {
+											// El evento está en esta sección
+											var timeInSection:Float = eventTime - currentTime;
+											var stepsInSection:Int = Math.round((timeInSection / 1000) * (currentBPM / 60) * 4);
+											stepTime = currentSteps + stepsInSection;
+											break;
+										}
+										
+										currentTime += sectionDuration;
+										currentSteps += deltaSteps;
+										
+										// Actualizar BPM si la sección lo cambia
+										if(song.notes[i].changeBPM && song.notes[i].bpm != currentBPM) {
+											currentBPM = song.notes[i].bpm;
+										}
+									}
+									
+									var bpmEvent:BPMChangeEvent = {
+										stepTime: stepTime,
+										songTime: eventTime,
+										bpm: newBPM,
+										stepCrochet: calculateCrochet(newBPM)/4
+									};
+									bpmChangeMap.push(bpmEvent);
+									trace('Added BPM change from event: ' + newBPM + ' at ' + eventTime + 'ms (step ' + stepTime + ')');
+								}
+							}
+							}
+						}
+					}
+				}
+			}
+			
+			// Ordenar el mapa por tiempo de canción
+			bpmChangeMap.sort(function(a, b) {
+				return a.songTime < b.songTime ? -1 : (a.songTime > b.songTime ? 1 : 0);
+			});
+		}
+		
 		trace("new BPM map BUDDY " + bpmChangeMap);
 	}
 
