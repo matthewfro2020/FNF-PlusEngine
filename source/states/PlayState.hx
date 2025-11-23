@@ -4525,7 +4525,17 @@ class PlayState extends MusicBeatState
 		
 		var end:Note = note.isSustainNote ? note.parent.tail[note.parent.tail.length - 1] : note.tail[note.tail.length - 1];
 		var splash:SustainSplash = grpHoldSplashes.recycle(SustainSplash);
-		splash.setupSusSplash((note.mustPress ? playerStrums : opponentStrums).members[note.noteData], note, playbackRate);
+		
+		// Buscar el NoteSplash correspondiente para heredar propiedades
+		var linkedSplash:NoteSplash = null;
+		grpNoteSplashes.forEachAlive(function(spr:NoteSplash) {
+			if (spr.babyArrow == (note.mustPress ? playerStrums : opponentStrums).members[note.noteData] && 
+			    spr.noteData == note.noteData % Note.colArray.length) {
+				linkedSplash = spr;
+			}
+		});
+		
+		splash.setupSusSplash((note.mustPress ? playerStrums : opponentStrums).members[note.noteData], note, playbackRate, linkedSplash);
 		grpHoldSplashes.add(end.noteHoldSplash = splash);
 	}
 

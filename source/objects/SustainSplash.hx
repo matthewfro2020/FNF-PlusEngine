@@ -6,6 +6,7 @@ class SustainSplash extends FlxSprite
 	public static var frameRate:Int;
 
 	public var strumNote:StrumNote;
+	public var linkedNoteSplash:NoteSplash; // Referencia al NoteSplash para heredar propiedades
 
 	var timer:FlxTimer;
 
@@ -40,7 +41,18 @@ class SustainSplash extends FlxSprite
 		{
 			setPosition(strumNote.x, strumNote.y);
 			visible = strumNote.visible;
-			alpha = 1;
+			
+			// Heredar propiedades dinámicas del NoteSplash si existe
+			if (linkedNoteSplash != null && linkedNoteSplash.alive)
+			{
+				// Heredar cámara si cambió
+				if (linkedNoteSplash.cameras != null && linkedNoteSplash.cameras.length > 0)
+					cameras = linkedNoteSplash.cameras;
+				
+				// Heredar otras propiedades que puedan cambiar dinámicamente
+				if (linkedNoteSplash.visible != visible && animation.curAnim?.name == "hold")
+					visible = linkedNoteSplash.visible;
+			}
 
 			if (animation.curAnim?.name == "hold" && strumNote.animation.curAnim?.name == "static")
 			{
@@ -50,7 +62,7 @@ class SustainSplash extends FlxSprite
 		}
 	}
 
-	public function setupSusSplash(strum:StrumNote, daNote:Note, ?playbackRate:Float = 1):Void
+	public function setupSusSplash(strum:StrumNote, daNote:Note, ?playbackRate:Float = 1, ?noteSplash:NoteSplash = null):Void
 	{
 		final lengthToGet:Int = !daNote.isSustainNote ? daNote.tail.length : daNote.parent.tail.length;
 		final timeToGet:Float = !daNote.isSustainNote ? daNote.strumTime : daNote.parent.strumTime;
@@ -76,7 +88,20 @@ class SustainSplash extends FlxSprite
 		}
 
 		strumNote = strum;
-		alpha = 1;
+		linkedNoteSplash = noteSplash; // Vincular con el NoteSplash
+		
+		// Heredar valores de noteSplashData (alpha, antialiasing, etc)
+		alpha = ClientPrefs.data.splashAlpha;
+		if (daNote != null) alpha = daNote.noteSplashData.a;
+		
+		antialiasing = ClientPrefs.data.antialiasing;
+		if (daNote != null) antialiasing = daNote.noteSplashData.antialiasing;
+		if (PlayState.isPixelStage) antialiasing = false;
+		
+		// Heredar cámara del NoteSplash si existe
+		if (linkedNoteSplash != null && linkedNoteSplash.cameras != null && linkedNoteSplash.cameras.length > 0)
+			cameras = linkedNoteSplash.cameras;
+		
 		offset.set(PlayState.isPixelStage ? 112.5 : 106.25, 100);
 
 		if (timer != null)
