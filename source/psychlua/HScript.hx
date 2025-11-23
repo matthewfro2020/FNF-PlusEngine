@@ -939,25 +939,23 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return null;
 		}
 		
-		// Intentar acceso normal primero con Reflect.getProperty (respeta getters/setters)
+		// Para objetos no-null, intentar acceso directo sin verificaciones previas
+		// Esto permite acceder a propiedades dinámicas y getters de Flixel
 		try {
-			// Primero intentar con getProperty para respetar propiedades y getters
-			if (Reflect.hasField(o, field) || Type.getInstanceFields(Type.getClass(o)).contains(field)) {
-				var value = Reflect.getProperty(o, field);
-				return value;
-			}
+			// Intentar getProperty primero (maneja getters/setters)
+			var value = Reflect.getProperty(o, field);
+			return value;
 		} catch(e:Dynamic) {
-			// Si falla, intentar con field directo
+			// Si getProperty falla, intentar field directo
 			try {
-				if (Reflect.hasField(o, field)) {
-					return Reflect.field(o, field);
-				}
+				var value = Reflect.field(o, field);
+				if (value != null) return value;
 			} catch(e2:Dynamic) {
-				// Ignorar y continuar
+				// Ignorar y continuar a fallback
 			}
 		}
 		
-		// Wrapper de compatibilidad: si falla el acceso, buscar en variables globales
+		// Wrapper de compatibilidad: si falla el acceso al objeto, buscar en variables globales
 		if(MusicBeatState.getVariables().exists(field)) {
 			return MusicBeatState.getVariables().get(field);
 		}
@@ -982,23 +980,23 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return value;
 		}
 		
-		// Intentar asignación normal con setProperty (respeta setters)
+		// Para objetos no-null, intentar asignación directa sin verificaciones previas
+		// Esto permite setear propiedades dinámicas y setters de Flixel
 		try {
-			if (Reflect.hasField(o, field) || Type.getInstanceFields(Type.getClass(o)).contains(field)) {
-				Reflect.setProperty(o, field, value);
-				return value;
-			}
+			// Intentar setProperty primero (maneja setters)
+			Reflect.setProperty(o, field, value);
+			return value;
 		} catch(e:Dynamic) {
-			// Si falla con setProperty, intentar con setField
+			// Si setProperty falla, intentar setField
 			try {
 				Reflect.setField(o, field, value);
 				return value;
 			} catch(e2:Dynamic) {
-				// Si también falla, guardar en variables globales
+				// Si todo falla, guardar en variables globales como fallback
 			}
 		}
 		
-		// Si no se pudo asignar, guardar en variables globales como fallback
+		// Si no se pudo asignar al objeto, guardar en variables globales como fallback
 		var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
 		if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
 			MusicBeatState.getVideoHandlers().set(field, value);

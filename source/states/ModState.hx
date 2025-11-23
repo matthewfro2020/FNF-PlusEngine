@@ -82,7 +82,7 @@ class ModState extends MusicBeatState
         add(ohnou);
         
         // Crear texto de error (inicialmente oculto)
-        errorText = new FlxText(10, 50, FlxG.width - 20, "", 16);
+        errorText = new FlxText(10, 50, FlxG.width - 20, "ERROR!", 16);
         errorText.color = FlxColor.RED;
         errorText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
         errorText.visible = false;
