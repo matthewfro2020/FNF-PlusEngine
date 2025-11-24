@@ -160,8 +160,119 @@ class WindowsFunctions
 		Lua_helper.add_callback(lua, "resetSystemChanges", function() {
 			WindowTweens.resetSystemChanges();
 		});
+
+		Lua_helper.add_callback(lua, "getDesktopWindowsXPos", function() {
+			return WindowTweens.getDesktopWindowsXPos();
+		});
+
+		Lua_helper.add_callback(lua, "getDesktopWindowsYPos", function() {
+			return WindowTweens.getDesktopWindowsYPos();
+		});
+
+		Lua_helper.add_callback(lua, "setWindowBorderColor", function(r:Int, g:Int, b:Int) {
+			WindowTweens.setWindowBorderColor(r, g, b);
+		});
+
+		Lua_helper.add_callback(lua, "setWindowOpacity", function(alpha:Float) {
+			WindowTweens.setWindowOpacity(alpha);
+		});
+
+		Lua_helper.add_callback(lua, "getWindowOpacity", function() {
+			return WindowTweens.getWindowOpacity();
+		});
+
+		Lua_helper.add_callback(lua, "setWindowVisible", function(visible:Bool) {
+			WindowTweens.setWindowVisible(visible);
+		});
+
+		Lua_helper.add_callback(lua, "showMessageBox", function(message:String, caption:String, ?icon:String = "WARNING") {
+			WindowTweens.showMessageBox(message, caption, icon);
+		});
+
+		Lua_helper.add_callback(lua, "changeWindowsWallpaper", function(path:String) {
+			WindowTweens.changeWindowsWallpaper(path);
+		});
+
+		Lua_helper.add_callback(lua, "saveCurrentWallpaper", function() {
+			WindowTweens.saveCurrentWallpaper();
+		});
+
+		Lua_helper.add_callback(lua, "restoreOldWallpaper", function() {
+			WindowTweens.restoreOldWallpaper();
+		});
+
+		Lua_helper.add_callback(lua, "reDefineMainWindowTitle", function(title:String) {
+			WindowTweens.reDefineMainWindowTitle(title);
+		});
+
+		Lua_helper.add_callback(lua, "allocConsole", function() {
+			WindowTweens.allocConsole();
+		});
+
+		Lua_helper.add_callback(lua, "clearTerminal", function() {
+			WindowTweens.clearTerminal();
+		});
+
+		Lua_helper.add_callback(lua, "hideMainWindow", function() {
+			WindowTweens.hideMainWindow();
+		});
+
+		Lua_helper.add_callback(lua, "setConsoleTitle", function(title:String) {
+			WindowTweens.setConsoleTitle(title);
+		});
+
+		Lua_helper.add_callback(lua, "setConsoleWindowIcon", function(path:String) {
+			WindowTweens.setConsoleWindowIcon(path);
+		});
+
+		Lua_helper.add_callback(lua, "centerConsoleWindow", function() {
+			WindowTweens.centerConsoleWindow();
+		});
+
+		Lua_helper.add_callback(lua, "disableResizeConsoleWindow", function() {
+			WindowTweens.disableResizeConsoleWindow();
+		});
+
+		Lua_helper.add_callback(lua, "disableCloseConsoleWindow", function() {
+			WindowTweens.disableCloseConsoleWindow();
+		});
+
+		Lua_helper.add_callback(lua, "maximizeConsoleWindow", function() {
+			WindowTweens.maximizeConsoleWindow();
+		});
+
+		Lua_helper.add_callback(lua, "getConsoleWindowWidth", function() {
+			return WindowTweens.getConsoleWindowWidth();
+		});
+
+		Lua_helper.add_callback(lua, "getConsoleWindowHeight", function() {
+			return WindowTweens.getConsoleWindowHeight();
+		});
+
+		Lua_helper.add_callback(lua, "setConsoleCursorPosition", function(x:Int, y:Int) {
+			WindowTweens.setConsoleCursorPosition(x, y);
+		});
+
+		Lua_helper.add_callback(lua, "getConsoleCursorPositionX", function() {
+			return WindowTweens.getConsoleCursorPositionX();
+		});
+
+		Lua_helper.add_callback(lua, "getConsoleCursorPositionY", function() {
+			return WindowTweens.getConsoleCursorPositionY();
+		});
+
+		Lua_helper.add_callback(lua, "setConsoleWindowPositionX", function(posX:Int) {
+			WindowTweens.setConsoleWindowPositionX(posX);
+		});
+
+		Lua_helper.add_callback(lua, "setConsoleWindowPositionY", function(posY:Int) {
+			WindowTweens.setConsoleWindowPositionY(posY);
+		});
+
+		Lua_helper.add_callback(lua, "hideConsoleWindow", function() {
+			WindowTweens.hideConsoleWindow();
+		});
 		
-		// Legacy/Compatibility Functions (mantener al final)
 		Lua_helper.add_callback(lua, "hideWindowBorder", function(enable:Bool) {
 			WindowTweens.setWindowBorderless(enable);
 		});

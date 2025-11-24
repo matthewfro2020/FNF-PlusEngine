@@ -466,4 +466,312 @@ class WindowTweens {
         }
         #end
     }
+
+    public static function getDesktopWindowsXPos():Int {
+        #if windows
+        try {
+            return WindowsAPI.getDesktopWindowsXPos();
+        } catch (e:Dynamic) {
+            trace('Error getting desktop X position: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function getDesktopWindowsYPos():Int {
+        #if windows
+        try {
+            return WindowsAPI.getDesktopWindowsYPos();
+        } catch (e:Dynamic) {
+            trace('Error getting desktop Y position: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function setWindowBorderColor(r:Int, g:Int, b:Int) {
+        #if windows
+        try {
+            WindowsAPI.setWindowBorderColor(r, g, b);
+        } catch (e:Dynamic) {
+            trace('Error setting window border color: $e');
+        }
+        #end
+    }
+
+    public static function setWindowOpacity(alpha:Float) {
+        #if windows
+        try {
+            var clampedAlpha = Math.max(0.0, Math.min(1.0, alpha));
+            WindowsAPI.setWindowOppacity(clampedAlpha);
+        } catch (e:Dynamic) {
+            trace('Error setting window opacity: $e');
+        }
+        #end
+    }
+
+    public static function getWindowOpacity():Float {
+        #if windows
+        try {
+            return WindowsAPI.getWindowOppacity();
+        } catch (e:Dynamic) {
+            trace('Error getting window opacity: $e');
+            return 1.0;
+        }
+        #else
+        return 1.0;
+        #end
+    }
+
+    public static function setWindowVisible(visible:Bool) {
+        #if windows
+        try {
+            WindowsAPI.setWindowVisible(visible);
+        } catch (e:Dynamic) {
+            trace('Error setting window visibility: $e');
+        }
+        #end
+    }
+
+    public static function showMessageBox(message:String, caption:String, icon:String = "WARNING") {
+        #if windows
+        try {
+            var iconType = switch(icon.toUpperCase()) {
+                case "ERROR": winapi.WindowsAPI.MessageBoxIcon.ERROR;
+                case "QUESTION": winapi.WindowsAPI.MessageBoxIcon.QUESTION;
+                case "INFORMATION": winapi.WindowsAPI.MessageBoxIcon.INFORMATION;
+                default: winapi.WindowsAPI.MessageBoxIcon.WARNING;
+            }
+            WindowsAPI.showMessageBox(message, caption, iconType);
+        } catch (e:Dynamic) {
+            trace('Error showing message box: $e');
+        }
+        #end
+    }
+
+    public static function changeWindowsWallpaper(path:String) {
+        #if windows
+        try {
+            WindowsAPI.changeWindowsWallpaper(path);
+        } catch (e:Dynamic) {
+            trace('Error changing wallpaper: $e');
+        }
+        #end
+    }
+
+    public static function saveCurrentWallpaper() {
+        #if windows
+        try {
+            WindowsAPI.saveCurrentWindowsWallpaper();
+        } catch (e:Dynamic) {
+            trace('Error saving current wallpaper: $e');
+        }
+        #end
+    }
+
+    public static function restoreOldWallpaper() {
+        #if windows
+        try {
+            WindowsAPI.setOldWindowsWallpaper();
+        } catch (e:Dynamic) {
+            trace('Error restoring old wallpaper: $e');
+        }
+        #end
+    }
+
+    public static function reDefineMainWindowTitle(title:String) {
+        #if windows
+        try {
+            WindowsAPI.reDefineMainWindowTitle(title);
+        } catch (e:Dynamic) {
+            trace('Error redefining main window title: $e');
+        }
+        #end
+    }
+
+    public static function allocConsole() {
+        #if windows
+        try {
+            WindowsAPI.allocConsole();
+        } catch (e:Dynamic) {
+            trace('Error allocating console: $e');
+        }
+        #end
+    }
+
+    public static function clearTerminal() {
+        #if windows
+        try {
+            WindowsAPI.clearTerminal();
+        } catch (e:Dynamic) {
+            trace('Error clearing terminal: $e');
+        }
+        #end
+    }
+
+    public static function hideMainWindow() {
+        #if windows
+        try {
+            WindowsAPI.hideMainWindow();
+        } catch (e:Dynamic) {
+            trace('Error hiding main window: $e');
+        }
+        #end
+    }
+
+    public static function setConsoleTitle(title:String) {
+        #if windows
+        try {
+            WindowsAPI.setConsoleTitle(title);
+        } catch (e:Dynamic) {
+            trace('Error setting console title: $e');
+        }
+        #end
+    }
+
+    public static function setConsoleWindowIcon(path:String) {
+        #if windows
+        try {
+            WindowsAPI.setConsoleWindowIcon(path);
+        } catch (e:Dynamic) {
+            trace('Error setting console window icon: $e');
+        }
+        #end
+    }
+
+    public static function centerConsoleWindow() {
+        #if windows
+        try {
+            WindowsAPI.centerConsoleWindow();
+        } catch (e:Dynamic) {
+            trace('Error centering console window: $e');
+        }
+        #end
+    }
+
+    public static function disableResizeConsoleWindow() {
+        #if windows
+        try {
+            WindowsAPI.disableResizeConsoleWindow();
+        } catch (e:Dynamic) {
+            trace('Error disabling console resize: $e');
+        }
+        #end
+    }
+
+    public static function disableCloseConsoleWindow() {
+        #if windows
+        try {
+            WindowsAPI.disableCloseConsoleWindow();
+        } catch (e:Dynamic) {
+            trace('Error disabling console close: $e');
+        }
+        #end
+    }
+
+    public static function maximizeConsoleWindow() {
+        #if windows
+        try {
+            WindowsAPI.maximizeConsoleWindow();
+        } catch (e:Dynamic) {
+            trace('Error maximizing console window: $e');
+        }
+        #end
+    }
+
+    public static function getConsoleWindowWidth():Int {
+        #if windows
+        try {
+            return WindowsAPI.getConsoleWindowWidth();
+        } catch (e:Dynamic) {
+            trace('Error getting console width: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function getConsoleWindowHeight():Int {
+        #if windows
+        try {
+            return WindowsAPI.getConsoleWindowHeight();
+        } catch (e:Dynamic) {
+            trace('Error getting console height: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function setConsoleCursorPosition(x:Int, y:Int) {
+        #if windows
+        try {
+            WindowsAPI.setConsoleCursorPosition(x, y);
+        } catch (e:Dynamic) {
+            trace('Error setting console cursor position: $e');
+        }
+        #end
+    }
+
+    public static function getConsoleCursorPositionX():Int {
+        #if windows
+        try {
+            return WindowsAPI.getConsoleCursorPositionInX();
+        } catch (e:Dynamic) {
+            trace('Error getting console cursor X: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function getConsoleCursorPositionY():Int {
+        #if windows
+        try {
+            return WindowsAPI.getConsoleCursorPositionInY();
+        } catch (e:Dynamic) {
+            trace('Error getting console cursor Y: $e');
+            return 0;
+        }
+        #else
+        return 0;
+        #end
+    }
+
+    public static function setConsoleWindowPositionX(posX:Int) {
+        #if windows
+        try {
+            WindowsAPI.setConsoleWindowPositionX(posX);
+        } catch (e:Dynamic) {
+            trace('Error setting console X position: $e');
+        }
+        #end
+    }
+
+    public static function setConsoleWindowPositionY(posY:Int) {
+        #if windows
+        try {
+            WindowsAPI.setConsoleWindowPositionY(posY);
+        } catch (e:Dynamic) {
+            trace('Error setting console Y position: $e');
+        }
+        #end
+    }
+
+    public static function hideConsoleWindow() {
+        #if windows
+        try {
+            WindowsAPI.hideConsoleWindow();
+        } catch (e:Dynamic) {
+            trace('Error hiding console window: $e');
+        }
+        #end
+    }
 }

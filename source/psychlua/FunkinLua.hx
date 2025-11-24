@@ -1590,6 +1590,7 @@ class FunkinLua {
 		DeprecatedFunctions.implement(this);
 		#if MODCHARTS_NOTITG_ALLOWED LuaModchart.implement(this); #end
 		#if WINDOWS_FUNCTIONS_ALLOWED WindowsFunctions.implement(this); #end
+		#if (WINDOWS_FUNCTIONS_ALLOWED && GDI_ENABLED) WindowsGDIFunctions.implement(this); #end
 		MobileFunctions.implement(this);
 		#if android AndroidFunctions.implement(this); #end
 		LuaVideo.implement(this);
