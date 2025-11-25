@@ -1,18 +1,7 @@
 package backend;
 
 // Importar todos los idiomas
-import backend.languages.EnUS;
-import backend.languages.EsLA;
-import backend.languages.EsES;
-import backend.languages.PtBR;
-import backend.languages.FrFR;
-import backend.languages.ItIT;
-import backend.languages.DeDE;
-import backend.languages.NlNL;
-import backend.languages.ZhCN;
-import backend.languages.ZhHK;
-import backend.languages.JpJP;
-import backend.languages.IdID;
+import backend.languages.*;
 
 class Language
 {
@@ -33,9 +22,9 @@ class Language
         ItIT,    // Italiano (Italia)
         DeDE,    // Deutsch (Deutschland)
         NlNL,    // Nederlands (Nederland)
-        ZhCN,    // Chinese (Mainland)
-        ZhHK,    // Chinese (Hong Kong)
-        JpJP,     // Japanese (Japan)
+        //ZhCN,    // Chinese (Mainland) - needs more support
+        //ZhHK,    // Chinese (Hong Kong) - needs more support
+        //JpJP,     // Japanese (Japan) - needs more support
 		IdID      // Indonesian (Bahasa Indonesia)
     ];
 
@@ -217,6 +206,29 @@ class Language
         return hideCharsRegex.replace(key.replace(' ', '_'), '').toLowerCase().trim();
 	}
 	#end
+
+	// Función para obtener introTexts localizados
+	public static function getLocalizedIntroTexts():Array<Array<String>>
+	{
+		#if TRANSLATIONS_ALLOWED
+		var langFile:String = ClientPrefs.data.language;
+		
+		// Buscar en idiomas hardcodeados
+		for (langClass in hardcodedLanguages) {
+			var languageCode:String = Reflect.field(langClass, 'languageCode');
+			if (languageCode == langFile) {
+				var introTexts:Array<Array<String>> = Reflect.field(langClass, 'introTexts');
+				if (introTexts != null && introTexts.length > 0) {
+					return introTexts;
+				}
+				break;
+			}
+		}
+		#end
+		
+		// Si no hay introTexts localizados, devolver null para usar el archivo default
+		return null;
+	}
 
 	#if LUA_ALLOWED
 	public static function addLuaCallbacks(lua:State) {

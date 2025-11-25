@@ -339,6 +339,16 @@ class TitleState extends MusicBeatState
 
 	function getIntroTextShit():Array<Array<String>>
 	{
+		// Intentar obtener introTexts localizados primero
+		#if TRANSLATIONS_ALLOWED
+		var localizedIntros:Array<Array<String>> = Language.getLocalizedIntroTexts();
+		if (localizedIntros != null && localizedIntros.length > 0)
+		{
+			return localizedIntros;
+		}
+		#end
+		
+		// Fallback: usar archivo introText.txt
 		#if MODS_ALLOWED
 		var firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt');
 		#else

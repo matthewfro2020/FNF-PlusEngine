@@ -5,6 +5,30 @@ class IdID
     public static var languageName:String = "Indonesian (Bahasa Ind.)";
     public static var languageCode:String = "id-ID";
     
+    // IntroTexts localizados untuk layar judul
+    public static var introTexts:Array<Array<String>> = [
+        ["shoutouts to tom fulp", "lol"],
+        ["Ludum dare", "luar biasa"],
+        ["cyberzone", "gratis"],
+        ["game ini bukan", "mod"],
+        ["banyak ritme", "untuk kamu"],
+        ["game ritme", "keren banget"],
+        ["kesulitan sedang", "oke lah"],
+        ["funkin", "deluxe"],
+        ["jangan berhenti", "funkin"],
+        ["hampir selesai", "ceritanya"],
+        ["dua pemain", "segera hadir"],
+        ["Psych Engine", "Plus Edition"],
+        ["engine ini", "keren"],
+        ["banyak not", "dimana-mana"],
+        ["ingat latihan", "bikin kamu lebih baik"],
+        ["engine dibuat oleh", "Shadow Mario"],
+        ["versi plus oleh", "Lenin Asto"],
+        ["nikmati", "permainannya"],
+        ["tekan Enter", "untuk mulai"],
+        ["friday night", "funkin"],
+    ];
+    
     public static var translations:Map<String, String> = [
         "update_available_title" => "Pembaruan Tersedia!",
         "version_comparison" => "Versi Saat Ini: {1} => Versi Terbaru: {2}",
@@ -258,6 +282,8 @@ class IdID
         "description_debug_data" => "Menampilkan informasi chart seperti kecepatan gulir, BPM, kesehatan; serta langkah, beats, dll.\nFitur ini akan tersedia jika Anda berada dalam mode Chart.",
         "setting_health_bar_opacity" => "Kecerahan Bar Kesehatan",
         "description_health_bar_opacity" => "Seberapa transparan seharusnya bar kesehatan dan ikon-ikon tersebut.",
+        "setting_smooth_health_bar" => "Bar Kesehatan Halus",
+        "description_smooth_health_bar" => "Jika dicentang, bar kesehatan akan bergerak dengan halus alih-alih bergerak secara tiba-tiba.",
         "setting_fps_counter" => "Penghitung FPS",
         "description_fps_counter" => "Jika tidak dicentang, akan menyebunyikan Penghitung FPS.",
         "setting_show_watermark" => "Tampilkan Watermark",

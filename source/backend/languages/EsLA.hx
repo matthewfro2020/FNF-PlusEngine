@@ -5,6 +5,19 @@ class EsLA
     public static var languageName:String = "Español (Latinoamérica)";
     public static var languageCode:String = "es-LA";
     
+    // IntroTexts localizados para la pantalla de título
+    public static var introTexts:Array<Array<String>> = [
+        ["Sic Parvis", "Magna"],
+        ["dejese de mamadas", "skiper!"],
+        ["diablo que dificil", "me la pusiste"],
+        ["descansa en paz", "shadow mario"],
+        ["perú...", "es clave"],
+        ["Sky", "x David"],
+        ["rickroll?", "watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1"],
+        ["si te dan limones", "haz limonada"],
+        ["inserta frase aqui", "no se me ocurre nada"]
+    ];
+    
     public static var translations:Map<String, String> = [
         "update_available_title" => "¡Actualización disponible!",
         "version_comparison" => "Versión actual: {1} => Nueva versión: {2}",
@@ -250,6 +263,8 @@ class EsLA
         "description_debug_data" => "Muestra información de chart como velocidad de desplazamiento, BPM, salud; tambien los steps, beats, etc.\nEstos ultimos estaran disponibles si estas en modo Chart.",
         "setting_health_bar_opacity" => "Opaci. de la barra de salud",
         "description_health_bar_opacity" => "¿Qué tan transparentes deben ser la barra y los iconos?",
+        "setting_smooth_health_bar" => "Barra de salud suave",
+        "description_smooth_health_bar" => "Si está marcado, la barra de salud se moverá suavemente en lugar de ir bruscamente.",
         "setting_fps_counter" => "Contador de FPS",
         "description_fps_counter" => "Si no está marcado, oculta el contador FPS",
         "setting_show_watermark" => "Mostrar marca de agua",

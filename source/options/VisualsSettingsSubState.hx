@@ -141,6 +141,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		option.decimals = 1;
 		addOption(option);
+
+		var option:Option = new Option('Smooth Health Bar',
+			'If checked, the health bar will move smoothly instead of instantly.',
+			'smoothHealthBar',
+			BOOL);
+		addOption(option);
 		
 		var option:Option = new Option('FPS Counter',
 			'If unchecked, hides FPS Counter.',
