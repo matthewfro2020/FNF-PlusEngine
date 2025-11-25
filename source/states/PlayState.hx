@@ -2277,11 +2277,6 @@ class PlayState extends MusicBeatState
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
 		
-		// En StepMania, siempre centrar los strums del jugador
-		if (isStepManiaChart) {
-			strumLineX = STRUM_X_MIDDLESCROLL;
-		}
-		
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
@@ -2291,11 +2286,7 @@ class PlayState extends MusicBeatState
 			var targetAlpha:Float = 1;
 			if (!isPlayerStrum) // Es una strum del oponente (no controlada por el jugador)
 			{
-				// En StepMania, ocultar completamente las strums del oponente
-				if (isStepManiaChart) {
-					targetAlpha = 0;
-				}
-				else if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
+				if(!ClientPrefs.data.opponentStrums) targetAlpha = 0;
 				else if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
 
