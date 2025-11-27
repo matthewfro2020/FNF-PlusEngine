@@ -214,7 +214,6 @@ class Main extends Sprite
 		
 		#if desktop 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullScreen);
-		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 		#end
 
 		#if mobile
@@ -271,50 +270,6 @@ class Main extends Sprite
 	function toggleFullScreen(event:KeyboardEvent) {
 		if (Controls.instance.justReleased('fullscreen'))
 			FlxG.fullscreen = !FlxG.fullscreen;
-	}
-
-	function onKeyUp(event:KeyboardEvent) {
-		if (event.keyCode == 49) 
-		{
-			openStateModSubstate();
-		}
-	}
-
-	function openStateModSubstate() {
-		var blockedStates:Array<String> = [
-			'states.PlayState',
-			'states.LoadingState',
-			'options.OptionsState',
-			'states.editors.ChartingState',
-			'states.editors.CharacterEditorState',
-			'states.editors.StageEditorState',
-			'states.editors.WeekEditorState',
-			'states.editors.MenuCharacterEditorState',
-			'states.editors.DialogueEditorState',
-			'states.editors.DialogueCharacterEditorState',
-			'states.editors.NoteSplashEditorState',
-			'states.editors.MasterEditorMenu'
-		];
-		
-		if (FlxG.state != null && Std.isOfType(FlxG.state, backend.MusicBeatState))
-		{
-			var currentStateClass:String = Type.getClassName(Type.getClass(FlxG.state));
-			
-			if (blockedStates.contains(currentStateClass))
-			{
-				return;
-			}
-			
-			var state:backend.MusicBeatState = cast FlxG.state;
-			
-			state.persistentUpdate = false;
-			
-			state.openSubState(new substates.StateModSubstate());
-		}
-		else
-		{
-			trace('Cannot open StateModSubstate: Current state is not a MusicBeatState');
-		}
 	}
 
 	function positionWatermark():Void {

@@ -178,23 +178,9 @@ class OptionsState extends MusicBeatState
 					LoadingState.loadAndSwitchState(new PlayState());
 					FlxG.sound.music.volume = 0;
 				}
-				else {
-					// Verificar si venimos de un ModState personalizado
-					#if HSCRIPT_ALLOWED
-					var cameFromModState = states.ModState.sharedVars.exists('cameFromMainMenu') && 
-                       					   states.ModState.sharedVars.get('cameFromMainMenu') == true;
-										   
-					if(cameFromModState && backend.Mods.canModExecuteStates())
-					{
-						// Volver al MainMenuState personalizado (ModState)
-						MusicBeatState.switchState(new states.ModState('MainMenuState'));
-					}
-					else
-					#end
-					{
-						// Volver al MainMenuState original
-						MusicBeatState.switchState(new MainMenuState());
-					}
+				else 
+				{
+					MusicBeatState.switchState(new MainMenuState());
 				}
 			}
 			else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);

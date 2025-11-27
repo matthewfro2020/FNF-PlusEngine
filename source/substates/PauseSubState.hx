@@ -386,63 +386,11 @@ class PauseSubState extends MusicBeatSubstate
 					
 					Mods.loadTopMod();
 					if(PlayState.isStoryMode)
-					{
-					// Verificar si el mod tiene StoryMenuState o MainMenuState personalizado
-					#if (HSCRIPT_ALLOWED && sys)
-					var hasCustomState:Bool = false;
-					
-					// ✅ Verificar que el mod tenga permiso para ejecutar custom states
-					if(backend.Mods.canModExecuteStates())
-					{
-						// Prioridad 1: StoryMenuState del mod
-						var storyMenuPath:String = Paths.hx('StoryMenuState');
-						if(sys.FileSystem.exists(storyMenuPath))
-						{
-							trace('Mod ${backend.Mods.currentModDirectory} tiene StoryMenuState personalizado');
-							hasCustomState = true;
-							MusicBeatState.switchState(new states.ModState('StoryMenuState'));
-						}
-						else
-						{
-							// Prioridad 2: MainMenuState del mod
-							var mainMenuPath:String = Paths.hx('MainMenuState');
-							if(sys.FileSystem.exists(mainMenuPath))
-							{
-								trace('Mod ${backend.Mods.currentModDirectory} tiene MainMenuState personalizado');
-								hasCustomState = true;
-								MusicBeatState.switchState(new states.ModState('MainMenuState'));
-							}
-						}
-					}						if(!hasCustomState)
-						#end
-						{
-							MusicBeatState.switchState(new StoryMenuState());
-						}
-					}
-				else 
-				{
-					// Detectar si el mod tiene FreeplayState personalizado
-					#if (HSCRIPT_ALLOWED && sys)
-					var hasCustomFreeplay:Bool = false;
-					
-					// ✅ Verificar que el mod tenga permiso para ejecutar custom states
-					if(backend.Mods.canModExecuteStates())
-					{
-						var freeplayPath:String = Paths.hx('FreeplayState');
-						if(sys.FileSystem.exists(freeplayPath))
-						{
-							trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
-							hasCustomFreeplay = true;
-							MusicBeatState.switchState(new states.ModState('FreeplayState'));
-						}
-					}
-					
-					if(!hasCustomFreeplay)
-					#end
-					{
+						MusicBeatState.switchState(new StoryMenuState());
+					else
 						MusicBeatState.switchState(new FreeplayState());
-					}
-				}					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				    
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 					FlxG.camera.followLerp = 0;

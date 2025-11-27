@@ -185,7 +185,6 @@ class HScript extends Iris
 		set('Discord', backend.DiscordClient);
 		#end
 		set('PlayState', PlayState);
-		set('ModState', states.ModState);
 		set('TitleState', states.TitleState);
 		set('MainMenuState', states.MainMenuState);
 		set('FreeplayState', states.FreeplayState);
@@ -516,7 +515,6 @@ class HScript extends Iris
 		set('this', this);
 		set('game', FlxG.state);
 		set('state', FlxG.state);
-		set('modstate', FlxG.state);
 		set('controls', Controls.instance);
 
 		set('buildTarget', LuaUtils.getBuildTarget());

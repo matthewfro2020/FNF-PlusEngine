@@ -3431,40 +3431,7 @@ class PlayState extends MusicBeatState
 					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 					canResync = false;
-					
-					// Verificar si el mod tiene StoryMenuState o MainMenuState personalizado
-					#if (HSCRIPT_ALLOWED && sys)
-					var hasCustomState:Bool = false;
-					
-					// ✅ Verificar que el mod tenga permiso para ejecutar custom states
-					if(backend.Mods.canModExecuteStates())
-					{
-						// Prioridad 1: StoryMenuState del mod
-						var storyMenuPath:String = Paths.hx('StoryMenuState');
-						if(sys.FileSystem.exists(storyMenuPath))
-						{
-							trace('Mod ${backend.Mods.currentModDirectory} tiene StoryMenuState personalizado');
-							hasCustomState = true;
-							MusicBeatState.switchState(new states.ModState('StoryMenuState'));
-						}
-						else
-						{
-							// Prioridad 2: MainMenuState del mod
-							var mainMenuPath:String = Paths.hx('MainMenuState');
-							if(sys.FileSystem.exists(mainMenuPath))
-							{
-								trace('Mod ${backend.Mods.currentModDirectory} tiene MainMenuState personalizado');
-								hasCustomState = true;
-								MusicBeatState.switchState(new states.ModState('MainMenuState'));
-							}
-						}
-					}
-					
-					if(!hasCustomState)
-					#end
-					{
-						MusicBeatState.switchState(new StoryMenuState());
-					}
+					MusicBeatState.switchState(new StoryMenuState());
 
 					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice') && !ClientPrefs.getGameplaySetting('botplay')) {
@@ -3502,28 +3469,8 @@ class PlayState extends MusicBeatState
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
 				canResync = false;
-				
-			// Verificar si el mod tiene FreeplayState personalizado
-			#if (HSCRIPT_ALLOWED && sys)
-			var hasCustomFreeplay:Bool = false;
-			
-			// ✅ Verificar que el mod tenga permiso para ejecutar custom states
-			if(backend.Mods.canModExecuteStates())
-			{
-				var freeplayPath:String = Paths.hx('FreeplayState');
-				if(sys.FileSystem.exists(freeplayPath))
-				{
-					trace('Mod ${backend.Mods.currentModDirectory} tiene FreeplayState personalizado');
-					hasCustomFreeplay = true;
-					MusicBeatState.switchState(new states.ModState('FreeplayState'));
-				}
-			}
-			
-			if(!hasCustomFreeplay)
-			#end
-			{
 				MusicBeatState.switchState(new FreeplayState());
-			}				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}
 			transitioning = true;
@@ -3545,24 +3492,17 @@ class PlayState extends MusicBeatState
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0;
 
-	// Wife3 Accuracy System STANDARD (StepMania)
-	public var wife3Scores:Array<Float> = []; // Guarda el score de cada nota individual
-	public var wife3_maxms:Float = 180.0; // Ventana máxima de timing en milisegundos (boo window)
-
-	// Psych Engine Accuracy System (Original)
-	// Usa totalNotesHit (suma de ratingMod) y totalPlayed
+	public var wife3Scores:Array<Float> = [];
+	public var wife3_maxms:Float = 180.0;
 	
-	// Simple Accuracy System
-	public var notesHitSimple:Int = 0; // Contador simple de notas golpeadas
+	public var notesHitSimple:Int = 0;
 	
-	// osu!mania Accuracy System
-	public var osuMania_n300:Int = 0;  // Epic/Sick hits
-	public var osuMania_n200:Int = 0;  // Good hits
-	public var osuMania_n100:Int = 0;  // Bad hits
-	public var osuMania_n50:Int = 0;   // Shit hits
-	public var osuMania_nMiss:Int = 0; // Misses
+	public var osuMania_n300:Int = 0;
+	public var osuMania_n200:Int = 0;
+	public var osuMania_n100:Int = 0;
+	public var osuMania_n50:Int = 0;
+	public var osuMania_nMiss:Int = 0; 
 	
-	// DJMAX Accuracy System
 	public var djmax_maxPerfect:Int = 0;
 	public var djmax_perfect:Int = 0;
 	public var djmax_great:Int = 0;
@@ -3572,15 +3512,14 @@ class PlayState extends MusicBeatState
 	public var djmax_combo:Int = 0;
 	public var djmax_maxCombo:Int = 0;
 	
-	// ITG (Dance Points) System
-	public var itg_FantasticPlus:Int = 0; // W0 - Epic (±15ms)
-	public var itg_Fantastic:Int = 0;     // W1 - Sick (±22.5ms)
-	public var itg_Excellent:Int = 0;     // W2 - Good (±45ms)
-	public var itg_Great:Int = 0;         // W3 - Bad (±90ms)
-	public var itg_Decent:Int = 0;        // W4 - Shit (±135ms)
-	public var itg_WayOff:Int = 0;        // W5 - Boo (±180ms)
+	public var itg_FantasticPlus:Int = 0; 
+	public var itg_Fantastic:Int = 0; 
+	public var itg_Excellent:Int = 0; 
+	public var itg_Great:Int = 0; 
+	public var itg_Decent:Int = 0;
+	public var itg_WayOff:Int = 0; 
 	public var itg_Miss:Int = 0;
-	public var itg_DP:Float = 0.0;        // Dance Points acumulativo
+	public var itg_DP:Float = 0.0; 
 
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;

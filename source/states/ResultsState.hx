@@ -311,45 +311,10 @@ class ResultsState extends MusicBeatState
         
         if (shouldContinue)
         {
-            #if HSCRIPT_ALLOWED
-            if (params.isMod && params.modFolder != null && params.modFolder != "") {
-                states.ModState.sharedVars.set('cameFromResults', true);
-                states.ModState.sharedVars.set('modFolderFromResults', params.modFolder);
-            }
+            #if MODS_ALLOWED
+            backend.Mods.currentModDirectory = '';
             #end
-            
-            #if HSCRIPT_ALLOWED
-            trace('ResultsState: Verificando permisos para mod ${params.modFolder}');
-            trace('ResultsState: activeModState = ${backend.ClientPrefs.data.activeModState}');
-            
-            if (backend.Mods.canModExecuteStates(params.modFolder)) {
-                trace('ResultsState: Mod ${params.modFolder} tiene permiso para ejecutar custom states');
-                backend.Mods.currentModDirectory = params.modFolder;
-                
-                var freeplayPath:String = Paths.hx('FreeplayState');
-                trace('ResultsState: Buscando FreeplayState en: $freeplayPath');
-                
-                if(sys.FileSystem.exists(freeplayPath))
-                {
-                    trace('ResultsState: Mod ${params.modFolder} tiene FreeplayState personalizado, cargando ModState');
-                    MusicBeatState.switchState(new states.ModState('FreeplayState'));
-                }
-                else
-                {
-                    trace('ResultsState: Mod ${params.modFolder} no tiene FreeplayState personalizado, usando del engine');
-                    backend.Mods.currentModDirectory = '';
-                    MusicBeatState.switchState(new FreeplayState());
-                }
-            }
-            else
-            #end
-            {
-                trace('ResultsState: Mod ${params.modFolder} NO tiene permiso o HSCRIPT_ALLOWED está deshabilitado');
-                #if MODS_ALLOWED
-                backend.Mods.currentModDirectory = '';
-                #end
-                MusicBeatState.switchState(new FreeplayState());
-            }
+            MusicBeatState.switchState(new FreeplayState());
         }
     }
 

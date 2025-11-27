@@ -69,7 +69,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(new GameplayOption('Instakill on Miss', 'instakill', BOOL, false));
 		optionsArray.push(new GameplayOption('Practice Mode', 'practice', BOOL, false));
 		optionsArray.push(new GameplayOption('Perfect Mode', 'perfect', BOOL, false));
-		optionsArray.push(new GameplayOption('Opponent Mode', 'opponentplay', BOOL, false));
+		//optionsArray.push(new GameplayOption('Opponent Mode', 'opponentplay', BOOL, false)); -- in manteinance
 		optionsArray.push(new GameplayOption('No Drop Penalty', 'nodroppenalty', BOOL, false));
 		optionsArray.push(new GameplayOption('Botplay', 'botplay', BOOL, false));
 	}
@@ -152,13 +152,13 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (controls.UI_UP_P)
+		if (controls.UI_UP_P || (touchPad != null && touchPad.buttonUp.justPressed))
 			changeSelection(-1);
 
-		if (controls.UI_DOWN_P)
+		if (controls.UI_DOWN_P || (touchPad != null && touchPad.buttonDown.justPressed))
 			changeSelection(1);
 
-		if (controls.BACK)
+		if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed))
 		{
 			close();
 			ClientPrefs.saveSettings();
@@ -171,7 +171,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			var usesCheckbox:Bool = (curOption.type == BOOL);
 			if(usesCheckbox)
 			{
-				if(controls.ACCEPT)
+				if(controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed))
 				{
 					FlxG.sound.play(Paths.sound('scrollMenu'));
 					curOption.setValue((curOption.getValue() == true) ? false : true);
@@ -181,9 +181,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			}
 			else
 			{
-				if(controls.UI_LEFT || controls.UI_RIGHT)
+				if(controls.UI_LEFT || controls.UI_RIGHT || (touchPad != null && (touchPad.buttonLeft.pressed || touchPad.buttonRight.pressed)))
 				{
-					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
+					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P || (touchPad != null && (touchPad.buttonLeft.justPressed || touchPad.buttonRight.justPressed)));
 					if(holdTime > 0.5 || pressed)
 					{
 						if(pressed)
@@ -275,11 +275,11 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					if(curOption.type != STRING)
 						holdTime += elapsed;
 				}
-				else if(controls.UI_LEFT_R || controls.UI_RIGHT_R)
+				else if(controls.UI_LEFT_R || controls.UI_RIGHT_R || (touchPad != null && (touchPad.buttonLeft.justReleased || touchPad.buttonRight.justReleased)))
 					clearHold();
 			}
 
-			if(controls.RESET || touchPad.buttonC.justPressed)
+			if(controls.RESET || (touchPad != null && touchPad.buttonC.justPressed))
 			{
 				for (i in 0...optionsArray.length)
 				{

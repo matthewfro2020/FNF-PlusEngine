@@ -27,11 +27,6 @@ import states.TitleState;
 	// Combo Break Settings
 	public var badShitBreakCombo:Bool = false; // Si está en true, Bad y Shit romperán el combo
 	
-	// ✅ Mod con permiso para ejecutar custom states
-	// Si es "NONE" o null, no se ejecutarán custom states de ningún mod
-	// Solo el mod especificado aquí podrá ejecutar sus custom states
-	public var activeModState:String = "NONE";
-	
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
