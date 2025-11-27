@@ -212,7 +212,8 @@
 	<!-- ____________________________ Modcharts? _______________________________ -->
 
     <section if="MODCHARTS_NOTITG_ALLOWED">
-		<assets path="assets/modchart"/>
+		<assets path="assets/modchart/arrowShape.csv" rename="modchart/arrowShape.csv" embed="true" />
+		<assets path="assets/modchart/eyeShape.csv" rename="modchart/eyeShape.csv" embed="true" />
 		<haxedef name="FM_ENGINE" value="PSYCH"/>
     	<haxedef name="FM_ENGINE_VERSION" value="1.0"/>
     	<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
