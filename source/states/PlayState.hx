@@ -1514,12 +1514,6 @@ class PlayState extends MusicBeatState
 
 	public function startCountdown()
 	{
-		// Verificar si hay modchart y no se ha mostrado la advertencia
-		if (!modchartWarningShown && !isShowingModchartWarning && hasModchart()) {
-			showModchartWarning();
-			return false;
-		}
-		
 		if(startedCountdown) {
 			callOnScripts('onStartCountdown');
 			return false;
