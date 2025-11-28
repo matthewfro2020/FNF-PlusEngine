@@ -27,6 +27,10 @@ class IdID
         ["nikmati", "permainannya"],
         ["tekan Enter", "untuk mulai"],
         ["friday night", "funkin"],
+        ["stecu stecu", "konoha"],
+        ["jiwa yang", "bersedih"],
+        ["sial sialnya", "ku bertemu dengan cinta semu"],
+        ["kisah tanpa", "dirimu"],
     ];
     
     public static var translations:Map<String, String> = [
@@ -542,7 +546,7 @@ class IdID
         "editorplaystate_score" => "Hits: {1} | Misses: {2}",
         
         // Language example text
-        "language_example_text" => "Ini adalah teks contoh dalam bahasa Indonesia."
+        "language_example_text" => "Ini adalah teks contoh dalam bahasa Indonesia Nusantara."
     ];
 }
 
