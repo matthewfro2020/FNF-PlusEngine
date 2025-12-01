@@ -1,6 +1,7 @@
 package psychlua;
 
 import modchart.Manager;
+import modchart.backend.standalone.Adapter;
 import psychlua.FunkinLua;
 import flixel.tweens.FlxEase;
 
@@ -101,6 +102,56 @@ class LuaModchart
                     funk.call(funcName, []); // No pasar el objeto event a Lua
                 }, field);
             }
+        });
+        
+        // Agregar modifier scriptado (custom)
+        Lua_helper.add_callback(lua, "addScriptedModifier", function(name:String, modifierInstance:Dynamic, ?field:Int = -1) {
+            if (Manager.instance != null && modifierInstance != null) {
+                // El modifierInstance debe ser una instancia de Modifier creada desde Lua/HScript
+                Manager.instance.addScriptedModifier(name, modifierInstance, field);
+            }
+        });
+        
+        /*
+        // Crear nodo (node): vincular inputs y outputs con una función
+        Lua_helper.add_callback(lua, "node", function(inputs:Array<String>, outputs:Array<String>, funcName:String, ?field:Int = -1) {
+            if (Manager.instance != null) {
+                Manager.instance.node(inputs, outputs, function(curInput:Array<Float>, curOutput:Int):Int {
+                    // Llamar función Lua con los valores de entrada
+                    var result:Dynamic = funk.call(funcName, [curInput]);
+                    // Retornar resultado o valor actual si no hay resultado
+                    if (result != null && Std.isOfType(result, Int)) {
+                        return cast result;
+                    }
+                    return curOutput;
+                }, field);
+            }
+        });
+        */
+        
+        // Obtener beat actual desde Conductor
+        Lua_helper.add_callback(lua, "getCurrentBeat", function():Float {
+            return Conductor.songPosition / Conductor.crochet;
+        });
+        
+        // Obtener step actual desde Conductor
+        Lua_helper.add_callback(lua, "getCurrentStep", function():Float {
+            return Conductor.songPosition / Conductor.stepCrochet;
+        });
+        
+        // Obtener tiempo de la canción en milisegundos
+        Lua_helper.add_callback(lua, "getSongPosition", function():Float {
+            return Conductor.songPosition;
+        });
+        
+        // Obtener BPM actual
+        Lua_helper.add_callback(lua, "getBPM", function():Float {
+            return Conductor.bpm;
+        });
+        
+        // Obtener cantidad de jugadores/playfields
+        Lua_helper.add_callback(lua, "getPlayerCount", function():Int {
+            return Adapter.instance.getPlayerCount();
         });
     }
     

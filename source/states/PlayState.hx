@@ -327,6 +327,9 @@ class PlayState extends MusicBeatState
 	// Modchart warning variables
 	var modchartWarningShown:Bool = false;
 	var isShowingModchartWarning:Bool = false;
+	
+	// Variables para mantener animación hold
+	var keysHeld:Array<Bool> = [false, false, false, false];
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -4008,6 +4011,11 @@ class PlayState extends MusicBeatState
 			spr.playAnim('static');
 			spr.resetAnim = 0;
 		}
+		
+		// Marcar tecla como no presionada
+		if(key >= 0 && key < keysHeld.length)
+			keysHeld[key] = false;
+		
 		callOnScripts('onKeyRelease', [key]);
 	}
 
@@ -4092,6 +4100,10 @@ class PlayState extends MusicBeatState
 			holdArray.push(isHeld);
 			pressArray.push(isPressed);
 			releaseArray.push(isReleased);
+			
+			// Actualizar estado de teclas presionadas
+			if(i < keysHeld.length)
+				keysHeld[i] = isHeld;
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
@@ -4752,6 +4764,10 @@ class PlayState extends MusicBeatState
 		// Opponent Mode: El jugador controla a dad, así que dad debe bailar cuando no canta
 		var playerChar:Character = playOpponent ? dad : boyfriend;
 		if(playerChar == null) return;
+		
+		// No resetear animación si hay alguna tecla presionada
+		for(keyHeld in keysHeld)
+			if(keyHeld) return;
 		
 		var anim:String = playerChar.getAnimationName();
 		if(playerChar.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * playerChar.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))

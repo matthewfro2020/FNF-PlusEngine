@@ -1,4 +1,4 @@
-package objects;
+package objects.wrappers;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
