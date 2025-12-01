@@ -887,6 +887,33 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return null;
 		}
 
+		// Manejo especial para Maps y sus métodos
+		if (Std.isOfType(o, haxe.Constraints.IMap)) {
+			var map:haxe.Constraints.IMap<Dynamic, Dynamic> = cast o;
+			// Llamar directamente a los métodos del Map para evitar problemas de binding
+			switch(funcToRun) {
+				case "exists":
+					return map.exists(args[0]);
+				case "get":
+					return map.get(args[0]);
+				case "set":
+					map.set(args[0], args[1]);
+					return args[1];
+				case "remove":
+					return map.remove(args[0]);
+				case "keys":
+					return map.keys();
+				case "iterator":
+					return map.iterator();
+				case "clear":
+					map.clear();
+					return null;
+				case "toString":
+					return map.toString();
+			}
+		}
+
+		// Para otros objetos, usar Reflect.callMethod normalmente
 		return Reflect.callMethod(o, f, args);
 	}
 
@@ -926,34 +953,83 @@ class CustomInterp extends crowplexus.hscript.Interp
 	}
 	
 	override function get(o:Dynamic, field:String):Dynamic {
-		// Si el objeto es null, intentar buscar en variables globales
+		// Si el objeto es null, error inmediato (compatible con SScript)
 		if (o == null) {
+			// Fallback: buscar en variables globales como última opción
 			if(MusicBeatState.getVariables().exists(field)) {
 				return MusicBeatState.getVariables().get(field);
 			}
 			if(MusicBeatState.getVideoHandlers().exists(field)) {
 				return MusicBeatState.getVideoHandlers().get(field);
 			}
+			error(EInvalidAccess(field));
 			return null;
 		}
 		
-		// Para objetos no-null, intentar acceso directo sin verificaciones previas
-		// Esto permite acceder a propiedades dinámicas y getters de Flixel
+		// Verificar si es un Map primero (compatible con SScript)
+		// Importante: Acceder a métodos del Map como 'exists', 'get', 'set', etc.
+		if (Std.isOfType(o, haxe.Constraints.IMap)) {
+			// Si se busca un método del Map, devolverlo usando Reflect.field directamente
+			if (field == "exists" || field == "get" || field == "set" || field == "remove" || 
+			    field == "keys" || field == "iterator" || field == "toString" || field == "clear" ||
+			    field == "copy") {
+				// IMPORTANTE: Usar Reflect.field para métodos de Maps
+				var method = Reflect.field(o, field);
+				if (method != null) return method;
+			}
+			// Si no es un método, tratar como acceso a key del Map
+			var map:haxe.Constraints.IMap<String, Dynamic> = cast o;
+			if (map.exists(field))
+				return map.get(field);
+			return null; // Maps devuelven null si no existe la key
+		}
+		
+		// Intentar acceso directo primero (más rápido y funciona con fields privados como _cache)
 		try {
-			// Intentar getProperty primero (maneja getters/setters)
-			var value = Reflect.getProperty(o, field);
-			return value;
-		} catch(e:Dynamic) {
-			// Si getProperty falla, intentar field directo
+			var value = Reflect.field(o, field);
+			if (value != null) return value;
+		} catch(e:Dynamic) {}
+		
+		// Verificar si el objeto tiene el field declarado (incluyendo privados)
+		if (Reflect.hasField(o, field)) {
 			try {
-				var value = Reflect.field(o, field);
-				if (value != null) return value;
-			} catch(e2:Dynamic) {
-				// Ignorar y continuar a fallback
+				return Reflect.field(o, field);
+			} catch(e:Dynamic) {
+				// Si falla field, intentar property
+				try {
+					return Reflect.getProperty(o, field);
+				} catch(e2:Dynamic) {}
 			}
 		}
 		
-		// Wrapper de compatibilidad: si falla el acceso al objeto, buscar en variables globales
+		// Verificar si es una propiedad o método de la clase
+		var classType = Type.getClass(o);
+		if (classType != null) {
+			var instanceFields = Type.getInstanceFields(classType);
+			if (instanceFields != null && instanceFields.contains(field)) {
+				// El field/método existe en la clase
+				try {
+					// Intentar field directo primero
+					var value = Reflect.field(o, field);
+					if (value != null) return value;
+					
+					// Si es null, intentar getProperty (para getters)
+					return Reflect.getProperty(o, field);
+				} catch(e:Dynamic) {
+					// Si falla, buscar en variables globales como fallback
+					if(MusicBeatState.getVariables().exists(field))
+						return MusicBeatState.getVariables().get(field);
+					
+					if(MusicBeatState.getVideoHandlers().exists(field))
+						return MusicBeatState.getVideoHandlers().get(field);
+					
+					return null; // Devolver null en lugar de error para compatibilidad
+				}
+			}
+		}
+		
+		// Si llegamos aquí, el field no existe en la clase
+		// Compatibilidad: buscar en variables globales antes de dar error
 		if(MusicBeatState.getVariables().exists(field)) {
 			return MusicBeatState.getVariables().get(field);
 		}
@@ -962,13 +1038,26 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return MusicBeatState.getVideoHandlers().get(field);
 		}
 		
-		// Si no se encuentra, devolver null en lugar de error para mayor compatibilidad
+		// Para compatibilidad con objetos dinámicos/anónimos, intentar getProperty
+		try {
+			var value = Reflect.getProperty(o, field);
+			if (value != null) return value;
+		} catch(e:Dynamic) {}
+		
+		// Último intento: acceso a fields privados/dinámicos con Reflect.field
+		try {
+			var value = Reflect.field(o, field);
+			if (value != null) return value;
+		} catch(e:Dynamic) {}
+		
+		// Si todo falla, devolver null para compatibilidad (no lanzar error)
 		return null;
 	}
 	
 	override function set(o:Dynamic, field:String, value:Dynamic):Dynamic {
-		// Si el objeto es null, guardar en variables globales
+		// Si el objeto es null, error inmediato (compatible con SScript)
 		if (o == null) {
+			// Fallback: guardar en variables globales
 			var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
 			if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
 				MusicBeatState.getVideoHandlers().set(field, value);
@@ -978,23 +1067,69 @@ class CustomInterp extends crowplexus.hscript.Interp
 			return value;
 		}
 		
-		// Para objetos no-null, intentar asignación directa sin verificaciones previas
-		// Esto permite setear propiedades dinámicas y setters de Flixel
-		try {
-			// Intentar setProperty primero (maneja setters)
-			Reflect.setProperty(o, field, value);
+		// Verificar si es un Map primero (compatible con SScript)
+		if (Std.isOfType(o, haxe.Constraints.IMap)) {
+			var map:haxe.Constraints.IMap<String, Dynamic> = cast o;
+			map.set(field, value);
 			return value;
-		} catch(e:Dynamic) {
-			// Si setProperty falla, intentar setField
+		}
+		
+		// Verificar si el field ya existe como field directo
+		if (Reflect.hasField(o, field)) {
 			try {
 				Reflect.setField(o, field, value);
 				return value;
-			} catch(e2:Dynamic) {
-				// Si todo falla, guardar en variables globales como fallback
+			} catch(e:Dynamic) {
+				// Si falla setField, intentar setProperty
+				try {
+					Reflect.setProperty(o, field, value);
+					return value;
+				} catch(e2:Dynamic) {}
 			}
 		}
 		
-		// Si no se pudo asignar al objeto, guardar en variables globales como fallback
+		// Verificar si es una propiedad (setter) de la clase
+		var classType = Type.getClass(o);
+		if (classType != null) {
+			var instanceFields = Type.getInstanceFields(classType);
+			if (instanceFields != null && instanceFields.contains(field)) {
+				// El field existe en la clase, usar setProperty para manejar setters
+				try {
+					Reflect.setProperty(o, field, value);
+					return value;
+				} catch(e:Dynamic) {
+					// Si setProperty falla, intentar setField
+					try {
+						Reflect.setField(o, field, value);
+						return value;
+					} catch(e2:Dynamic) {
+						// Guardar en variables globales como fallback
+						var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
+						if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
+							MusicBeatState.getVideoHandlers().set(field, value);
+						} else {
+							MusicBeatState.getVariables().set(field, value);
+						}
+						return value;
+					}
+				}
+			}
+		}
+		
+		// Si llegamos aquí, el field no existe en la clase
+		// Para objetos dinámicos/anónimos, intentar setProperty
+		try {
+			Reflect.setProperty(o, field, value);
+			return value;
+		} catch(e:Dynamic) {
+			// Si falla, intentar setField
+			try {
+				Reflect.setField(o, field, value);
+				return value;
+			} catch(e2:Dynamic) {}
+		}
+		
+		// Si todo falla, guardar en variables globales como fallback
 		var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
 		if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
 			MusicBeatState.getVideoHandlers().set(field, value);
