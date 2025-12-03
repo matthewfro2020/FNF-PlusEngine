@@ -273,6 +273,8 @@ class PlayState extends MusicBeatState
 	public var songMisses:Int = 0;
 	public var comboBreaks:Int = 0; // Contador de combo breaks (incluye misses + bad/shit si está activado)
 	public var scoreTxt:FlxText;
+	public var scoreTxtOverridden:Bool = false; // Bandera para detectar si un script modificó el texto
+	private var lastScoreTxtContent:String = ""; // Último texto conocido del motor
 	public var maxCombo:Int = 0;
 	public var totalNotes:Int = 0;
 	var timeTxt:FlxText;
@@ -779,7 +781,12 @@ class PlayState extends MusicBeatState
 		reloadHealthBarColors();
 		if (!isNotITG) uiGroup.add(healthBar);
 
+		// Cargar íconos con soporte para animación
+		var bf_animatedIcon:Bool = (boyfriend != null && boyfriend.animatedIcon == true) || (SONG.isAnimated == true);
+		var dad_animatedIcon:Bool = (dad != null && dad.animatedIcon == true) || (SONG.isAnimated == true);
+		
 		iconP1 = new HealthIcon(boyfriend != null ? boyfriend.healthIcon : 'bf', true);
+		if(bf_animatedIcon) iconP1.changeIcon(iconP1.getCharacter(), true, true);
 		iconP1.y = healthBar.y - 75;
 		// Ocultar iconos en NotITG
 		iconP1.visible = !ClientPrefs.data.hideHud && !isNotITG;
@@ -787,11 +794,12 @@ class PlayState extends MusicBeatState
 		if (!isNotITG) uiGroup.add(iconP1);
 
 		iconP2 = new HealthIcon(dad != null ? dad.healthIcon : 'dad', false);
+		if(dad_animatedIcon) iconP2.changeIcon(iconP2.getCharacter(), true, true);
 		iconP2.y = healthBar.y - 75;
 		iconP2.visible = !ClientPrefs.data.hideHud && !isNotITG;
 		iconP2.alpha = ClientPrefs.data.healthBarAlpha;
 		if (!isNotITG) uiGroup.add(iconP2);
-
+		
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
@@ -1704,6 +1712,16 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdateScore', [miss]);
 	}
+	
+	/**
+	 * Permite a los scripts resetear el control del scoreTxt al motor
+	 * Llama a esta función desde Lua con: callMethod('resetScoreTxtOverride')
+	 */
+	public function resetScoreTxtOverride():Void {
+		scoreTxtOverridden = false;
+		lastScoreTxtContent = "";
+		updateScoreText();
+	}
 
 	function abbreviateScore(score:Int):String {
 		if (score >= 1_000_000)
@@ -1743,7 +1761,17 @@ class PlayState extends MusicBeatState
 		}
 		else
 			tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2} | TPS: {3}/{4}', [scoreStr, str, nps, maxNPS]);
-		scoreTxt.text = tempScore;
+		
+		// Detectar si un script modificó el texto externamente
+		if (scoreTxt.text != lastScoreTxtContent && scoreTxt.text != tempScore) {
+			scoreTxtOverridden = true;
+		}
+		
+		// Solo actualizar si no ha sido sobrescrito por un script
+		if (!scoreTxtOverridden) {
+			scoreTxt.text = tempScore;
+			lastScoreTxtContent = tempScore;
+		}
 	}
 	
 	function updateStepManiaUI()
@@ -2813,13 +2841,26 @@ class PlayState extends MusicBeatState
 	{
 		if (!iconsAnimations || healthBar == null || !healthBar.enabled) return;
 		
-		// Opponent Mode: Invertir lógica de íconos cuando la barra va de izquierda a derecha
-		if (playOpponent) {
-			iconP1.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; // Dad pierde cuando la barra está llena
-			iconP2.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; // Boyfriend pierde cuando la barra está vacía
-		} else {
-			iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
-			iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+		var healthPercent:Float = healthBar.percent / 100;
+		
+		// Actualizar íconos animados con el nuevo sistema
+		if(iconP1.isAnimated) {
+			iconP1.updateIconState(playOpponent ? healthPercent : 1 - healthPercent);
+		}
+		if(iconP2.isAnimated) {
+			iconP2.updateIconState(playOpponent ? 1 - healthPercent : healthPercent);
+		}
+		
+		// Sistema de frames para íconos estáticos (comportamiento original)
+		if(!iconP1.isAnimated) {
+			// Opponent Mode: Invertir lógica de íconos cuando la barra va de izquierda a derecha
+			if (playOpponent) {
+				iconP1.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; // Dad pierde cuando la barra está llena
+				iconP2.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; // Boyfriend pierde cuando la barra está vacía
+			} else {
+				iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+				iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+			}
 		}
 	}
 

@@ -681,6 +681,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		// SONG TAB
 		songNameInputText.text = PlayState.SONG.song;
 		allowVocalsCheckBox.checked = (PlayState.SONG.needsVoices != false); //If the song for some reason does not have this value, it will be set to true
+		animatedIconsCheckBox.checked = (PlayState.SONG.isAnimated == true); //Check if animated icons are enabled
 
 		bpmStepper.value = PlayState.SONG.bpm;
 		scrollSpeedStepper.value = PlayState.SONG.speed;
@@ -3495,6 +3496,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	var songNameInputText:PsychUIInputText;
 	var allowVocalsCheckBox:PsychUICheckBox;
+	var animatedIconsCheckBox:PsychUICheckBox; // Checkbox para íconos animados en el chart
 
 	var bpmStepper:PsychUINumericStepper;
 	var scrollSpeedStepper:PsychUINumericStepper;
@@ -3519,8 +3521,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			PlayState.SONG.needsVoices = allowVocalsCheckBox.checked;
 			loadMusic();
 		});
-		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() loadMusic(true), 80);
-
+		
+		animatedIconsCheckBox = new PsychUICheckBox(objX + 40, objY + 20, 'Animated Icons', 100, function()
+		{
+			PlayState.SONG.isAnimated = animatedIconsCheckBox.checked;
+			// Recargar íconos en el chart editor
+			updateHeads(true);
+		});		
+		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() loadMusic(true), 80);	
+		
 		#if (mac || mobile)
 		var reloadJsonButton:PsychUIButton = new PsychUIButton(objX + 205, objY, 'Reload JSON', function()
 		{
@@ -3578,6 +3587,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		tab_group.add(new FlxText(songNameInputText.x, songNameInputText.y - 15, 80, 'Song Name:'));
 		tab_group.add(songNameInputText);
 		tab_group.add(allowVocalsCheckBox);
+		tab_group.add(animatedIconsCheckBox); // Agregar checkbox de íconos animados
 		tab_group.add(reloadAudioButton);
 		#if (mac || mobile)
 		tab_group.add(reloadJsonButton);
