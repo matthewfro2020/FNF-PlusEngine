@@ -190,13 +190,13 @@ class Character extends FlxSprite
 
 		// data
 		healthIcon = json.healthicon;
-	singDuration = json.sing_duration;
-	flipX = (json.flip_x != isPlayer);
-	healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
-	vocalsFile = json.vocals_file != null ? json.vocals_file : '';
-	animatedIcon = (json.animatedIcon == true); // Cargar configuración de ícono animado
-	originalFlipX = (json.flip_x == true);
-	editorIsPlayer = json._editor_isPlayer;		// antialiasing
+		singDuration = json.sing_duration;
+		flipX = (json.flip_x != isPlayer);
+		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
+		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
+		animatedIcon = (json.animatedIcon == true); // Cargar configuración de ícono animado
+		originalFlipX = (json.flip_x == true);
+		editorIsPlayer = json._editor_isPlayer;		// antialiasing
 		noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
 

@@ -31,28 +31,37 @@ class HealthIcon extends FlxSprite
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String, ?allowGPU:Bool = true, ?forceAnimated:Bool = false) {
 		if(this.char != char) {
-			var name:String = 'icons/' + char;
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
-			
-			// Detectar si es un ícono animado (buscar XML)
-			var xmlPath:String = name + '.xml';
-			isAnimated = forceAnimated || Paths.fileExists('images/' + xmlPath, TEXT);
-			
-			if(isAnimated) {
-				// Cargar ícono animado con frames XML
-				frames = Paths.getSparrowAtlas(name.substring(6)); // Remover 'icons/' del path
+			try {
+				var name:String = 'icons/' + char;
+				if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+				if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 				
-			if(frames != null) {
-				// Buscar animaciones disponibles manualmente
-				var hasNormalAnim:Bool = false;
-				var hasLosingAnim:Bool = false;
+				// Detectar si es un ícono animado (buscar XML)
+				var xmlPath:String = name + '.xml';
+				isAnimated = forceAnimated || Paths.fileExists('images/' + xmlPath, TEXT);
 				
-				for(frame in frames.frames) {
-					if(frame.name.startsWith('normal')) hasNormalAnim = true;
-					if(frame.name.startsWith('losing')) hasLosingAnim = true;
-					if(hasNormalAnim && hasLosingAnim) break; // Optimización: salir si ya encontramos ambas
-				}					if(hasNormalAnim) {
+				if(isAnimated) {
+					// Cargar ícono animado con frames XML
+					var atlas:FlxAtlasFrames = null;
+					try {
+						atlas = Paths.getSparrowAtlas(name.substring(6)); // Remover 'icons/' del path
+					} catch(e:Dynamic) {
+						trace('Error loading animated icon atlas for $char: $e');
+						atlas = null;
+					}
+					
+				if(atlas != null && atlas.frames != null && atlas.frames.length > 0) {
+					frames = atlas;
+					// Buscar animaciones disponibles manualmente
+					var hasNormalAnim:Bool = false;
+					var hasLosingAnim:Bool = false;
+					
+					for(frame in frames.frames) {
+						if(frame.name.startsWith('normal')) hasNormalAnim = true;
+						if(frame.name.startsWith('losing')) hasLosingAnim = true;
+						if(hasNormalAnim && hasLosingAnim) break; // Optimización: salir si ya encontramos ambas
+					}
+					if(hasNormalAnim) {
 						animation.addByPrefix('normal', 'normal', animFPS, true, isPlayer);
 						if(hasLosingAnim) {
 							animation.addByPrefix('losing', 'losing', animFPS, true, isPlayer);
@@ -67,7 +76,7 @@ class HealthIcon extends FlxSprite
 					// Calcular offsets para íconos animados
 					if(animation.curAnim != null && animation.curAnim.numFrames > 0) {
 						var firstFrameData = frames.frames[0];
-						if(firstFrameData != null) {
+						if(firstFrameData != null && firstFrameData.frame != null) {
 							iconOffsets[0] = (firstFrameData.frame.width - 150) / 2;
 							iconOffsets[1] = (firstFrameData.frame.height - 150) / 2;
 						} else {
@@ -77,7 +86,7 @@ class HealthIcon extends FlxSprite
 						iconOffsets[0] = iconOffsets[1] = 0;
 					}
 				} else {
-					// Si no se pudo cargar el XML, usar método estático
+					// Si no se pudo cargar el XML o está vacío, usar método estático
 					isAnimated = false;
 					loadStaticIcon(name, allowGPU);
 				}
@@ -93,19 +102,51 @@ class HealthIcon extends FlxSprite
 				antialiasing = false;
 			else
 				antialiasing = ClientPrefs.data.antialiasing;
+			} catch(e:Dynamic) {
+				trace('CRITICAL ERROR loading icon for $char: $e');
+				// Fallback a icono por defecto
+				var defaultName:String = 'icons/icon-face';
+				if(Paths.fileExists('images/' + defaultName + '.png', IMAGE)) {
+					try {
+						isAnimated = false;
+						loadStaticIcon(defaultName, allowGPU);
+						updateHitbox();
+						this.char = char;
+					} catch(e2:Dynamic) {
+						trace('ERROR: Could not load fallback icon either: $e2');
+					}
+				}
+			}
 		}
 	}
 	
 	// Función auxiliar para cargar íconos estáticos
 	private function loadStaticIcon(name:String, allowGPU:Bool = true):Void {
 		var graphic = Paths.image(name, allowGPU);
-		var iSize:Float = Math.round(graphic.width / graphic.height);
-		loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
-		iconOffsets[0] = (width - 150) / iSize;
-		iconOffsets[1] = (height - 150) / iSize;
+		if(graphic == null) {
+			trace('ERROR: Could not load graphic for icon: $name');
+			return;
+		}
 		
-		animation.add(char, [for(i in 0...frames.frames.length) i], 0, false, isPlayer);
-		animation.play(char);
+		var iSize:Float = 1.0;
+		if(graphic.width > 0 && graphic.height > 0) {
+			iSize = Math.round(graphic.width / graphic.height);
+			if(iSize <= 0) iSize = 1.0;
+		}
+		
+		loadGraphic(graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
+		
+		if(width > 0 && height > 0) {
+			iconOffsets[0] = (width - 150) / iSize;
+			iconOffsets[1] = (height - 150) / iSize;
+		} else {
+			iconOffsets[0] = iconOffsets[1] = 0;
+		}
+		
+		if(frames != null && frames.frames != null && frames.frames.length > 0) {
+			animation.add(char, [for(i in 0...frames.frames.length) i], 0, false, isPlayer);
+			animation.play(char);
+		}
 	}
 	
 	/**

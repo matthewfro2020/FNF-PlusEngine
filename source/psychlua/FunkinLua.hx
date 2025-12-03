@@ -41,6 +41,7 @@ import psychlua.WindowTweens;
 import psychlua.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
+import psychlua.SScript;
 #end
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
@@ -63,6 +64,7 @@ class FunkinLua {
 
 	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
+	public var sscript:SScriptCompat = null; // Para compatibilidad con mods antiguos
 	#end
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -1580,6 +1582,7 @@ class FunkinLua {
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end
 		HScript.implement(this);
+		SScriptCompat.implement(this); // Compatibilidad con mods antiguos 0.6.x - 0.7.3
 		#if flxanimate FlxAnimateFunctions.implement(this); #end
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
@@ -1698,6 +1701,11 @@ class FunkinLua {
 		{
 			hscript.destroy();
 			hscript = null;
+		}
+		if(sscript != null)
+		{
+			sscript.destroy();
+			sscript = null;
 		}
 		#end
 	}
