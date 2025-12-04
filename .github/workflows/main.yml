@@ -203,12 +203,15 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       
       - name: Compile iOS (No Code Signing)
-        run: haxelib run lime build ios --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS
+        run: |
+          haxelib run lime build ios --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER="" SKIP_INSTALL=NO
         env:
           CODESIGN_IDENTITY: ""
           CODE_SIGNING_REQUIRED: "NO"
           CODE_SIGN_IDENTITY: ""
           CODE_SIGNING_ALLOWED: "NO"
+          DEVELOPMENT_TEAM: ""
+          PROVISIONING_PROFILE_SPECIFIER: ""
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
