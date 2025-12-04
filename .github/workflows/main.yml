@@ -203,18 +203,18 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       
       - name: Compile iOS (No Code Signing)
+        run: haxelib run lime build ios -arm64 -nosign --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS
+      
+      - name: Make IPA
         run: |
-          haxelib run lime build ios --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO DEVELOPMENT_TEAM="" PROVISIONING_PROFILE_SPECIFIER="" SKIP_INSTALL=NO
-        env:
-          CODESIGN_IDENTITY: ""
-          CODE_SIGNING_REQUIRED: "NO"
-          CODE_SIGN_IDENTITY: ""
-          CODE_SIGNING_ALLOWED: "NO"
-          DEVELOPMENT_TEAM: ""
-          PROVISIONING_PROFILE_SPECIFIER: ""
+          cd export/release/ios/build/Release-iphoneos
+          rm -rf Payload
+          mkdir Payload
+          mv *.app Payload
+          zip -r PlusEngine.ipa Payload
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
           name: iOSBuild
-          path: export/release/ios/bin
+          path: export/release/ios/build/Release-iphoneos/*.ipa
