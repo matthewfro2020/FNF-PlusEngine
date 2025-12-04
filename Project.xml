@@ -126,7 +126,7 @@
 	<!--Psych stuff needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="hscript-iris" if="HSCRIPT_ALLOWED"/>
-	<!--Compatibility with older mods-->
+	<!--Compatibility with older mods, only pc works-->
 	<haxelib name="SScript" if="SSCRIPT_ALLOWED"/>
 	<!--end-->
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
