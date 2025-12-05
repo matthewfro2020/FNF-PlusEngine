@@ -50,6 +50,7 @@ class IdID
         "combo_breaks" => "Kombo Istirahat",
 
         // Ratings
+        "rating_terrible" => "Mengerikan",
         "rating_you_suck" => "Tolol!",
         "rating_shit" => "Jancok",
         "rating_bad" => "Buruk",
@@ -61,6 +62,8 @@ class IdID
         "rating_sick" => "Sick!",
         "rating_epic" => "Epik!!",
         "rating_perfect" => "Sempurna!!!",
+        "rating_marvelous" => "LUAR BIASA!!!!",
+        "rating_legendary" => "★ LEGENDARIS ★",
 
         // Dialogues
         "dialogue_skip" => "Tekan BACK untuk skip",
@@ -354,6 +357,8 @@ class IdID
         "description_end_countdown_seconds" => "Berapa detik durasi countdown di akhir lagu.\n(10 - 30)",
         "setting_accuracy_system" => "Sistem Akurasi:",
         "description_accuracy_system" => "Sistem perhitungan akurasi mana yang Anda sukai?\nWife3 - Akurasi ms StepMania\nPsych - Berbasis Rating Mod\nSimple - Hit dasar/total\nosu!mania - Sistem penilaian berbobot\nDJMAX - Sistem bonus kombo\nITG - Sistem poin tari\n\n",
+        "setting_system_score_multiplier" => "Sistem Pengganda Skor",
+        "description_system_score_multiplier" => "Pilih sistem pengganda skor untuk note hits",
 
         // Modchart Settings
         "setting_hold_subdivisions" => "Tahan Subdivisi",

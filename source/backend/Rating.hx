@@ -35,27 +35,29 @@ class Rating
 	{
 		var ratingsData:Array<Rating> = [new Rating('epic')]; // Epics primero
 
+		var isCodenameSystem:Bool = (ClientPrefs.data.systemScoreMultiplier == 'Codename'); // Check if it the System Score Multiplier was Codename
+
 		var rating:Rating = new Rating('sick');
 		rating.ratingMod = 0.9;
-		rating.score = 350;
+		rating.score = isCodenameSystem ? 300 : 350;
 		rating.noteSplash = true;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('good');
 		rating.ratingMod = 0.67;
-		rating.score = 200;
+		rating.score = isCodenameSystem ? 200 : 200;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('bad');
 		rating.ratingMod = 0.34;
-		rating.score = 100;
+		rating.score = isCodenameSystem ? 100 : 100;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('shit');
 		rating.ratingMod = 0;
-		rating.score = 50;
+		rating.score = isCodenameSystem ? 50 : 50;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
