@@ -1,11 +1,5 @@
-- Added support for scripts that generate "invalid access to field *" in hscript.
-- For Psych 0.6.3 mods, class verification has been added for get/setPropertyFromClass().
-- You can now disable the watermark from the visual options.
-- BPM changes in Stepmania graphics have been fixed thanks to Moonchart.
-- The transition between states has been improved.
-- Missing images have been added to some translations.
-- You can now toggle the health bar movement between smooth and the default Psych movement.
-- ModStates is no longer included (we will implement it in future updates).
-- The sl-windows-api library has been updated to version 1.2.0 (introducing GDI "beta" functions).
-- The introduction text now has a text array for each language; you can add them yourself and then submit a pull request.
-- and More
+- The SScript 7.7.0 library, previously used by Psych Engine 0.7.3, has been added. This should resolve many bugs in older Psych mods. Don't worry, HScript-Iris is still in the engine, so it won't break any mods.
+- The character will now maintain their dancing position if you hold down a key.
+- Hxvlc updated to version 2.2.5
+- New feature: animated icons just like codename (apparently)
+- New gameplay option: System Score Multiplier
