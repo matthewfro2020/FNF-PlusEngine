@@ -17,7 +17,7 @@ enum MainMenuColumn {
 class MainMenuState extends MusicBeatState
 {
 	public static var fnfVersion:String = '0.2.8';
-    public static var plusEngineVersion:String = '1.0.6'; // Nothing interesting =)
+    public static var plusEngineVersion:String = '1.1'; // Nothing interesting =)
 	public static var psychEngineVersion:String = "1.0.4 (" + plusEngineVersion + ")"; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;
@@ -46,6 +46,9 @@ class MainMenuState extends MusicBeatState
 	override function create()
 	{
 		super.create();
+
+		// TEST CRASH HANDLER - Descomentar para probar
+		throw "Test error from MainMenuState to test CrashHandler restart/exit functionality";
 
 		#if MODS_ALLOWED
 		Mods.pushGlobalMods();

@@ -41,7 +41,7 @@ class SScriptCompat extends SScript
 	{
 		if(parent.sscript == null)
 		{
-			trace('initializing SScript (Psych 0.7.3) interp for: ${parent.scriptName}');
+			trace('SScript (Psych 0.7.x) file loaded successfully: ${parent.scriptName}');
 			parent.sscript = new SScriptCompat(parent);
 		}
 	}
@@ -51,7 +51,7 @@ class SScriptCompat extends SScript
 		var ss:SScriptCompat = try parent.sscript catch (e) null;
 		if(ss == null)
 		{
-			trace('initializing SScript (Psych 0.7.3) interp for: ${parent.scriptName}');
+			trace('SScript (Psych 0.7.x) file loaded successfully: ${parent.scriptName}');
 			parent.sscript = new SScriptCompat(parent, code, varsToBring);
 		}
 		else

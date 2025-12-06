@@ -123,7 +123,7 @@ class LoadingState extends MusicBeatState
 					if(hscript.exists('onCreate'))
 					{
 						hscript.call('onCreate');
-						trace('initialized hscript interp successfully: $scriptPath');
+						trace('HScript (Psych 1.0.x) file loaded successfully: $scriptPath');
 						return super.create();
 					}
 					else

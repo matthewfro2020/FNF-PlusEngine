@@ -208,6 +208,8 @@ class EsLA
         "setting_health_loss_multiplier" => "Mult. al perder vida",
         "setting_instakill_on_miss" => "Muerte al perder notas",
         "setting_practice_mode" => "Modo Práctica",
+        "setting_perfect_mode" => "Modo Perfecto",
+        "setting_no_drop_penalty" => "No fallas al soltar notas largas",
         "setting_botplay" => "Modo Automático",
 
         // Graphics Settings
@@ -328,6 +330,8 @@ class EsLA
         "description_end_countdown_seconds" => "Cuántos segundos debe durar la cuenta regresiva al final de la canción.\n(10 - 30)",
         "setting_accuracy_system" => "Sistema de precisión:",
         "description_accuracy_system" => "¿Qué sistema de cálculo de precisión prefieres?\nWife3 - Precisión en ms de StepMania\nPsych - Basado en Rating Mod\nSimple - Aciertos básicos/total\nosu!mania - Sistema de juicio ponderado\nDJMAX - Sistema de bonificación de combo\nITG - Sistema de puntos de baile\n\n",
+        "setting_system_score_multiplier" => "Multiplicador de puntuación del sistema",
+        "description_system_score_multiplier" => "Ajusta el multiplicador de puntuación al tocar notas.",
 
         // Modchart Options
         "setting_hold_subdivisions" => "Subdivisiones de notas largas",

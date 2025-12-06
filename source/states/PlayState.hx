@@ -4919,7 +4919,7 @@ class PlayState extends MusicBeatState
 		{
 			newScript = new HScript(null, file);
 			if (newScript.exists('onCreate')) newScript.call('onCreate');
-			trace('initialized hscript interp successfully: $file');
+			trace('HScript (Psych 1.0.x) file loaded successfully: $file');
 			hscriptArray.push(newScript);
 		}
 		catch(e:IrisError)

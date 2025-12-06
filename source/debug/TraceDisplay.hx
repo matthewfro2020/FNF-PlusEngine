@@ -42,6 +42,7 @@ enum TraceType {
     ERROR;
     LUA_ERROR;
     HSCRIPT_ERROR;
+    SSCRIPT_ERROR;
     WARNING;
     INFO;
 }
@@ -140,8 +141,13 @@ class TraceDisplay extends TextField
         
         // Reemplazar con nuestra función personalizada
         Log.trace = function(v:Dynamic, ?infos:PosInfos):Void {
-            // Llamar al trace original para mantener funcionalidad
-            originalTrace(v, infos);
+            // Formatear para la consola/terminal con estilo limpio
+            if (infos != null) {
+                var fileName = extractFileName(infos.fileName);
+                Sys.println('[$fileName]: ${Std.string(v)}');
+            } else {
+                Sys.println(Std.string(v));
+            }
             
             // Agregar a nuestro display
             addTrace(v, infos, NORMAL, 0xFFFFFF);
@@ -269,7 +275,7 @@ class TraceDisplay extends TextField
                 var name = instance.extractFileName(origin);
                 errorText = 'SSCRIPT ERROR in $name: $text';
             }
-            instance.addTraceDirectly(errorText, ERROR, 0xFF4444);
+            instance.addTraceDirectly(errorText, SSCRIPT_ERROR, 0xFF4444);
         }
         
         // Incrementar contador en FPSCounter
@@ -319,10 +325,10 @@ class TraceDisplay extends TextField
     {
         if (!isVisible) return;
         
-        var displayText:String = "=== TRACES (F4 para ocultar) ===\n";
+        var displayText:String = "=== TRACES ===\n";
         
         if (traces.length == 0) {
-            displayText += "No hay traces recientes...";
+            displayText += "Nothing for now...";
         } else {
             for (i in 0...traces.length) {
                 var trace = traces[i];
@@ -330,6 +336,7 @@ class TraceDisplay extends TextField
                     case ERROR: "[ERROR] ";
                     case LUA_ERROR: "[LUA-ERR] ";
                     case HSCRIPT_ERROR: "[HSC-ERR] ";
+                    case SSCRIPT_ERROR: "[SSCR-ERR] ";
                     case WARNING: "[WARN] ";
                     case INFO: "[INFO] ";
                     case NORMAL: "";
