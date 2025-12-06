@@ -270,6 +270,8 @@ class IdID
         "description_note_splash_opacity" => "Seberapa transparan seharusnya Note Splashes?",
         "setting_hide_hud" => "Sembunyikan HUD",
         "description_hide_hud" => "Jika dicentang, menyembunyikan sebagian besar elemen HUD.",
+        "setting_hide_sustain_splash" => "Sembunyikan Sustain Splash",
+        "description_hide_sustain_splash" => "Jika dicentang, menyembunyikan Sustain Splash.",
         "setting_time_bar" => "Bar Waktu:",
         "setting_time_bar-time_left" => "Sisa Waktu",
         "setting_time_bar-time_elapsed" => "Waktu Berlalu",
