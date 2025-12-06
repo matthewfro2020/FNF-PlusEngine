@@ -46,6 +46,9 @@ class IdID
         "score_text" => "Skor: {1} | {2}: {3} | Rating: {4} | TPS: {5}/{6}",
         "score_text_instakill" => "Skor: {1} | Rating: {2} | TPS: {3}/{4}",
         "botplay" => "Botplay",
+        "practice_mode" => "Mode Latihan",
+        "perfect_mode" => "Mode Sempurna",
+        "opponent_mode" => "Mode Lawan",
         "misses" => "Misses",
         "combo_breaks" => "Kombo Istirahat",
 
