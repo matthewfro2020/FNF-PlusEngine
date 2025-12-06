@@ -276,6 +276,8 @@ class IdID
         "setting_time_bar-song_name" => "Nama Lagu",
         "setting_time_bar-disabled" => "Dimatikan",
         "description_time_bar" => "Apa yang harus ditampilkan oleh Bar Waktu?",
+        "setting_gradient_time_bar" => "Bar Waktu Gradasi",
+        "description_gradient_time_bar" => "Jika dicentang, bar waktu akan diarsir sesuai dengan warna ikon karakter.",
         "setting_flashing_lights" => "Lampu Berkedip",
         "description_flashing_lights" => "Hilangkan centang pada opsi ini jika Anda sensitif terhadap cahaya berkedip!",
         "setting_show_key_viewer" => "Tampilkan Key Viewer",
