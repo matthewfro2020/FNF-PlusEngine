@@ -158,12 +158,19 @@ class SScriptCompat extends SScript
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic) {
-			// Si es un VideoHandler o MP4Handler, guardarlo por separado
-			if (Type.getClassName(Type.getClass(value)) == "objects.wrappers.VideoHandler" || 
-				Type.getClassName(Type.getClass(value)) == "objects.wrappers.MP4Handler") {
-				MusicBeatState.getVideoHandlers().set(name, value);
-			} else {
-				MusicBeatState.getVariables().set(name, value);
+			try {
+				// Si es un VideoHandler o MP4Handler, guardarlo por separado
+				if (Type.getClassName(Type.getClass(value)) == "objects.wrappers.VideoHandler" || 
+					Type.getClassName(Type.getClass(value)) == "objects.wrappers.MP4Handler") {
+					MusicBeatState.getVideoHandlers().set(name, value);
+				} else {
+					MusicBeatState.getVariables().set(name, value);
+				}
+			} catch(e:Dynamic) {
+				var warnMsg = 'Null reference in setVar("$name"): ${e}';
+				if(PlayState.instance != null)
+					PlayState.instance.addTextToDebug('WARNING (${this.origin}): $warnMsg', FlxColor.YELLOW);
+				trace('WARNING (${this.origin}): $warnMsg');
 			}
 			return value;
 		});
@@ -420,6 +427,33 @@ class SScriptCompat extends SScript
 			final e = callValue.exceptions[0];
 			if (e != null) {
 				var msg:String = e.toString();
+				
+				// Detectar null reference y convertir a warning
+				var isNullError = msg.toLowerCase().contains('null') && 
+				                  (msg.toLowerCase().contains('object') || 
+				                   msg.toLowerCase().contains('reference') ||
+				                   msg.toLowerCase().contains('access'));
+				
+				if(isNullError) {
+					// Mostrar como warning en lugar de error
+					#if LUA_ALLOWED
+					if(parentLua != null)
+					{
+						FunkinLua.luaTrace('$origin: ${parentLua.lastCalledFunction} - WARNING: $msg', false, false, FlxColor.YELLOW);
+						if(sscriptWarnHandler != null) {
+							sscriptWarnHandler('${parentLua.lastCalledFunction} - $msg', origin);
+						}
+						return callValue; // Continuar ejecución
+					}
+					#end
+					PlayState.instance.addTextToDebug('$origin - WARNING: $msg', FlxColor.YELLOW);
+					if(sscriptWarnHandler != null) {
+						sscriptWarnHandler(msg, origin);
+					}
+					return callValue; // Continuar ejecución
+				}
+				
+				// Para errores que no son null, mantener comportamiento original
 				sscript_Errors++;
 				#if LUA_ALLOWED
 				if(parentLua != null)

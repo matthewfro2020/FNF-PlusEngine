@@ -118,6 +118,7 @@ class HScript extends Iris
 		super(scriptThing, new IrisConfig(scriptName, false, false));
 		var customInterp:CustomInterp = new CustomInterp();
 		customInterp.parentInstance = FlxG.state;
+		customInterp.scriptName = scriptName != null ? scriptName : "Unknown";
 		customInterp.showPosOnLog = false;
 		this.interp = customInterp;
 		#if LUA_ALLOWED
@@ -859,6 +860,7 @@ class CustomFlxTextBorderStyle {
 class CustomInterp extends crowplexus.hscript.Interp
 {
 	public var parentInstance(default, set):Dynamic = [];
+	public var scriptName:String = "Unknown";
 	private var _instanceFields:Array<String>;
 	function set_parentInstance(inst:Dynamic):Dynamic
 	{
@@ -878,6 +880,15 @@ class CustomInterp extends crowplexus.hscript.Interp
 	}
 
 	override function fcall(o:Dynamic, funcToRun:String, args:Array<Dynamic>):Dynamic {
+		// Capturar null reference antes de continuar
+		if (o == null) {
+			var warnMsg = 'Null reference: trying to call "$funcToRun()" on null object';
+			if(PlayState.instance != null)
+				PlayState.instance.addTextToDebug('WARNING ($scriptName): $warnMsg', FlxColor.YELLOW);
+			trace('WARNING ($scriptName): $warnMsg');
+			return null;
+		}
+
 		for (_using in usings) {
 			var v = _using.call(o, funcToRun, args);
 			if (v != null)
@@ -887,7 +898,11 @@ class CustomInterp extends crowplexus.hscript.Interp
 		var f = get(o, funcToRun);
 
 		if (f == null) {
-			Iris.error('Tried to call null function $funcToRun', posInfos());
+			// Mostrar warning en lugar de error
+			var warnMsg = 'Tried to call null function $funcToRun';
+			if(PlayState.instance != null)
+				PlayState.instance.addTextToDebug('WARNING ($scriptName): $warnMsg', FlxColor.YELLOW);
+			trace('WARNING ($scriptName): $warnMsg');
 			return null;
 		}
 
@@ -957,7 +972,7 @@ class CustomInterp extends crowplexus.hscript.Interp
 	}
 	
 	override function get(o:Dynamic, field:String):Dynamic {
-		// Si el objeto es null, error inmediato (compatible con SScript)
+		// Si el objeto es null, mostrar warning en lugar de crashear
 		if (o == null) {
 			// Fallback: buscar en variables globales como última opción
 			if(MusicBeatState.getVariables().exists(field)) {
@@ -966,7 +981,11 @@ class CustomInterp extends crowplexus.hscript.Interp
 			if(MusicBeatState.getVideoHandlers().exists(field)) {
 				return MusicBeatState.getVideoHandlers().get(field);
 			}
-			error(EInvalidAccess(field));
+			// Mostrar warning en lugar de error
+			var warnMsg = 'Null reference: trying to access "$field" on null object';
+			if(PlayState.instance != null)
+				PlayState.instance.addTextToDebug('WARNING ($scriptName): $warnMsg', FlxColor.YELLOW);
+			trace('WARNING ($scriptName): $warnMsg');
 			return null;
 		}
 		
@@ -1059,8 +1078,13 @@ class CustomInterp extends crowplexus.hscript.Interp
 	}
 	
 	override function set(o:Dynamic, field:String, value:Dynamic):Dynamic {
-		// Si el objeto es null, error inmediato (compatible con SScript)
+		// Si el objeto es null, mostrar warning y guardar en variables globales
 		if (o == null) {
+			var warnMsg = 'Null reference: trying to set "$field" on null object, saving to global variables instead';
+			if(PlayState.instance != null)
+				PlayState.instance.addTextToDebug('WARNING ($scriptName): $warnMsg', FlxColor.YELLOW);
+			trace('WARNING ($scriptName): $warnMsg');
+			
 			// Fallback: guardar en variables globales
 			var className = try Type.getClassName(Type.getClass(value)) catch(e:Dynamic) null;
 			if (className == "objects.VideoHandler" || className == "objects.MP4Handler") {
