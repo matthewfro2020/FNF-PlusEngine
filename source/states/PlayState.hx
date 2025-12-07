@@ -2012,7 +2012,10 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
-		if(autoUpdateRPC) DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+		if(autoUpdateRPC) {
+			var iconChar:String = (iconP2 != null) ? iconP2.getCharacter() : 'dad';
+			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconChar, true, songLength);
+		}
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
@@ -2459,7 +2462,8 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 		if (!paused && health > 0 && autoUpdateRPC)
 		{
-			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			var iconChar:String = (iconP2 != null) ? iconP2.getCharacter() : 'dad';
+			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconChar);
 		}
 		shutdownThread = true;
 	}
@@ -2472,10 +2476,11 @@ class PlayState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		if(!autoUpdateRPC) return;
 
+		var iconChar:String = (iconP2 != null) ? iconP2.getCharacter() : 'dad';
 		if (showTime)
-			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.data.noteOffset);
+			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconChar, true, songLength - Conductor.songPosition - ClientPrefs.data.noteOffset);
 		else
-			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconChar);
 		#end
 	}
 
@@ -2830,20 +2835,24 @@ class PlayState extends MusicBeatState
 	// Health icon updaters
 	public dynamic function updateIconsScale(elapsed:Float)
 	{
-		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP1.scale.set(mult, mult);
-		iconP1.updateHitbox();
+		if (iconP1 != null) {
+			var mult:Float = FlxMath.lerp(1, iconP1.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP1.scale.set(mult, mult);
+			iconP1.updateHitbox();
+		}
 
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
-		iconP2.scale.set(mult, mult);
-		iconP2.updateHitbox();
+		if (iconP2 != null) {
+			var mult:Float = FlxMath.lerp(1, iconP2.scale.x, Math.exp(-elapsed * 9 * playbackRate));
+			iconP2.scale.set(mult, mult);
+			iconP2.updateHitbox();
+		}
 	}
 
 	public dynamic function updateIconsPosition()
 	{
 		var iconOffset:Int = 26;
-		iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
-		iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
+		if (iconP1 != null) iconP1.x = healthBar.barCenter + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
+		if (iconP2 != null) iconP2.x = healthBar.barCenter - (150 * iconP2.scale.x) / 2 - iconOffset * 2;
 	}
 
 	var iconsAnimations:Bool = true;
@@ -2924,22 +2933,22 @@ class PlayState extends MusicBeatState
 		var healthPercent:Float = healthBar.percent / 100;
 		
 		// Actualizar íconos animados con el nuevo sistema
-		if(iconP1.isAnimated) {
+		if(iconP1 != null && iconP1.isAnimated) {
 			iconP1.updateIconState(playOpponent ? healthPercent : 1 - healthPercent);
 		}
-		if(iconP2.isAnimated) {
+		if(iconP2 != null && iconP2.isAnimated) {
 			iconP2.updateIconState(playOpponent ? 1 - healthPercent : healthPercent);
 		}
 		
 		// Sistema de frames para íconos estáticos (comportamiento original)
-		if(!iconP1.isAnimated) {
+		if(iconP1 != null && !iconP1.isAnimated) {
 			// Opponent Mode: Invertir lógica de íconos cuando la barra va de izquierda a derecha
 			if (playOpponent) {
 				iconP1.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; // Dad pierde cuando la barra está llena
-				iconP2.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; // Boyfriend pierde cuando la barra está vacía
+				if (iconP2 != null) iconP2.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; // Boyfriend pierde cuando la barra está vacía
 			} else {
 				iconP1.animation.curAnim.curFrame = (healthBar.percent < 20) ? 1 : 0; //If health is under 20%, change player icon to frame 1 (losing icon), otherwise, frame 0 (normal)
-				iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
+				if (iconP2 != null) iconP2.animation.curAnim.curFrame = (healthBar.percent > 80) ? 1 : 0; //If health is over 80%, change opponent icon to frame 1 (losing icon), otherwise, frame 0 (normal)
 			}
 		}
 	}

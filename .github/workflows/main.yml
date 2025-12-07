@@ -29,6 +29,18 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.4
+      
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            ~/.hxcpp_cache
+            export/release/linux/haxe
+            export/release/linux/obj
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -62,6 +74,18 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.4
+      
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/haxelib
+            ~\.hxcpp_cache
+            export/release/windows/haxe
+            export/release/windows/obj
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -94,6 +118,18 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.4
+      
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            ~/.hxcpp_cache
+            export/release/macos/haxe
+            export/release/macos/obj
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -108,7 +144,8 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}"  -D officialBuild
+        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -verbose -D HXCPP_IGNORE_WARNINGS
+        timeout-minutes: 60
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
@@ -125,6 +162,18 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.4
+      
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            ~/.hxcpp_cache
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-android-${{ hashFiles('**/Project.xml', '**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-android-
       
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
@@ -178,3 +227,53 @@ jobs:
         with:
           name: androidBuild
           path: export/release/android/bin
+
+  buildIOS:
+    runs-on: macos-15
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4.1.7
+
+      - uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.4
+      
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/haxelib
+            ~/.hxcpp_cache
+            ~/Library/Caches/CocoaPods
+            export/release/ios/haxe
+            export/release/ios/obj
+          key: ${{ runner.os }}-ios-${{ hashFiles('**/Project.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-ios-
+      
+      # Runs a set of commands using the runners shell
+      - name: Install Haxelib
+        run: |
+          haxelib setup ~/haxelib
+          haxelib install hxcpp > /dev/null --quiet
+          chmod +x ./setup/unish-lib.sh
+          sh ./setup/unish-lib.sh
+      
+      - name: Skip SScript setup mode
+        run: |
+          echo -n 'oy9:showMacroty8:loopCosti25y10:includeAllfg' > ~/settings.cocoa
+          cat ~/settings.cocoa
+      
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+      
+      - name: Compile
+        run: haxelib run lime build ios -nosign --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -verbose -D HXCPP_IGNORE_WARNINGS
+        timeout-minutes: 60
+      
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4.3.4
+        with:
+          name: iOSBuild
+          path: export/release/ios/build/Release-iphoneos
