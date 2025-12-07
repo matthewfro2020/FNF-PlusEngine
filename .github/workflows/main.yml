@@ -109,7 +109,7 @@ jobs:
         run: |
           cd ~/haxelib/hxcpp/git/tools/hxcpp
           haxe compile.hxml
-          cd ~/haxelib/hxcpp/git/project
+          cd ../../project
           neko build.n
       
       - name: Setup Project
@@ -217,7 +217,7 @@ jobs:
         run: |
           cd ~/haxelib/hxcpp/git/tools/hxcpp
           haxe compile.hxml
-          cd ~/haxelib/hxcpp/git/project
+          cd ../../project
           neko build.n
       
       - name: Setup Project
