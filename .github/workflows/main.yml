@@ -107,14 +107,14 @@ jobs:
       - name: Skip SScript setup mode
         run: |
           echo -n 'oy9:showMacroty8:loopCosti25y10:includeAllfg' > ~/settings.cocoa
-          
+
           cat ~/settings.cocoa
           
           haxelib set hxcpp 4.3.2
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS
+        run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
@@ -214,7 +214,7 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       
       - name: Compile
-        run: haxelib run lime build ios -nosign --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -D HXCPP_IGNORE_WARNINGS
+        run: haxelib run lime build ios -nosign --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
