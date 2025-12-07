@@ -101,18 +101,10 @@ jobs:
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
-          haxelib install hxcpp 4.3.2 --quiet
+          haxelib install hxcpp 4.3.2
           chmod +x ./setup/unish-lib.sh
+          haxelib set hxcpp 4.3.2
           sh ./setup/unish-lib.sh
-      
-      - name: Patch hxcpp zlib for Xcode 16.4
-        run: |
-          ZUTIL_PATH=~/haxelib/hxcpp/4,3,2/project/thirdparty/zlib-1.2.13/zutil.h
-          if [ -f "$ZUTIL_PATH" ]; then
-            sed -i.bak '147s/.*\/\/ #        define fdopen(fd,mode) NULL \/* No fdopen() *\//' "$ZUTIL_PATH"
-            echo "Patched zlib fdopen macro"
-          fi
-      
       - name: Skip SScript setup mode
         run: |
           echo -n 'oy9:showMacroty8:loopCosti25y10:includeAllfg' > ~/settings.cocoa
@@ -206,17 +198,10 @@ jobs:
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
-          haxelib install hxcpp 4.3.2 --quiet
+          haxelib install hxcpp 4.3.2
           chmod +x ./setup/unish-lib.sh
+          haxelib set hxcpp 4.3.2
           sh ./setup/unish-lib.sh
-      
-      - name: Patch hxcpp zlib for Xcode 16.4
-        run: |
-          ZUTIL_PATH=~/haxelib/hxcpp/4,3,2/project/thirdparty/zlib-1.2.13/zutil.h
-          if [ -f "$ZUTIL_PATH" ]; then
-            sed -i.bak '147s/.*/\/\/ #        define fdopen(fd,mode) NULL \/* No fdopen() *\//' "$ZUTIL_PATH"
-            echo "Patched zlib fdopen macro"
-          fi
       
       - name: Skip SScript setup mode
         run: |
