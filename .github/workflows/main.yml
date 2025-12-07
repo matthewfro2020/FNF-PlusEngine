@@ -257,17 +257,6 @@ jobs:
           echo -n 'oy9:showMacroty8:loopCosti25y10:includeAllfg' > ~/settings.cocoa
           cat ~/settings.cocoa
       
-      - name: Fix extraParams.hxml path for iOS
-        run: |
-          # Copiar el archivo a la raíz
-          if [ -f source/extraParams.hxml ]; then
-            cp source/extraParams.hxml ./extraParams.hxml
-          fi
-          # Modificar Project.xml para que use el path correcto en iOS
-          sed -i '' 's|source/extraParams.hxml|extraParams.hxml|g' Project.xml
-          echo "Project.xml modificado para iOS:"
-          grep "extraParams.hxml" Project.xml
-      
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       
