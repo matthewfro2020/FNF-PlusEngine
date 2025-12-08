@@ -139,6 +139,7 @@ class SMFile {
 	 * @param difficultyIndex 
 	 */
 	public function convertToFNF(songName:String, difficultyIndex:Int = 0):SwagSong {
+		#if !(mac || ios)
 		if (!isValid) {
 			trace('Cannot convert invalid SM file');
 			return null;
@@ -238,6 +239,10 @@ class SMFile {
 			trace(haxe.CallStack.toString(haxe.CallStack.exceptionStack()));
 			return null;
 		}
+		#else
+		trace('StepMania conversion not supported on macOS/iOS');
+		return null;
+		#end
 	}
 	
 	function createNewSection(isDouble:Bool = false):SwagSection {
