@@ -338,10 +338,319 @@ class ResultsState extends MusicBeatState
         } catch(e:Dynamic) {
             trace("Could not read Windows registry, using defaults: " + e);
         }
+        #elseif linux
+        try {
+            var lang = Sys.getEnv("LANG");
+            if (lang != null && lang.length > 0) {
+                var locale = lang.split(".")[0];
+
+                var process = new sys.io.Process("locale", ["-k", "d_fmt"]);
+                var output = process.stdout.readAll().toString();
+                process.close();
+                
+                if (output.indexOf("d_fmt") != -1) {
+                    var lines = output.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("d_fmt") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "");
+                                dateFormat = convertLocaleDateFormat(fmt);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                var process2 = new sys.io.Process("locale", ["-k", "t_fmt"]);
+                var output2 = process2.stdout.readAll().toString();
+                process2.close();
+                
+                if (output2.indexOf("t_fmt") != -1) {
+                    var lines = output2.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("t_fmt") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "");
+                                use24HourFormat = (fmt.indexOf("%H") != -1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (dateFormat == null) {
+                    if (locale.indexOf("en_US") != -1) {
+                        dateFormat = "MM/DD/YYYY";
+                    } else if (locale.indexOf("en_GB") != -1 || locale.indexOf("en_AU") != -1 || 
+                            locale.indexOf("en_CA") != -1 || locale.indexOf("fr_") != -1 ||
+                            locale.indexOf("de_") != -1 || locale.indexOf("it_") != -1 ||
+                            locale.indexOf("es_") != -1 || locale.indexOf("pt_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                    } else if (locale.indexOf("ja_") != -1 || locale.indexOf("ko_") != -1 ||
+                            locale.indexOf("zh_") != -1) {
+                        dateFormat = "YYYY-MM-DD";
+                    } else if (locale.indexOf("ru_") != -1 || locale.indexOf("pl_") != -1 ||
+                            locale.indexOf("cs_") != -1) {
+                        dateFormat = "DD.MM.YYYY";
+                    }
+                }
+
+                if (use24HourFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_CA") != -1 || 
+                        locale.indexOf("en_PH") != -1 || locale.indexOf("en_IN") != -1) {
+                        use24HourFormat = false;
+                    } else {
+                        use24HourFormat = true;
+                    }
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read Linux locale settings, using defaults: " + e);
+        }
+        #elseif mac
+        try {
+            var process = new sys.io.Process("defaults", ["read", "-g", "AppleLocale"]);
+            var locale = process.stdout.readAll().toString().trim();
+            process.close();
+            
+            if (locale.length > 0) {
+                var process2 = new sys.io.Process("defaults", ["read", "-g", "AppleICUDateFormatStrings"]);
+                var output2 = process2.stdout.readAll().toString();
+                process2.close();
+                
+                if (output2.indexOf("1") != -1) {
+                    var lines = output2.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("1") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "").replace(";", "");
+                                dateFormat = convertLocaleDateFormat(fmt);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                var process3 = new sys.io.Process("defaults", ["read", "-g", "AppleICUTimeFormatStrings"]);
+                var output3 = process3.stdout.readAll().toString();
+                process3.close();
+                
+                if (output3.indexOf("1") != -1) {
+                    var lines = output3.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("1") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "").replace(";", "");
+                                use24HourFormat = (fmt.indexOf("HH") != -1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (dateFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_") == 0) {
+                        dateFormat = "MM/DD/YYYY";
+                    } else if (locale.indexOf("en_GB") != -1 || locale.indexOf("fr_") != -1 ||
+                            locale.indexOf("de_") != -1 || locale.indexOf("it_") != -1 ||
+                            locale.indexOf("es_") != -1 || locale.indexOf("pt_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                    } else if (locale.indexOf("ja_") != -1 || locale.indexOf("ko_") != -1 ||
+                            locale.indexOf("zh_") != -1) {
+                        dateFormat = "YYYY-MM-DD";
+                    }
+                }
+                
+                if (use24HourFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_CA") != -1) {
+                        use24HourFormat = false;
+                    } else {
+                        use24HourFormat = true;
+                    }
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read macOS settings, using defaults: " + e);
+        }
+        #elseif ios
+        try {
+            var lang = Sys.getEnv("AppleLanguages");
+            if (lang != null && lang.length > 0) {
+                var locale = lang.split(",")[0].replace("\"", "").replace("[", "").replace("]", "");
+                
+                if (locale.indexOf("en-US") != -1) {
+                    dateFormat = "MM/DD/YYYY";
+                    use24HourFormat = false;
+                } else if (locale.indexOf("en-GB") != -1 || locale.indexOf("en-CA") != -1 ||
+                        locale.indexOf("fr-") != -1 || locale.indexOf("de-") != -1 ||
+                        locale.indexOf("it-") != -1 || locale.indexOf("es-") != -1 ||
+                        locale.indexOf("pt-") != -1 || locale.indexOf("id-") != -1) {
+                    dateFormat = "DD/MM/YYYY";
+                    use24HourFormat = true;
+                } else if (locale.indexOf("ja-") != -1 || locale.indexOf("ko-") != -1 ||
+                        locale.indexOf("zh-") != -1) {
+                    dateFormat = "YYYY-MM-DD";
+                    use24HourFormat = true;
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read iOS settings, using defaults: " + e);
+        }
         #elseif android
-        dateFormat = "MM/DD/YYYY";
-        use24HourFormat = true;
+        try {
+            var lang = Sys.getEnv("LANG");
+            if (lang == null || lang == "") {
+                lang = Sys.getEnv("LC_ALL");
+            }
+            if (lang == null || lang == "") {
+                lang = Sys.getEnv("LC_TIME");
+            }
+            if (lang == null || lang == "") {
+                lang = Sys.getEnv("LC_MESSAGES");
+            }
+            
+            if (lang != null && lang != "") {
+                var localeParts = lang.split(".");
+                var localeStr = localeParts[0];
+
+                trace("Android locale detected via env: " + localeStr);
+
+                if (localeStr.indexOf("en_US") != -1 || localeStr.indexOf("en_PH") != -1 || 
+                    localeStr.indexOf("en_CA") != -1 || localeStr.indexOf("en_IN") != -1) {
+                    dateFormat = "MM/DD/YYYY";
+                    use24HourFormat = false;
+                } else if (localeStr.indexOf("en_GB") != -1 || localeStr.indexOf("en_AU") != -1 || 
+                        localeStr.indexOf("en_NZ") != -1 || localeStr.indexOf("en_IE") != -1 ||
+                        localeStr.indexOf("en_ZA") != -1) {
+                    dateFormat = "DD/MM/YYYY";
+                    use24HourFormat = true;
+                } else if (localeStr.indexOf("fr_") != -1 || localeStr.indexOf("de_") != -1 || 
+                        localeStr.indexOf("it_") != -1 || localeStr.indexOf("es_") != -1 || 
+                        localeStr.indexOf("pt_") != -1 || localeStr.indexOf("nl_") != -1 ||
+                        localeStr.indexOf("sv_") != -1 || localeStr.indexOf("no_") != -1 ||
+                        localeStr.indexOf("da_") != -1 || localeStr.indexOf("fi_") != -1 || 
+                        localeStr.indexOf("id_") != -1) {
+                    dateFormat = "DD/MM/YYYY";
+                    use24HourFormat = true;
+                } else if (localeStr.indexOf("ja_") != -1 || localeStr.indexOf("ko_") != -1 || 
+                        localeStr.indexOf("zh_") != -1) {
+                    dateFormat = "YYYY-MM-DD";
+                    use24HourFormat = true;
+                } else if (localeStr.indexOf("ru_") != -1 || localeStr.indexOf("pl_") != -1 || 
+                        localeStr.indexOf("cs_") != -1 || localeStr.indexOf("hu_") != -1 ||
+                        localeStr.indexOf("sk_") != -1 || localeStr.indexOf("sl_") != -1) {
+                    dateFormat = "DD.MM.YYYY";
+                    use24HourFormat = true;
+                } else if (localeStr.indexOf("ar_") != -1 || localeStr.indexOf("fa_") != -1 || 
+                        localeStr.indexOf("he_") != -1 || localeStr.indexOf("tr_") != -1) {
+                    dateFormat = "DD/MM/YYYY";
+                    use24HourFormat = true;
+                } else {
+                    dateFormat = "MM/DD/YYYY";
+                    use24HourFormat = true;
+                }
+            } else {
+                dateFormat = "MM/DD/YYYY";
+                use24HourFormat = true;
+            }
+        } catch(e:Dynamic) {
+            trace("Could not detect Android locale via env, using defaults: " + e);
+            dateFormat = "MM/DD/YYYY";
+            use24HourFormat = true;
+        }
         #end
+
+        if (dateFormat == null) dateFormat = "MM/DD/YYYY";
+        if (use24HourFormat == null) use24HourFormat = true;
+    }
+
+    function convertLocaleDateFormat(localeFormat:String):String {
+        if (localeFormat == null) return "MM/DD/YYYY";
+
+        var format = localeFormat;
+
+        format = format.replace("%d", "DD");
+        format = format.replace("%m", "MM");
+        format = format.replace("%Y", "YYYY");
+        format = format.replace("%y", "YY");
+        format = format.replace("%e", "D");
+
+        format = format.replace("\"", "").trim();
+
+        if (format.indexOf("DD/MM/YYYY") != -1 || format.indexOf("D/M/YYYY") != -1) {
+            return "DD/MM/YYYY";
+        } else if (format.indexOf("MM/DD/YYYY") != -1 || format.indexOf("M/D/YYYY") != -1) {
+            return "MM/DD/YYYY";
+        } else if (format.indexOf("YYYY-MM-DD") != -1) {
+            return "YYYY-MM-DD";
+        } else if (format.indexOf("DD.MM.YYYY") != -1 || format.indexOf("D.M.YYYY") != -1) {
+            return "DD.MM.YYYY";
+        } else if (format.indexOf("YYYY/MM/DD") != -1) {
+            return "YYYY-MM-DD";
+        }
+
+        return "MM/DD/YYYY";
+    }
+
+    function convertAndroidDateFormat(format:String):String {
+        if (format == null) return "MM/DD/YYYY";
+
+        var result = format;
+
+        result = result.replace("-", "/");
+        result = result.replace(".", "/");
+
+        if (result.indexOf("yyyy") != -1) {
+            result = result.replace("yyyy", "YYYY");
+        } else if (result.indexOf("yy") != -1) {
+            result = result.replace("yy", "YY");
+        }
+
+        if (result.indexOf("MM") != -1) {
+        } else if (result.indexOf("M") != -1) {
+            result = result.replace("M", "MM");
+        }
+
+        if (result.indexOf("dd") != -1) {
+            result = result.replace("dd", "DD");
+        } else if (result.indexOf("d") != -1) {
+            result = result.replace("d", "DD");
+        }
+
+        if (result.indexOf("MM") != -1 && result.indexOf("DD") != -1 && result.indexOf("YYYY") != -1) {
+            var parts = result.split("/");
+            if (parts.length >= 3) {
+                if (parts[0].indexOf("M") != -1 && parts[1].indexOf("D") != -1) {
+                    return "MM/DD/YYYY";
+                } else if (parts[0].indexOf("D") != -1 && parts[1].indexOf("M") != -1) {
+                    return "DD/MM/YYYY";
+                } else if (parts[0].indexOf("Y") != -1 && parts[1].indexOf("M") != -1) {
+                    return "YYYY-MM-DD";
+                }
+            }
+        }
+        
+        return "MM/DD/YYYY";
+    }
+
+    function is24HourFormat(format:String):Bool {
+        if (format == null) return true;
+
+        if (format.indexOf("H") != -1) {
+            return true;
+        } else if (format.indexOf("h") != -1) {
+            return false;
+        }
+
+        if (format.indexOf("a") != -1 || format.indexOf("A") != -1) {
+            return false;
+        }
+        
+        return true;
     }
 
     function formatDateTimeAccordingToDevice(date:Date):String {
@@ -378,6 +687,8 @@ class ResultsState extends MusicBeatState
         var minutes = date.getMinutes();
 
         var minutesStr = (minutes < 10) ? "0" + minutes : Std.string(minutes);
+        var monthStr = (month < 10) ? "0" + month : Std.string(month);
+        var dayStr = (day < 10) ? "0" + day : Std.string(day);
 
         var timeStr = "";
         if (use24HourFormat) {
@@ -388,19 +699,28 @@ class ResultsState extends MusicBeatState
             if (hour12 == 0) hour12 = 12;
             timeStr = '$hour12:$minutesStr $amPm';
         }
-        
+
         var dateStr = "";
         switch (dateFormat.toUpperCase()) {
             case "MM/DD/YYYY":
-                dateStr = '$monthName $day, $year';
+                dateStr = '$dayName, $monthName $day $year';
             case "DD/MM/YYYY":
-                dateStr = '$day $monthName $year';
+                dateStr = '$dayName, $day $monthName $year';
             case "YYYY-MM-DD":
-                dateStr = '$year-$month-$day';
+                dateStr = '$dayName, $year-$monthStr-$dayStr';
             case "DD.MM.YYYY":
-                dateStr = '$day.$month.$year';
+                dateStr = '$dayName, $dayStr.$monthStr.$year';
             default:
-                dateStr = '$dayName - $monthName $day, $year';
+                if (dateFormat.indexOf("MM") != -1 && dateFormat.indexOf("DD") != -1 && dateFormat.indexOf("YYYY") != -1) {
+                    var custom = dateFormat;
+                    custom = custom.replace("MM", monthStr);
+                    custom = custom.replace("DD", dayStr);
+                    custom = custom.replace("YYYY", Std.string(year));
+                    custom = custom.replace("YY", Std.string(year).substr(2, 2));
+                    dateStr = '$dayName, $custom';
+                } else {
+                    dateStr = '$dayName, $monthName $day $year';
+                }
         }
         
         return '$dateStr - $timeStr';
