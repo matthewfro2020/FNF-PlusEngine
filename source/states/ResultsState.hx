@@ -495,7 +495,7 @@ class ResultsState extends MusicBeatState
                 } else if (locale.indexOf("en-GB") != -1 || locale.indexOf("en-CA") != -1 ||
                         locale.indexOf("fr-") != -1 || locale.indexOf("de-") != -1 ||
                         locale.indexOf("it-") != -1 || locale.indexOf("es-") != -1 ||
-                        locale.indexOf("pt-") != -1) {
+                        locale.indexOf("pt-") != -1 || locale.indexOf("id-") != -1) {
                     dateFormat = "DD/MM/YYYY";
                     use24HourFormat = true;
                 } else if (locale.indexOf("ja-") != -1 || locale.indexOf("ko-") != -1 ||
