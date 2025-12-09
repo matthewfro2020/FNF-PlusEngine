@@ -479,47 +479,212 @@ class PauseSubState extends MusicBeatSubstate
 		skipTimeText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(curTime / 1000)), false) + ' / ' + FlxStringUtil.formatTime(Math.max(0, Math.floor(FlxG.sound.music.length / 1000)), false);
 
 	function loadDeviceDateTimeSettings() {
-		#if windows
-		try {
-			var process = new sys.io.Process("reg", ["query", "HKCU\\Control Panel\\International", "/v", "sShortDate"]);
-			var output = process.stdout.readAll().toString();
-			if (output.indexOf("sShortDate") != -1) {
-				var lines = output.split("\n");
-				for (line in lines) {
-					if (line.indexOf("sShortDate") != -1) {
-						var parts = line.split("REG_SZ");
-						if (parts.length > 1) {
-							dateFormat = StringTools.trim(parts[1]);
-							break;
-						}
-					}
-				}
-			}
-			process.close();
+        #if windows
+        try {
+            var process = new sys.io.Process("reg", ["query", "HKCU\\Control Panel\\International", "/v", "sShortDate"]);
+            var output = process.stdout.readAll().toString();
+            if (output.indexOf("sShortDate") != -1) {
+                var lines = output.split("\n");
+                for (line in lines) {
+                    if (line.indexOf("sShortDate") != -1) {
+                        var parts = line.split("REG_SZ");
+                        if (parts.length > 1) {
+                            dateFormat = StringTools.trim(parts[1]);
+                            break;
+                        }
+                    }
+                }
+            }
+            process.close();
 
-			var process2 = new sys.io.Process("reg", ["query", "HKCU\\Control Panel\\International", "/v", "iTime"]);
-			var output2 = process2.stdout.readAll().toString();
-			if (output2.indexOf("iTime") != -1) {
-				var lines = output2.split("\n");
-				for (line in lines) {
-					if (line.indexOf("iTime") != -1) {
-						var parts = line.split("REG_SZ");
-						if (parts.length > 1) {
-							use24HourFormat = (StringTools.trim(parts[1]) == "1");
-							break;
-						}
-					}
-				}
-			}
-			process2.close();
-		} catch(e:Dynamic) {
-			trace("Could not read Windows registry, using defaults: " + e);
-		}
-		#elseif android
-		dateFormat = "MM/DD/YYYY";
-		use24HourFormat = true;
-		#end
-	}
+            var process2 = new sys.io.Process("reg", ["query", "HKCU\\Control Panel\\International", "/v", "iTime"]);
+            var output2 = process2.stdout.readAll().toString();
+            if (output2.indexOf("iTime") != -1) {
+                var lines = output2.split("\n");
+                for (line in lines) {
+                    if (line.indexOf("iTime") != -1) {
+                        var parts = line.split("REG_SZ");
+                        if (parts.length > 1) {
+                            use24HourFormat = (StringTools.trim(parts[1]) == "1");
+                            break;
+                        }
+                    }
+                }
+            }
+            process2.close();
+        } catch(e:Dynamic) {
+            trace("Could not read Windows registry, using defaults: " + e);
+        }
+        #elseif linux
+        try {
+            var lang = Sys.getEnv("LANG");
+            if (lang != null && lang.length > 0) {
+                var locale = lang.split(".")[0];
+
+                var process = new sys.io.Process("locale", ["-k", "d_fmt"]);
+                var output = process.stdout.readAll().toString();
+                process.close();
+                
+                if (output.indexOf("d_fmt") != -1) {
+                    var lines = output.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("d_fmt") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "");
+                                dateFormat = convertLocaleDateFormat(fmt);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                var process2 = new sys.io.Process("locale", ["-k", "t_fmt"]);
+                var output2 = process2.stdout.readAll().toString();
+                process2.close();
+                
+                if (output2.indexOf("t_fmt") != -1) {
+                    var lines = output2.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("t_fmt") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "");
+                                use24HourFormat = (fmt.indexOf("%H") != -1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (dateFormat == null) {
+                    if (locale.indexOf("en_US") != -1) {
+                        dateFormat = "MM/DD/YYYY";
+                    } else if (locale.indexOf("en_GB") != -1 || locale.indexOf("en_AU") != -1 || 
+                            locale.indexOf("en_CA") != -1 || locale.indexOf("fr_") != -1 ||
+                            locale.indexOf("de_") != -1 || locale.indexOf("it_") != -1 ||
+                            locale.indexOf("es_") != -1 || locale.indexOf("pt_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                    } else if (locale.indexOf("ja_") != -1 || locale.indexOf("ko_") != -1 ||
+                            locale.indexOf("zh_") != -1) {
+                        dateFormat = "YYYY-MM-DD";
+                    } else if (locale.indexOf("ru_") != -1 || locale.indexOf("pl_") != -1 ||
+                            locale.indexOf("cs_") != -1) {
+                        dateFormat = "DD.MM.YYYY";
+                    }
+                }
+
+                if (use24HourFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_CA") != -1 || 
+                        locale.indexOf("en_PH") != -1 || locale.indexOf("en_IN") != -1) {
+                        use24HourFormat = false;
+                    } else {
+                        use24HourFormat = true;
+                    }
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read Linux locale settings, using defaults: " + e);
+        }
+        #elseif mac
+        try {
+            var process = new sys.io.Process("defaults", ["read", "-g", "AppleLocale"]);
+            var locale = process.stdout.readAll().toString().trim();
+            process.close();
+            
+            if (locale.length > 0) {
+                var process2 = new sys.io.Process("defaults", ["read", "-g", "AppleICUDateFormatStrings"]);
+                var output2 = process2.stdout.readAll().toString();
+                process2.close();
+                
+                if (output2.indexOf("1") != -1) {
+                    var lines = output2.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("1") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "").replace(";", "");
+                                dateFormat = convertLocaleDateFormat(fmt);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                var process3 = new sys.io.Process("defaults", ["read", "-g", "AppleICUTimeFormatStrings"]);
+                var output3 = process3.stdout.readAll().toString();
+                process3.close();
+                
+                if (output3.indexOf("1") != -1) {
+                    var lines = output3.split("\n");
+                    for (line in lines) {
+                        if (line.indexOf("1") != -1) {
+                            var parts = line.split("=");
+                            if (parts.length > 1) {
+                                var fmt = StringTools.trim(parts[1]).replace("\"", "").replace(";", "");
+                                use24HourFormat = (fmt.indexOf("HH") != -1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (dateFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_") == 0) {
+                        dateFormat = "MM/DD/YYYY";
+                    } else if (locale.indexOf("en_GB") != -1 || locale.indexOf("fr_") != -1 ||
+                            locale.indexOf("de_") != -1 || locale.indexOf("it_") != -1 ||
+                            locale.indexOf("es_") != -1 || locale.indexOf("pt_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                    } else if (locale.indexOf("ja_") != -1 || locale.indexOf("ko_") != -1 ||
+                            locale.indexOf("zh_") != -1) {
+                        dateFormat = "YYYY-MM-DD";
+                    }
+                }
+                
+                if (use24HourFormat == null) {
+                    if (locale.indexOf("en_US") != -1 || locale.indexOf("en_CA") != -1) {
+                        use24HourFormat = false;
+                    } else {
+                        use24HourFormat = true;
+                    }
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read macOS settings, using defaults: " + e);
+        }
+        #elseif ios
+        try {
+            var lang = Sys.getEnv("AppleLanguages");
+            if (lang != null && lang.length > 0) {
+                var locale = lang.split(",")[0].replace("\"", "").replace("[", "").replace("]", "");
+                
+                if (locale.indexOf("en-US") != -1) {
+                    dateFormat = "MM/DD/YYYY";
+                    use24HourFormat = false;
+                } else if (locale.indexOf("en-GB") != -1 || locale.indexOf("en-CA") != -1 ||
+                        locale.indexOf("fr-") != -1 || locale.indexOf("de-") != -1 ||
+                        locale.indexOf("it-") != -1 || locale.indexOf("es-") != -1 ||
+                        locale.indexOf("pt-") != -1) {
+                    dateFormat = "DD/MM/YYYY";
+                    use24HourFormat = true;
+                } else if (locale.indexOf("ja-") != -1 || locale.indexOf("ko-") != -1 ||
+                        locale.indexOf("zh-") != -1) {
+                    dateFormat = "YYYY-MM-DD";
+                    use24HourFormat = true;
+                }
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read iOS settings, using defaults: " + e);
+        }
+        #elseif android
+        dateFormat = "MM/DD/YYYY";
+        use24HourFormat = true;
+        #end
+
+        if (dateFormat == null) dateFormat = "MM/DD/YYYY";
+        if (use24HourFormat == null) use24HourFormat = true;
+    }
 
 	function formatDateTimeAccordingToDevice(date:Date):String {
 		var dayNames = [
