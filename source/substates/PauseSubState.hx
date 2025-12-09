@@ -10,6 +10,12 @@ import states.StoryMenuState;
 import states.FreeplayState;
 import options.OptionsState;
 
+#if android
+import android.PrimaryLocale;
+import android.text.format.DateFormat;
+import android.content.Context;
+#end
+
 class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
@@ -678,12 +684,122 @@ class PauseSubState extends MusicBeatSubstate
             trace("Could not read iOS settings, using defaults: " + e);
         }
         #elseif android
-        dateFormat = "MM/DD/YYYY";
-        use24HourFormat = true;
+        try {
+            var locale = android.PrimaryLocale.getDefault();
+            if (locale != null) {
+                var country = locale.getCountry();
+                var language = locale.getLanguage();
+                var localeStr = language + "_" + country;
+
+                var dateFormatStr = android.text.format.DateFormat.getDateFormat(android.content.Context.getApplicationContext());
+                var timeFormatStr = android.text.format.DateFormat.getTimeFormat(android.content.Context.getApplicationContext());
+
+                dateFormat = convertAndroidDateFormat(dateFormatStr);
+                use24HourFormat = is24HourFormat(timeFormatStr);
+                
+                trace("Android locale detected: " + localeStr + ", date format: " + dateFormat + ", 24h: " + use24HourFormat);
+
+                if (dateFormat == null) {
+                    if (localeStr.indexOf("en_US") != -1 || localeStr.indexOf("en_PH") != -1 || 
+                        localeStr.indexOf("en_CA") != -1) {
+                        dateFormat = "MM/DD/YYYY";
+                        use24HourFormat = false;
+                    } else if (localeStr.indexOf("en_GB") != -1 || localeStr.indexOf("en_AU") != -1 || 
+                            localeStr.indexOf("en_NZ") != -1 || localeStr.indexOf("en_IE") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                        use24HourFormat = true;
+                    } else if (localeStr.indexOf("fr_") != -1 || localeStr.indexOf("de_") != -1 || 
+                            localeStr.indexOf("it_") != -1 || localeStr.indexOf("es_") != -1 || 
+                            localeStr.indexOf("pt_") != -1 || localeStr.indexOf("id_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                        use24HourFormat = true;
+                    } else if (localeStr.indexOf("ja_") != -1 || localeStr.indexOf("ko_") != -1 || 
+                            localeStr.indexOf("zh_") != -1) {
+                        dateFormat = "YYYY-MM-DD";
+                        use24HourFormat = true;
+                    } else if (localeStr.indexOf("ru_") != -1 || localeStr.indexOf("pl_") != -1 || 
+                            localeStr.indexOf("cs_") != -1 || localeStr.indexOf("hu_") != -1) {
+                        dateFormat = "DD.MM.YYYY";
+                        use24HourFormat = true;
+                    } else if (localeStr.indexOf("ar_") != -1 || localeStr.indexOf("fa_") != -1 || 
+                            localeStr.indexOf("he_") != -1) {
+                        dateFormat = "DD/MM/YYYY";
+                        use24HourFormat = true;
+                    } else {
+                        dateFormat = "MM/DD/YYYY";
+                        use24HourFormat = true;
+                    }
+                }
+            } else {
+                dateFormat = "MM/DD/YYYY";
+                use24HourFormat = true;
+            }
+        } catch(e:Dynamic) {
+            trace("Could not read Android locale settings, using defaults: " + e);
+            dateFormat = "MM/DD/YYYY";
+            use24HourFormat = true;
+        }
         #end
 
         if (dateFormat == null) dateFormat = "MM/DD/YYYY";
         if (use24HourFormat == null) use24HourFormat = true;
+    }
+
+	function convertAndroidDateFormat(format:String):String {
+        if (format == null) return "MM/DD/YYYY";
+
+        var result = format;
+
+        result = result.replace("-", "/");
+        result = result.replace(".", "/");
+
+        if (result.indexOf("yyyy") != -1) {
+            result = result.replace("yyyy", "YYYY");
+        } else if (result.indexOf("yy") != -1) {
+            result = result.replace("yy", "YY");
+        }
+
+        if (result.indexOf("MM") != -1) {
+        } else if (result.indexOf("M") != -1) {
+            result = result.replace("M", "MM");
+        }
+
+        if (result.indexOf("dd") != -1) {
+            result = result.replace("dd", "DD");
+        } else if (result.indexOf("d") != -1) {
+            result = result.replace("d", "DD");
+        }
+
+        if (result.indexOf("MM") != -1 && result.indexOf("DD") != -1 && result.indexOf("YYYY") != -1) {
+            var parts = result.split("/");
+            if (parts.length >= 3) {
+                if (parts[0].indexOf("M") != -1 && parts[1].indexOf("D") != -1) {
+                    return "MM/DD/YYYY";
+                } else if (parts[0].indexOf("D") != -1 && parts[1].indexOf("M") != -1) {
+                    return "DD/MM/YYYY";
+                } else if (parts[0].indexOf("Y") != -1 && parts[1].indexOf("M") != -1) {
+                    return "YYYY-MM-DD";
+                }
+            }
+        }
+        
+        return "MM/DD/YYYY";
+    }
+
+    function is24HourFormat(format:String):Bool {
+        if (format == null) return true;
+
+        if (format.indexOf("H") != -1) {
+            return true;
+        } else if (format.indexOf("h") != -1) {
+            return false;
+        }
+
+        if (format.indexOf("a") != -1 || format.indexOf("A") != -1) {
+            return false;
+        }
+        
+        return true;
     }
 
 	function formatDateTimeAccordingToDevice(date:Date):String {
