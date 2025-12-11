@@ -521,7 +521,7 @@ class FPSCounter extends TextField
 	private function getLastCommit():Void {
 		#if sys
 		// Intentar obtener información desde la API de GitHub
-		var http = new Http('https://api.github.com/repos/LeninAsto/FNF-PlusEngine/commits?per_page=1');
+		var http = new Http('https://api.github.com/repos/Psych-Plus-Team/FNF-PlusEngine/commits?per_page=1');
 		http.addHeader('User-Agent', 'FNF-PlusEngine');
 		
 		http.onData = function(data:String) {

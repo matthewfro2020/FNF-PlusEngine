@@ -1580,6 +1580,49 @@ class FunkinLua {
 			return closed;
 		});
 
+		// Memory Manager callbacks (Android optimization)
+		#if android
+		addLocalCallback("removeImageFromMemory", function(path:String, ?removeInstantly:Bool = true) {
+			backend.MemoryManager.removeImageFromMemory(path, removeInstantly);
+		});
+		
+		addLocalCallback("removeImagesFromMemory", function(paths:Array<String>, ?removeInstantly:Bool = true) {
+			backend.MemoryManager.removeImagesFromMemory(paths, removeInstantly);
+		});
+		
+		addLocalCallback("removeCharacterFromMemory", function(characterName:String, ?removeInstantly:Bool = true) {
+			backend.MemoryManager.removeCharacterFromMemory(characterName, removeInstantly);
+		});
+		
+		addLocalCallback("clearUnusedUI", function() {
+			backend.MemoryManager.clearUnusedUI();
+		});
+		
+		addLocalCallback("clearPreloadedCharacters", function() {
+			backend.MemoryManager.clearPreloadedCharacters();
+		});
+		
+		addLocalCallback("aggressiveMemoryCleanup", function() {
+			backend.MemoryManager.aggressiveCleanup();
+		});
+		
+		addLocalCallback("getMemoryUsage", function() {
+			return backend.MemoryManager.getMemoryUsage();
+		});
+		
+		addLocalCallback("reportMemoryUsage", function() {
+			backend.MemoryManager.reportMemoryUsage();
+		});
+		
+		addLocalCallback("clearShaders", function() {
+			backend.MemoryManager.clearShaders();
+		});
+		
+		addLocalCallback("autoMonitorMemory", function(?thresholdMB:Float = 500) {
+			backend.MemoryManager.autoMonitor(thresholdMB);
+		});
+		#end
+
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end

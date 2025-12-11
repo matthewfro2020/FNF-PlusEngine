@@ -13,7 +13,7 @@ class CoolUtil
 
 	public static function checkForUpdates(url:String = null):String {
 		if (url == null || url.length == 0)
-			url = "https://raw.githubusercontent.com/LeninAsto/FNF-PlusEngine/refs/heads/main/gitVersion.txt";
+			url = "https://raw.githubusercontent.com/Psych-Plus-Team/FNF-PlusEngine/refs/heads/main/gitVersion.txt";
 		
 		var currentVersion:String = states.MainMenuState.plusEngineVersion.trim();
 		hasUpdate = false;

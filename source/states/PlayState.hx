@@ -451,6 +451,12 @@ class PlayState extends MusicBeatState
 		_lastLoadedModDirectory = Mods.currentModDirectory;
 		Paths.clearUnusedMemory();
 		Paths.clearStoredMemory();
+		
+		// Optimización inicial para Android
+		#if android
+		backend.MemoryManager.reportMemoryUsage();
+		backend.MemoryManager.clearPreloadedCharacters();
+		#end
 		if(nextReloadAll)
 		{
 			Paths.clearUnusedMemory();
@@ -1653,6 +1659,12 @@ class PlayState extends MusicBeatState
 				swagCounter += 1;
 			}, 5);
 		}
+		
+		// Limpiar UI no utilizada después del countdown (Android)
+		#if android
+		backend.MemoryManager.clearUnusedUI();
+		#end
+		
 		return true;
 	}
 
@@ -4688,6 +4700,12 @@ class PlayState extends MusicBeatState
 	}
 
 	override function destroy() {
+		// Limpieza agresiva de memoria antes de destruir (Android)
+		#if android
+		backend.MemoryManager.aggressiveCleanup();
+		backend.MemoryManager.reportMemoryUsage();
+		#end
+		
 		// Limpiar todos los videos de Lua
 		#if LUA_ALLOWED
 		psychlua.LuaVideo.clearAll();
