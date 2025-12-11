@@ -153,7 +153,7 @@ class ModsMenuState extends MusicBeatState
 
 		var footerText = new FlxText(0, FlxG.height - 30, FlxG.width, 
 			Language.getPhrase('mods_footer_hint', 'Use arrow keys to navigate, ENTER to select, ESC to go back'), 16);
-		footerText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.LIGHT_GRAY, CENTER);
+		footerText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFD3D3D3, CENTER);
 		add(footerText);
 
 		if (modsList.all.length > 0) {
@@ -181,7 +181,7 @@ class ModsMenuState extends MusicBeatState
 		add(listTitle);
 
 		scrollBarTrack = new FlxSprite(modListPanel.x + modListPanel.width - 10, modListPanel.y + 50);
-		scrollBarTrack.makeGraphic(8, modListPanel.height - 70, 0x88446688);
+		scrollBarTrack.makeGraphic(8, Std.int(modListPanel.height - 70), 0x88446688);
 		add(scrollBarTrack);
 		
 		scrollBar = new FlxSprite(scrollBarTrack.x, scrollBarTrack.y);
@@ -233,11 +233,11 @@ class ModsMenuState extends MusicBeatState
 		add(modAuthor);
 		
 		modVersion = new FlxText(panel.x + padding + 160, panel.y + padding + 95, panel.width - 180, "", 16);
-		modVersion.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.LIGHT_GRAY);
+		modVersion.setFormat(Paths.font("vcr.ttf"), 16, 0xFFD3D3D3);
 		add(modVersion);
 
 		var descBg = new FlxSprite(panel.x + padding, panel.y + 180);
-		descBg.makeGraphic(panel.width - padding * 2, 180, 0xFF1E3A5F);
+		descBg.makeGraphic(Std.int(panel.width - padding * 2), 180, 0xFF1E3A5F);
 		FlxSpriteUtil.drawRoundRect(descBg, 0, 0, descBg.width, descBg.height, 10, 10);
 		add(descBg);
 		
@@ -246,12 +246,12 @@ class ModsMenuState extends MusicBeatState
 		add(descTitle);
 		
 		modDesc = new FlxText(descBg.x + 15, descBg.y + 40, descBg.width - 30, "", 18);
-		modDesc.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.LIGHT_GRAY, LEFT);
+		modDesc.setFormat(Paths.font("vcr.ttf"), 18, 0xFFD3D3D3, LEFT);
 		modDesc.wordWrap = true;
 		add(modDesc);
 
 		var statsBg = new FlxSprite(panel.x + padding, panel.y + 370);
-		statsBg.makeGraphic(panel.width - padding * 2, 80, 0xFF1E3A5F);
+		sstatsBg.makeGraphic(Std.int(panel.width - padding * 2), 80, 0xFF1E3A5F);
 		FlxSpriteUtil.drawRoundRect(statsBg, 0, 0, statsBg.width, statsBg.height, 10, 10);
 		add(statsBg);
 		
@@ -275,27 +275,27 @@ class ModsMenuState extends MusicBeatState
 		var startX = (FlxG.width - (buttonWidth * 7 + spacing * 6)) / 2;
 
 		buttonToggle = new MobileButton(startX, panel.y + 10, buttonWidth, buttonHeight, 
-			"", Paths.image('ui/modIcons/toggle'), toggleCurrentMod);
+            "", 'ui/modIcons/toggle', toggleCurrentMod);
 		controlButtons.push(buttonToggle);
 		add(buttonToggle);
 
 		buttonMoveUp = new MobileButton(startX + buttonWidth + spacing, panel.y + 10, buttonWidth, buttonHeight,
-			"", Paths.image('ui/modIcons/up'), () -> moveMod(-1));
+            "", 'ui/modIcons/up', () -> moveMod(-1));
 		controlButtons.push(buttonMoveUp);
 		add(buttonMoveUp);
 
 		buttonMoveDown = new MobileButton(startX + (buttonWidth + spacing) * 2, panel.y + 10, buttonWidth, buttonHeight,
-			"", Paths.image('ui/modIcons/down'), () -> moveMod(1));
+            "", 'ui/modIcons/down', () -> moveMod(1));
 		controlButtons.push(buttonMoveDown);
 		add(buttonMoveDown);
 
 		buttonMoveTop = new MobileButton(startX + (buttonWidth + spacing) * 3, panel.y + 10, buttonWidth, buttonHeight,
-			"", Paths.image('ui/modIcons/top'), () -> moveModToPosition(0));
+            "", 'ui/modIcons/top', () -> moveModToPosition(0));
 		controlButtons.push(buttonMoveTop);
 		add(buttonMoveTop);
 
 		buttonSettings = new MobileButton(startX + (buttonWidth + spacing) * 4, panel.y + 10, buttonWidth, buttonHeight,
-			"", Paths.image('ui/modIcons/settings'), openSettings);
+            "", 'ui/modIcons/settings', openSettings);
 		controlButtons.push(buttonSettings);
 		add(buttonSettings);
 
@@ -332,11 +332,15 @@ class ModsMenuState extends MusicBeatState
 		add(touchAreaControls);
 	}
 	
-	function addMobileControls()
-	{
+	override function addMobileControls(defaultDrawTarget:Bool = false)
+    {
 		var virtualPad = new FlxVirtualPad(FULL, A_B);
 		virtualPad.alpha = 0.6;
-		add(virtualPad);
+		if (defaultDrawTarget) {
+			add(virtualPad);
+		} else {
+			insert(members.indexOf(controlPanel), virtualPad);
+		}
 
 		virtualPad.y = FlxG.height - virtualPad.height - 10;
 
@@ -394,7 +398,7 @@ class ModsMenuState extends MusicBeatState
 			}
 		}
 
-		if (controls.BACK || (buttonBack != null && buttonBack.justPressed)) {
+		if (controls.BACK) {
 			exitState();
 		}
 
@@ -429,10 +433,10 @@ class ModsMenuState extends MusicBeatState
 	function handleButtonNavigation()
 	{
 		if (controls.UI_LEFT_P) {
-			curSelectedButton = Math.max(0, curSelectedButton - 1);
+			curSelectedButton = Std.int(Math.max(0, curSelectedButton - 1));
 			updateButtonSelection();
 		} else if (controls.UI_RIGHT_P) {
-			curSelectedButton = Math.min(controlButtons.length - 1, curSelectedButton + 1);
+			curSelectedButton = Std.int(Math.min(controlButtons.length - 1, curSelectedButton + 1));
 			updateButtonSelection();
 		} else if (controls.UI_UP_P) {
 			hoveringOnMods = true;
@@ -443,17 +447,14 @@ class ModsMenuState extends MusicBeatState
 	function handleMobileTouch()
 	{
 		if (FlxG.touches.justStarted().length > 0) {
-			var touch = FlxG.touches.justStarted()[0];
+				var touch = FlxG.touches.justStarted()[0];
 
-			for (i => modCard in modsGroup.members) {
-				if (modCard.exists && touch.overlaps(modCard)) {
-					curSelectedMod = i;
-					changeSelectedMod();
-
-					if (touch.timeSinceLastTap < 0.3) {
-						toggleCurrentMod();
+				for (i => modCard in modsGroup.members) {
+					if (modCard.exists && touch.overlaps(modCard)) {
+						curSelectedMod = i;
+						changeSelectedMod();
+						break; // Removed double-tap logic
 					}
-					break;
 				}
 			}
 
@@ -471,12 +472,11 @@ class ModsMenuState extends MusicBeatState
 
 		if (FlxG.touches.list.length > 0) {
 			var touch = FlxG.touches.list[0];
-			if (touchAreaMods != null && touch.overlaps(touchAreaMods) && Math.abs(touch.deltaY) > 10) {
-				var scrollAmount = Std.int(touch.deltaY / 10);
+			if (touchAreaMods != null && touch.overlaps(touchAreaMods) && Math.abs(touch.delta.y) > 10) {
+				var scrollAmount = Std.int(touch.delta.y / 10);
 				changeSelectedMod(scrollAmount);
 			}
 		}
-	}
 	
 	function changeSelectedMod(change:Int = 0)
 	{
@@ -552,11 +552,12 @@ class ModsMenuState extends MusicBeatState
 		buttonDisableAll.enabled = modsList.enabled.length > 0;
 
 		if (hasMods && curMod != null) {
-			buttonToggle.text = curMod.isEnabled ? 
-				Language.getPhrase('disable', 'OFF') : 
-				Language.getPhrase('enable', 'ON');
+			if (buttonToggle.text != null) {
+				buttonToggle.text.text = curMod.isEnabled ? 
+					Language.getPhrase('disable', 'OFF') : 
+					Language.getPhrase('enable', 'ON');
+			}
 		}
-	}
 	
 	function updateScrollbar()
 	{
@@ -727,16 +728,16 @@ class ModsMenuState extends MusicBeatState
 	}
 	
 	function showRestartConfirmation() {
-		#if desktop
-		openSubState(new RestartConfirmSubState());
-		#else
-		FlxG.sound.play(Paths.sound('cancelMenu'));
-		MusicBeatState.switchState(new MainMenuState());
-		#end
+			#if desktop
+			openSubState(new RestartConfirmSubState());
+			#else
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			MusicBeatState.switchState(new MainMenuState());
+			#end
+		}
+		
+		var needsRestart:Bool = false;
 	}
-	
-	var needsRestart:Bool = false;
-}
 
 	function getText(key:String, fallback:String):String {
 		#if LANG_ALLOWED
@@ -746,95 +747,96 @@ class ModsMenuState extends MusicBeatState
 		#end
 	}
 
-class ModCard extends FlxSpriteGroup
-{
-	public var bg:FlxSprite;
-	public var icon:FlxSprite;
-	public var nameText:FlxText;
-	public var statusText:FlxText;
-	public var highlight:FlxSprite;
-	
-	public var folder:String;
-	public var name:String;
-	public var author:String;
-	public var version:String;
-	public var desc:String;
-	public var mustRestart:Bool;
-	public var settings:Array<Dynamic>;
-	public var isEnabled:Bool = true;
-	
-	public function new(modFolder:String, index:Int)
+	class ModCard extends FlxSpriteGroup
 	{
-		super();
+		public var bg:FlxSprite;
+		public var icon:FlxSprite;
+		public var nameText:FlxText;
+		public var statusText:FlxText;
+		public var highlight:FlxSprite;
 		
-		this.folder = modFolder;
+		public var folder:String;
+		public var name:String;
+		public var author:String;
+		public var version:String;
+		public var desc:String;
+		public var mustRestart:Bool;
+		public var settings:Array<Dynamic>;
+		public var isEnabled:Bool = true;
+		
+		public function new(modFolder:String, index:Int)
+		{
+			super();
+			
+			this.folder = modFolder;
 
-		var pack = Mods.getPack(modFolder);
-		
-		this.name = modFolder;
-		this.desc = "No description provided.";
-		this.author = "Unknown";
-		this.version = "1.0.0";
-		this.mustRestart = false;
-		
-		if (pack != null) {
-			if (pack.name != null) this.name = pack.name;
-			if (pack.description != null) this.desc = pack.description;
-			if (pack.author != null) this.author = pack.author;
-			if (pack.version != null) this.version = pack.version;
-			if (pack.restart == true) this.mustRestart = true;
+			var pack = Mods.getPack(modFolder);
+			
+			this.name = modFolder;
+			this.desc = "No description provided.";
+			this.author = "Unknown";
+			this.version = "1.0.0";
+			this.mustRestart = false;
+			
+			if (pack != null) {
+				if (pack.name != null) this.name = pack.name;
+				if (pack.description != null) this.desc = pack.description;
+				if (pack.author != null) this.author = pack.author;
+				if (pack.version != null) this.version = pack.version;
+				if (pack.restart == true) this.mustRestart = true;
 
-			var settingsPath = Paths.mods('$modFolder/data/settings.json');
-			if (FileSystem.exists(settingsPath)) {
-				try {
-					settings = tjson.TJSON.parse(File.getContent(settingsPath));
-				} catch (e:Dynamic) {
-					trace('Failed to load settings for $modFolder: $e');
+				var settingsPath = Paths.mods('$modFolder/data/settings.json');
+				if (FileSystem.exists(settingsPath)) {
+					try {
+						settings = tjson.TJSON.parse(File.getContent(settingsPath));
+					} catch (e:Dynamic) {
+						trace('Failed to load settings for $modFolder: $e');
+					}
 				}
 			}
+
+			bg = new FlxSprite(0, 0);
+			bg.makeGraphic(380, 100, 0xFF1E3A5F);
+			FlxSpriteUtil.drawRoundRect(bg, 0, 0, 380, 100, 15, 15, 0xFF0F3460);
+			add(bg);
+
+			highlight = new FlxSprite(0, 0);
+			highlight.makeGraphic(384, 104, 0xFFFFFFFF);
+			highlight.alpha = 0;
+			highlight.x = -2;
+			highlight.y = -2;
+			add(highlight);
+
+			icon = new FlxSprite(10, 10);
+			var iconPath = Paths.mods('$modFolder/pack.png');
+			if (FileSystem.exists(iconPath)) {
+				icon.loadGraphic(iconPath);
+			} else {
+				icon.loadGraphic(Paths.image('unknownMod'));
+			}
+			icon.scale.set(0.5, 0.5);
+			icon.updateHitbox();
+			add(icon);
+
+			nameText = new FlxText(90, 15, 270, this.name, 22);
+			nameText.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, LEFT);
+			add(nameText);
+
+			statusText = new FlxText(90, 45, 270, "ENABLED", 16);
+			statusText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.GREEN, LEFT);
+			add(statusText);
+
+			var versionText = new FlxText(90, 65, 270, "v" + this.version, 14);
+			versionText.setFormat(Paths.font("vcr.ttf"), 14, 0xFFD3D3D3, LEFT);
+			add(versionText);
 		}
-
-		bg = new FlxSprite(0, 0);
-		bg.makeGraphic(380, 100, 0xFF1E3A5F);
-		FlxSpriteUtil.drawRoundRect(bg, 0, 0, 380, 100, 15, 15, 0xFF0F3460);
-		add(bg);
-
-		highlight = new FlxSprite(0, 0);
-		highlight.makeGraphic(384, 104, 0xFFFFFFFF);
-		highlight.alpha = 0;
-		highlight.x = -2;
-		highlight.y = -2;
-		add(highlight);
-
-		icon = new FlxSprite(10, 10);
-		var iconPath = Paths.mods('$modFolder/pack.png');
-		if (FileSystem.exists(iconPath)) {
-			icon.loadGraphic(iconPath);
-		} else {
-			icon.loadGraphic(Paths.image('unknownMod'));
-		}
-		icon.scale.set(0.5, 0.5);
-		icon.updateHitbox();
-		add(icon);
-
-		nameText = new FlxText(90, 15, 270, this.name, 22);
-		nameText.setFormat(Paths.font("vcr.ttf"), 22, FlxColor.WHITE, LEFT);
-		add(nameText);
-
-		statusText = new FlxText(90, 45, 270, "ENABLED", 16);
-		statusText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.GREEN, LEFT);
-		add(statusText);
-
-		var versionText = new FlxText(90, 65, 270, "v" + this.version, 14);
-		versionText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.LIGHT_GRAY, LEFT);
-		add(versionText);
 	}
 	
 	public function setSelected(selected:Bool)
 	{
 		highlight.alpha = selected ? 0.3 : 0;
 	}
-	
+		
 	public function setEnabled()
 	{
 		isEnabled = true;
@@ -842,7 +844,7 @@ class ModCard extends FlxSpriteGroup
 		statusText.color = FlxColor.GREEN;
 		bg.color = 0xFF1E3A5F;
 	}
-	
+		
 	public function setDisabled()
 	{
 		isEnabled = false;
@@ -850,7 +852,7 @@ class ModCard extends FlxSpriteGroup
 		statusText.color = FlxColor.RED;
 		bg.color = 0xFF3A1E3A;
 	}
-	
+		
 	public function updateSelection(pulseSine:Float)
 	{
 		if (highlight.alpha > 0) {

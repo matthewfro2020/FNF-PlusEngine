@@ -7,9 +7,11 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxTimer;
 import backend.ClientPrefs;
-import states.MusicBeatSubstate;
+import backend.MusicBeatSubstate;
+import states.TitleState;
 
 class RestartConfirmSubState extends MusicBeatSubstate
 {
@@ -63,7 +65,7 @@ class RestartConfirmSubState extends MusicBeatSubstate
             Language.getPhrase('restart_required_message', 
                 'Mod changes require a restart to take effect.\n\nWould you like to restart now?\n\nGame will auto-restart in {0} seconds.', [countdown]), 
             24);
-        messageText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.LIGHT_GRAY, CENTER);
+        messageText.setFormat(Paths.font("vcr.ttf"), 24, 0xFFD3D3D3, CENTER);
         messageText.screenCenter(X);
         messageText.y = panel.y + 150;
         messageText.alpha = 0;
