@@ -447,14 +447,13 @@ class ModsMenuState extends MusicBeatState
 	function handleMobileTouch()
 	{
 		if (FlxG.touches.justStarted().length > 0) {
-				var touch = FlxG.touches.justStarted()[0];
+			var touch = FlxG.touches.justStarted()[0];
 
-				for (i => modCard in modsGroup.members) {
-					if (modCard.exists && touch.overlaps(modCard)) {
-						curSelectedMod = i;
-						changeSelectedMod();
-						break; // Removed double-tap logic
-					}
+			for (i => modCard in modsGroup.members) {
+				if (modCard.exists && touch.overlaps(modCard)) {
+					curSelectedMod = i;
+					changeSelectedMod();
+					break;
 				}
 			}
 
@@ -559,6 +558,7 @@ class ModsMenuState extends MusicBeatState
 					Language.getPhrase('enable', 'ON');
 			}
 		}
+	}
 	
 	function updateScrollbar()
 	{
