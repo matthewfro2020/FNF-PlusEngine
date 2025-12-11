@@ -141,7 +141,7 @@ class MemoryManager
         #if android
         if (PlayState.instance == null) return;
 
-        if (!PlayState.instance.isPixelStage)
+        if (!PlayState.isPixelStage)
         {
             // Limpiar UI pixel si estamos en stage normal
             Assets.cache.clear('assets/shared/images/pixelUI');
