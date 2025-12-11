@@ -107,7 +107,6 @@ class IdID
         "no_score" => "Tidak ada skor.",
 
         // Mods Menu
-        "mods_menu_title" => "MANAJER MODS",
         "mods_count" => "Mods: {0} total, {1} diaktifkan",
         "mods_footer_hint" => "Gunakan tombol panah untuk navigasi, tekan ENTER untuk memilih, tekan ESC untuk kembali",
         "mods_list_title" => "MODS TERINSTAL",

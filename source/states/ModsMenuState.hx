@@ -2,18 +2,26 @@ package states;
 
 import backend.WeekData;
 import backend.Mods;
-
-import flixel.FlxBasic;
-import flixel.graphics.FlxGraphic;
-import flash.geom.Rectangle;
-import haxe.Json;
-
-import flixel.util.FlxSpriteUtil;
 import objects.AttachedSprite;
 import options.ModSettingsSubState;
+import substates.RestartConfirmSubState;
 
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.FlxBasic;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxSpriteGroup;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import flixel.util.FlxSpriteUtil;
+import flixel.ui.FlxVirtualPad;
+
+import haxe.Json;
+import sys.io.File;
+import sys.FileSystem;
 import openfl.display.BitmapData;
 import lime.utils.Assets;
+import haxe.io.Path;
 
 class ModsMenuState extends MusicBeatState
 {
@@ -98,7 +106,7 @@ class ModsMenuState extends MusicBeatState
 		headerBg.alpha = 0.8;
 		add(headerBg);
 		
-		headerText = new FlxText(0, 20, FlxG.width, Language.getPhrase('mods_menu_title', 'MODS MANAGER'), 48);
+		headerText = new FlxText(0, 20, FlxG.width, 'MODS MANAGER', 48);
 		headerText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF16213E);
 		headerText.borderSize = 3;
 		add(headerText);
@@ -106,7 +114,7 @@ class ModsMenuState extends MusicBeatState
 		var modCount = modsList.all.length;
 		var enabledCount = modsList.enabled.length;
 		modCountText = new FlxText(20, 80, FlxG.width - 40, 
-			Language.getPhrase('mods_count', 'Mods: {0} total, {1} diaktifkan', [modCount, enabledCount]), 20);
+			Language.getPhrase('mods_count', 'Mods: {0} total, {1} enabled', [modCount, enabledCount]), 20);
 		modCountText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.CYAN, LEFT);
 		add(modCountText);
 
@@ -687,20 +695,23 @@ class ModsMenuState extends MusicBeatState
 		}
 	}
 	
-	function saveModsList()
-	{
-		var fileStr = '';
-		for (mod in modsList.all) {
-			if (mod.trim().length < 1) continue;
+	function saveModsList() {
+		try {
+			var fileStr = '';
+			for (mod in modsList.all) {
+				if (mod.trim().length < 1) continue;
+				
+				var status = modsList.disabled.contains(mod) ? '0' : '1';
+				fileStr += '$mod|$status\n';
+			}
 			
-			var status = modsList.disabled.contains(mod) ? '0' : '1';
-			fileStr += '$mod|$status\n';
+			var path = Paths.mods('modsList.txt');
+			File.saveContent(path, fileStr);
+			Mods.parseList();
+			Mods.loadTopMod();
+		} catch (e:Dynamic) {
+			trace('Failed to save mods list: $e');
 		}
-		
-		var path = #if android StorageUtil.getExternalStorageDirectory() + #else Sys.getCwd() + #end 'modsList.txt';
-		File.saveContent(path, fileStr);
-		Mods.parseList();
-		Mods.loadTopMod();
 	}
 	
 	function updateModCount()
@@ -715,13 +726,25 @@ class ModsMenuState extends MusicBeatState
 		needsRestart = true;
 	}
 	
-	function showRestartConfirmation()
-	{
+	function showRestartConfirmation() {
+		#if desktop
 		openSubState(new RestartConfirmSubState());
+		#else
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+		MusicBeatState.switchState(new MainMenuState());
+		#end
 	}
 	
 	var needsRestart:Bool = false;
 }
+
+	function getText(key:String, fallback:String):String {
+		#if LANG_ALLOWED
+		return Language.getPhrase(key, fallback);
+		#else
+		return fallback;
+		#end
+	}
 
 class ModCard extends FlxSpriteGroup
 {
