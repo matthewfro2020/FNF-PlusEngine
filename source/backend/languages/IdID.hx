@@ -134,6 +134,8 @@ class IdID
 
         // Credits
         "description_shadow_mario" => "Tim Psych Engine",
+        "credits_title" => "KREDIT",
+        "link_hint" => "Tekan A/ENTER untuk buka tautan | B/ESC untuk kembali",
 
         // Reset Score/Achievement
         "reset_score" => "Reset skor dari",

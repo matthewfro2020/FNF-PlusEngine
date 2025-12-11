@@ -1,6 +1,12 @@
 package states;
 
 import objects.AttachedSprite;
+import flixel.effects.FlxFlicker;
+import flixel.util.FlxColor;
+import flixel.math.FlxMath;
+import flixel.text.FlxText;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 class CreditsState extends MusicBeatState
 {
@@ -11,27 +17,55 @@ class CreditsState extends MusicBeatState
 	private var creditsStuff:Array<Array<String>> = [];
 
 	var bg:FlxSprite;
+	var bgOverlay:FlxSprite;
 	var descText:FlxText;
+	var descBg:FlxSprite;
 	var intendedColor:FlxColor;
-	var descBox:AttachedSprite;
+	var colorTween:FlxTween;
+	var scrollFactorGroup:FlxTypedGroup<FlxSprite>;
 
 	var offsetThing:Float = -75;
+	var particleTimer:Float = 0;
+	var particles:Array<FlxSprite> = [];
+
+	var titleText:FlxText;
+	var selectedBorder:FlxSprite;
+	var linkHint:FlxText;
+	var selectionGlow:FlxSprite;
 
 	override function create()
 	{
 		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
 		persistentUpdate = true;
+
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
+		bg.color = FlxColor.BLACK;
+		bg.alpha = 0.9;
 		add(bg);
 		bg.screenCenter();
-		
+
+		bgOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bgOverlay.alpha = 0.3;
+		add(bgOverlay);
+
+		createParticles();
+
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
+
+		titleText = new FlxText(0, 40, FlxG.width, Language.getPhrase("credits_title", "CREDITS"), 48);
+		titleText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		titleText.borderSize = 3;
+		titleText.antialiasing = ClientPrefs.data.antialiasing;
+		titleText.scrollFactor.set(0, 0);
+		titleText.alpha = 0;
+		add(titleText);
+
+		FlxTween.tween(titleText, {y: 60, alpha: 1}, 0.8, {ease: FlxEase.backOut});
 
 		#if MODS_ALLOWED
 		for (mod in Mods.parseList().enabled) pushModCreditsToList(mod);
@@ -82,7 +116,18 @@ class CreditsState extends MusicBeatState
 		
 		for(i in defaultList)
 			creditsStuff.push(i);
-	
+
+		selectionGlow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+		selectionGlow.alpha = 0.3;
+		selectionGlow.blend = ADD;
+		add(selectionGlow);
+
+		selectedBorder = new FlxSprite();
+		selectedBorder.makeGraphic(1, 1, FlxColor.WHITE);
+		selectedBorder.alpha = 0;
+		selectedBorder.antialiasing = ClientPrefs.data.antialiasing;
+		add(selectedBorder);
+
 		for (i => credit in creditsStuff)
 		{
 			var isSelectable:Bool = !unselectableCheck(i);
@@ -91,7 +136,13 @@ class CreditsState extends MusicBeatState
 			optionText.targetY = i;
 			optionText.changeX = false;
 			optionText.snapToPosition();
+			optionText.alpha = 0;
 			grpOptions.add(optionText);
+
+			FlxTween.tween(optionText, {alpha: 1}, 0.5, {
+				ease: FlxEase.quadOut,
+				startDelay: 0.1 * i
+			});
 
 			if(isSelectable)
 			{
@@ -110,8 +161,13 @@ class CreditsState extends MusicBeatState
 				if(str.endsWith('-pixel')) icon.antialiasing = false;
 				icon.xAdd = optionText.width + 10;
 				icon.sprTracker = optionText;
+				icon.alpha = 0;
+
+				FlxTween.tween(icon, {alpha: 1}, 0.5, {
+					ease: FlxEase.quadOut,
+					startDelay: 0.1 * i + 0.2
+				});
 	
-				// using a FlxGroup is too much fuss!
 				iconArray.push(icon);
 				add(icon);
 				Mods.currentModDirectory = '';
@@ -120,21 +176,28 @@ class CreditsState extends MusicBeatState
 			}
 			else optionText.alignment = CENTERED;
 		}
-		
-		descBox = new AttachedSprite();
-		descBox.makeGraphic(1, 1, FlxColor.BLACK);
-		descBox.xAdd = -10;
-		descBox.yAdd = -10;
-		descBox.alphaMult = 0.6;
-		descBox.alpha = 0.6;
-		add(descBox);
+
+		descBg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		descBg.alpha = 0.8;
+		descBg.antialiasing = ClientPrefs.data.antialiasing;
+		add(descBg);
 
 		descText = new FlxText(50, FlxG.height + offsetThing - 25, 1180, "", 32);
-		descText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
+		descText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
 		descText.scrollFactor.set();
-		//descText.borderSize = 2.4;
-		descBox.sprTracker = descText;
+		descText.borderStyle = OUTLINE;
+		descText.borderColor = FlxColor.BLACK;
+		descText.borderSize = 2;
 		add(descText);
+
+		linkHint = new FlxText(20, FlxG.height - 40, FlxG.width - 40, Language.getPhrase("link_hint", "Press A/ENTER to open link | B/ESC to go back"), 20);
+		linkHint.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		linkHint.borderSize = 2;
+		linkHint.scrollFactor.set();
+		linkHint.alpha = 0;
+		add(linkHint);
+		
+		FlxTween.tween(linkHint, {alpha: 0.7}, 1.0, {ease: FlxEase.quadInOut, startDelay: 1.0});
 
 		bg.color = CoolUtil.colorFromString(creditsStuff[curSelected][4]);
 		intendedColor = bg.color;
@@ -144,9 +207,27 @@ class CreditsState extends MusicBeatState
 
 		super.create();
 	}
+	
+	function createParticles()
+	{
+		for (i in 0...15)
+		{
+			var particle = new FlxSprite();
+			particle.makeGraphic(Std.int(FlxG.random.float(2, 4)), Std.int(FlxG.random.float(2, 4)), FlxColor.WHITE);
+			particle.alpha = FlxG.random.float(0.1, 0.3);
+			particle.blend = ADD;
+			particle.scrollFactor.set(0, 0);
+			particle.x = FlxG.random.float(0, FlxG.width);
+			particle.y = FlxG.random.float(0, FlxG.height);
+			particles.push(particle);
+			add(particle);
+		}
+	}
 
 	var quitting:Bool = false;
 	var holdTime:Float = 0;
+	var timeSinceLastScroll:Float = 0;
+	
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -156,8 +237,29 @@ class CreditsState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * elapsed;
 		}
 
+		particleTimer += elapsed;
+		if (particleTimer > 0.016)
+		{
+			particleTimer = 0;
+			for (particle in particles)
+			{
+				particle.x += Math.cos(particle.y * 0.01) * 0.5;
+				particle.y += Math.sin(particle.x * 0.01) * 0.5;
+				
+				if (particle.x > FlxG.width) particle.x = 0;
+				if (particle.x < 0) particle.x = FlxG.width;
+				if (particle.y > FlxG.height) particle.y = 0;
+				if (particle.y < 0) particle.y = FlxG.height;
+			}
+		}
+
+		titleText.scale.x = 1 + Math.sin(FlxG.game.ticks * 0.001) * 0.02;
+		titleText.scale.y = 1 + Math.sin(FlxG.game.ticks * 0.001) * 0.02;
+
 		if(!quitting)
 		{
+			timeSinceLastScroll += elapsed;
+			
 			if(creditsStuff.length > 1)
 			{
 				var shiftMult:Int = 1;
@@ -170,11 +272,13 @@ class CreditsState extends MusicBeatState
 				{
 					changeSelection(-shiftMult);
 					holdTime = 0;
+					timeSinceLastScroll = 0;
 				}
 				if (downP)
 				{
 					changeSelection(shiftMult);
 					holdTime = 0;
+					timeSinceLastScroll = 0;
 				}
 
 				if(controls.UI_DOWN || controls.UI_UP || (touchPad != null && (touchPad.buttonDown.pressed || touchPad.buttonUp.pressed)))
@@ -187,21 +291,42 @@ class CreditsState extends MusicBeatState
 					{
 						var isUp = controls.UI_UP || (touchPad != null && touchPad.buttonUp.pressed);
 						changeSelection((checkNewHold - checkLastHold) * (isUp ? -shiftMult : shiftMult));
+						timeSinceLastScroll = 0;
 					}
 				}
 			}
 
 			if((controls.ACCEPT || (touchPad != null && touchPad.buttonA.justPressed)) && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4)) {
-				CoolUtil.browserLoad(creditsStuff[curSelected][3]);
+				var selectedText = grpOptions.members[curSelected];
+				if (selectedText != null)
+				{
+					FlxFlicker.flicker(selectedText, 0.5, 0.06, true);
+					FlxG.sound.play(Paths.sound('confirmMenu'));
+				}
+
+				new FlxTimer().start(0.3, function(tmr:FlxTimer) {
+					CoolUtil.browserLoad(creditsStuff[curSelected][3]);
+				});
 			}
 			if (controls.BACK || (touchPad != null && touchPad.buttonB.justPressed))
 			{
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new MainMenuState());
 				quitting = true;
+
+				FlxTween.tween(titleText, {alpha: 0, y: titleText.y - 20}, 0.5, {ease: FlxEase.quadIn});
+				for (item in grpOptions.members)
+					FlxTween.tween(item, {alpha: 0}, 0.4, {ease: FlxEase.quadIn});
+				for (icon in iconArray)
+					FlxTween.tween(icon, {alpha: 0}, 0.4, {ease: FlxEase.quadIn});
+				FlxTween.tween(descText, {alpha: 0}, 0.4, {ease: FlxEase.quadIn});
+				FlxTween.tween(linkHint, {alpha: 0}, 0.4, {ease: FlxEase.quadIn});
+				
+				new FlxTimer().start(0.5, function(tmr:FlxTimer) {
+					MusicBeatState.switchState(new MainMenuState());
+				});
 			}
 		}
-		
+
 		for (item in grpOptions.members)
 		{
 			if(!item.bold)
@@ -212,12 +337,25 @@ class CreditsState extends MusicBeatState
 					var lastX:Float = item.x;
 					item.screenCenter(X);
 					item.x = FlxMath.lerp(item.x - 70, lastX, lerpVal);
+
+					selectionGlow.setPosition(item.x - 10, item.y - 5);
+					selectionGlow.scale.set(item.width + 20, item.height + 10);
+					selectionGlow.updateHitbox();
+					selectionGlow.alpha = 0.2 + Math.sin(FlxG.game.ticks * 0.003) * 0.1;
 				}
 				else
 				{
-				item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
+					item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
 				}
+
+				item.y += Math.sin(item.targetY * 0.5 + FlxG.game.ticks * 0.001) * 0.5;
 			}
+		}
+
+		if (selectedBorder.alpha > 0)
+		{
+			selectedBorder.scale.x = 1 + Math.sin(FlxG.game.ticks * 0.005) * 0.05;
+			selectedBorder.scale.y = 1 + Math.sin(FlxG.game.ticks * 0.005) * 0.05;
 		}
 	}
 
@@ -232,12 +370,18 @@ class CreditsState extends MusicBeatState
 		while(unselectableCheck(curSelected));
 
 		var newColor:FlxColor = CoolUtil.colorFromString(creditsStuff[curSelected][4]);
-		//trace('The BG color is: $newColor');
 		if(newColor != intendedColor)
 		{
 			intendedColor = newColor;
-			FlxTween.cancelTweensOf(bg);
-			FlxTween.color(bg, 1, bg.color, intendedColor);
+			if(colorTween != null) colorTween.cancel();
+
+			colorTween = FlxTween.color(bg, 0.8, bg.color, intendedColor, {
+				onUpdate: function(twn:FlxTween) {
+					var currentColor:FlxColor = bg.color;
+					var pulseColor:FlxColor = currentColor.getLightened(0.1);
+					bgOverlay.color = pulseColor;
+				}
+			});
 		}
 
 		for (num => item in grpOptions.members)
@@ -247,6 +391,20 @@ class CreditsState extends MusicBeatState
 				item.alpha = 0.6;
 				if (item.targetY == 0) {
 					item.alpha = 1;
+
+					var selectedItem = grpOptions.members[curSelected];
+					if (selectedItem != null)
+					{
+						selectedBorder.setPosition(selectedItem.x - 5, selectedItem.y - 5);
+						selectedBorder.scale.set(selectedItem.width + 10, selectedItem.height + 10);
+						selectedBorder.updateHitbox();
+						selectedBorder.alpha = 0.8;
+
+						FlxTween.cancelTweensOf(selectedBorder);
+						selectedBorder.scale.set(selectedItem.width + 20, selectedItem.height + 20);
+						FlxTween.tween(selectedBorder.scale, {x: selectedItem.width + 10, y: selectedItem.height + 10}, 
+							0.2, {ease: FlxEase.backOut});
+					}
 				}
 			}
 		}
@@ -254,16 +412,32 @@ class CreditsState extends MusicBeatState
 		descText.text = creditsStuff[curSelected][2];
 		if(descText.text.trim().length > 0)
 		{
-			descText.visible = descBox.visible = true;
+			descText.visible = true;
+			descBg.visible = true;
 			descText.y = FlxG.height - descText.height + offsetThing - 60;
+
+			descBg.setPosition(descText.x - 10, descText.y - 10);
+			descBg.scale.set(descText.width + 20, descText.height + 20);
+			descBg.updateHitbox();
 	
 			if(moveTween != null) moveTween.cancel();
 			moveTween = FlxTween.tween(descText, {y : descText.y + 75}, 0.25, {ease: FlxEase.sineOut});
-	
-			descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
-			descBox.updateHitbox();
+			FlxTween.tween(descBg, {y : descText.y + 75 - 10}, 0.25, {ease: FlxEase.sineOut});
+
+			var fullText = descText.text;
+			descText.text = "";
+			new FlxTimer().start(0.02, function(tmr:FlxTimer) {
+				var currentLength = descText.text.length;
+				if (currentLength < fullText.length) {
+					descText.text = fullText.substr(0, currentLength + 1);
+				}
+			}, fullText.length);
 		}
-		else descText.visible = descBox.visible = false;
+		else 
+		{
+			descText.visible = false;
+			descBg.visible = false;
+		}
 	}
 
 	#if MODS_ALLOWED
@@ -272,7 +446,6 @@ class CreditsState extends MusicBeatState
 		var creditsFile:String = Paths.mods(folder + '/data/credits.txt');
 		
 		#if TRANSLATIONS_ALLOWED
-		//trace('/data/credits-${ClientPrefs.data.language}.txt');
 		var translatedCredits:String = Paths.mods(folder + '/data/credits-${ClientPrefs.data.language}.txt');
 		#end
 
