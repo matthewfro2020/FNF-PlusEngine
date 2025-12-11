@@ -27,8 +27,9 @@ class CreditsState extends MusicBeatState
 	var offsetThing:Float = -75;
 	var particleTimer:Float = 0;
 	var particles:Array<FlxSprite> = [];
+	var textAnimationTimer:FlxTimer = null;
 
-	var titleText:FlxText;
+	var titleText:Alphabet;
 	var selectedBorder:FlxSprite;
 	var linkHint:FlxText;
 	var selectionGlow:FlxSprite;
@@ -54,18 +55,24 @@ class CreditsState extends MusicBeatState
 
 		createParticles();
 
+		selectionGlow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+		selectionGlow.alpha = 0.3;
+		selectionGlow.blend = ADD;
+		add(selectionGlow);
+
+		selectedBorder = new FlxSprite();
+		selectedBorder.makeGraphic(1, 1, FlxColor.WHITE);
+		selectedBorder.alpha = 0;
+		selectedBorder.antialiasing = ClientPrefs.data.antialiasing;
+		add(selectedBorder);
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		titleText = new FlxText(0, 40, FlxG.width, Language.getPhrase("credits_title", "CREDITS"), 48);
-		titleText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		titleText.borderSize = 3;
-		titleText.antialiasing = ClientPrefs.data.antialiasing;
+		titleText = new Alphabet(75, 45, Language.getPhrase("credits_title", "CREDITS"), true);
+		titleText.setScale(0.6);
 		titleText.scrollFactor.set(0, 0);
-		titleText.alpha = 0;
+		titleText.alpha = 0.4;
 		add(titleText);
-
-		FlxTween.tween(titleText, {y: 60, alpha: 1}, 0.8, {ease: FlxEase.backOut});
 
 		#if MODS_ALLOWED
 		for (mod in Mods.parseList().enabled) pushModCreditsToList(mod);
@@ -79,7 +86,7 @@ class CreditsState extends MusicBeatState
 			['TheoDev',             "theo",         "Owner, Lead coder of Funkin Modchart",                       "https://github.com/TheoDevelops",    "FFB347"],
 			[''],
 			['Plus Contributors'],
-			['sirthegamercoder',	'sir',			    'Indonesian translation',					'https://bsky.app/profile/stgmd.bsky.social',	     '7FDBFF'],
+			['sirthegamercoder',	'sir',    'Indonesian translation and others PRs',       		'https://bsky.app/profile/stgmd.bsky.social',	     '7FDBFF'],
 			[''],
 			['Mobile Porting Team'],
 			['HomuHomu833',			'homura',             'Head Porter of Psych Engine and Author of linc_luajit-rewriten',                       'https://youtube.com/@HomuHomu833',		'FFE7C0'],
@@ -116,17 +123,6 @@ class CreditsState extends MusicBeatState
 		
 		for(i in defaultList)
 			creditsStuff.push(i);
-
-		selectionGlow = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-		selectionGlow.alpha = 0.3;
-		selectionGlow.blend = ADD;
-		add(selectionGlow);
-
-		selectedBorder = new FlxSprite();
-		selectedBorder.makeGraphic(1, 1, FlxColor.WHITE);
-		selectedBorder.alpha = 0;
-		selectedBorder.antialiasing = ClientPrefs.data.antialiasing;
-		add(selectedBorder);
 
 		for (i => credit in creditsStuff)
 		{
@@ -253,9 +249,6 @@ class CreditsState extends MusicBeatState
 			}
 		}
 
-		titleText.scale.x = 1 + Math.sin(FlxG.game.ticks * 0.001) * 0.02;
-		titleText.scale.y = 1 + Math.sin(FlxG.game.ticks * 0.001) * 0.02;
-
 		if(!quitting)
 		{
 			timeSinceLastScroll += elapsed;
@@ -338,7 +331,7 @@ class CreditsState extends MusicBeatState
 					item.screenCenter(X);
 					item.x = FlxMath.lerp(item.x - 70, lastX, lerpVal);
 
-					selectionGlow.setPosition(item.x - 10, item.y - 5);
+					selectionGlow.setPosition(item.x - 10, item.y + 45);
 					selectionGlow.scale.set(item.width + 20, item.height + 10);
 					selectionGlow.updateHitbox();
 					selectionGlow.alpha = 0.2 + Math.sin(FlxG.game.ticks * 0.003) * 0.1;
@@ -395,7 +388,7 @@ class CreditsState extends MusicBeatState
 					var selectedItem = grpOptions.members[curSelected];
 					if (selectedItem != null)
 					{
-						selectedBorder.setPosition(selectedItem.x - 5, selectedItem.y - 5);
+					selectedBorder.setPosition(selectedItem.x - 5, selectedItem.y + 10);
 						selectedBorder.scale.set(selectedItem.width + 10, selectedItem.height + 10);
 						selectedBorder.updateHitbox();
 						selectedBorder.alpha = 0.8;
@@ -426,7 +419,8 @@ class CreditsState extends MusicBeatState
 
 			var fullText = descText.text;
 			descText.text = "";
-			new FlxTimer().start(0.02, function(tmr:FlxTimer) {
+			if(textAnimationTimer != null) textAnimationTimer.cancel();
+				textAnimationTimer = new FlxTimer().start(0.02, function(tmr:FlxTimer) {
 				var currentLength = descText.text.length;
 				if (currentLength < fullText.length) {
 					descText.text = fullText.substr(0, currentLength + 1);
