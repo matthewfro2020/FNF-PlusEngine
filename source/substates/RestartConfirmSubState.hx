@@ -1,4 +1,4 @@
-package states;
+package substates;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -9,6 +9,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import backend.ClientPrefs;
+import states.MusicBeatSubstate;
 
 class RestartConfirmSubState extends MusicBeatSubstate
 {
