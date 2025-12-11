@@ -5,6 +5,7 @@ import backend.Mods;
 import objects.AttachedSprite;
 import options.ModSettingsSubState;
 import substates.RestartConfirmSubState;
+import states.MainMenuState;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -471,8 +472,8 @@ class ModsMenuState extends MusicBeatState
 
 		if (FlxG.touches.list.length > 0) {
 			var touch = FlxG.touches.list[0];
-			if (touchAreaMods != null && touch.overlaps(touchAreaMods) && Math.abs(touch.delta.y) > 10) {
-				var scrollAmount = Std.int(touch.delta.y / 10);
+			if (touchAreaMods != null && touch.overlaps(touchAreaMods) && Math.abs(touch.deltaY) > 10) {
+				var scrollAmount = Std.int(touch.deltaY / 10);
 				changeSelectedMod(scrollAmount);
 			}
 		}
