@@ -385,6 +385,8 @@ class IdID
         "description_accuracy_system" => "Sistem perhitungan akurasi mana yang Anda sukai?\nWife3 - Akurasi ms StepMania\nPsych - Berbasis Rating Mod\nSimple - Hit dasar/total\nosu!mania - Sistem penilaian berbobot\nDJMAX - Sistem bonus kombo\nITG - Sistem poin tari\n\n",
         "setting_system_score_multiplier" => "Sistem Pengganda Skor",
         "description_system_score_multiplier" => "Pilih sistem pengganda skor untuk note hits",
+        "setting_heavy_charts_mode" => "Mode Charts Berat",
+        "description_heavy_charts_mode" => "Jika dicentang, mengaktifkan sistem Charts Berat untuk kinerja yang lebih baik\ndengan chart yang memiliki banyak note (1000+).",
 
         // Modchart Settings
         "setting_hold_subdivisions" => "Tahan Subdivisi",
