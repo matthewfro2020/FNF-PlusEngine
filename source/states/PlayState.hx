@@ -46,6 +46,9 @@ import objects.Note.EventNote;
 import objects.*;
 import states.stages.*;
 import states.stages.objects.*;
+import lenin.PreloadedChartNote;
+import lenin.HeavyChartManager;
+import lenin.NoteSpawner;
 
 #if LUA_ALLOWED
 import psychlua.*;
@@ -213,6 +216,13 @@ class PlayState extends MusicBeatState
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
+
+	// Heavy Charts System
+	public var useHeavyCharts:Bool = false;
+	public var preloadedNotes:Array<PreloadedChartNote> = [];
+	public var notesAddedCount:Int = 0;
+	public var noteLimitCount:Int = 0; // Cuenta de notas activas en memoria
+	public var dynamicNoteLimit:Int = 200; // Límite dinámico basado en RAM
 
 	public var camFollow:FlxObject;
 	private static var prevCamFollow:FlxObject;
@@ -2275,6 +2285,22 @@ class PlayState extends MusicBeatState
 				makeEvent(event, i);
 
 		unspawnNotes.sort(sortByTime);
+		
+		// Heavy Charts Mode: Convertir notas a estructura ligera
+		useHeavyCharts = HeavyChartManager.shouldUseHeavyCharts();
+		if (useHeavyCharts && unspawnNotes.length > 0)
+		{
+			preloadedNotes = NoteSpawner.convertNotesToPreloaded(unspawnNotes);
+			unspawnNotes = [];
+			// Calcular el límite dinámico de notas basado en RAM disponible
+			dynamicNoteLimit = HeavyChartManager.getDynamicNoteLimit();
+			HeavyChartManager.logChartInfo(songData.song, preloadedNotes.length, true);
+		}
+		else
+		{
+			HeavyChartManager.logChartInfo(songData.song, unspawnNotes.length, false);
+		}
+		
 		generatedMusic = true;
 		
 		totalNotes = 0;
@@ -2836,6 +2862,10 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
+			// Heavy Charts Mode: Spawnear notas dinámicamente
+			if (useHeavyCharts && !paused && startedCountdown)
+				spawnHeavyNotes();
+
 			checkEventNote();
 		}
 
@@ -3540,10 +3570,23 @@ class PlayState extends MusicBeatState
 				if(daNote.strumTime < songLength - Conductor.safeZoneOffset)
 					health -= 0.05 * healthLoss;
 			});
-			for (daNote in unspawnNotes)
+			
+			// Verificar notas sin spawnear
+			if (useHeavyCharts)
 			{
-				if(daNote != null && daNote.strumTime < songLength - Conductor.safeZoneOffset)
-					health -= 0.05 * healthLoss;
+				for (daNote in preloadedNotes)
+				{
+					if(daNote != null && !daNote.wasHit && daNote.strumTime < songLength - Conductor.safeZoneOffset)
+						health -= 0.05 * healthLoss;
+				}
+			}
+			else
+			{
+				for (daNote in unspawnNotes)
+				{
+					if(daNote != null && daNote.strumTime < songLength - Conductor.safeZoneOffset)
+						health -= 0.05 * healthLoss;
+				}
 			}
 
 			if(doDeathCheck()) {
@@ -3769,6 +3812,11 @@ class PlayState extends MusicBeatState
 			invalidateNote(daNote);
 		}
 		unspawnNotes = [];
+		if (preloadedNotes.length > 0)
+		{
+			HeavyChartManager.cleanupPreloadedNotes(preloadedNotes);
+			preloadedNotes = [];
+		}
 		eventNotes = [];
 	}
 
@@ -5838,4 +5886,79 @@ class PlayState extends MusicBeatState
 		if (!FlxG.signals.preUpdate.has(checkForResync))
 			FlxG.signals.preUpdate.add(checkForResync);
 	}
+
+	/**
+	 * Spawnea notas dinámicamente para el Heavy Charts Mode
+	 * Solo crea notas visuales cuando están cerca de ser ejecutadas
+	 */
+	function spawnHeavyNotes():Void
+	{
+		if (!useHeavyCharts || preloadedNotes.length == 0 || notesAddedCount >= preloadedNotes.length)
+			return;
+
+		// Tiempo de spawn: notas aparecen 1600ms antes de ser ejecutadas (ajustable con songSpeed)
+		var NOTE_SPAWN_TIME:Float = 1600 / songSpeed;
+		var currentSongPos:Float = Conductor.songPosition;
+
+		// Contar cuántas notas activas hay en memoria ahora
+		noteLimitCount = notes.countLiving();
+
+		var targetNote:PreloadedChartNote = null;
+		var spawnedCount:Int = 0;
+		var lastNote:Note = null; // Rastrear la última nota para sustains
+
+		// Spawnear notas mientras haya espacio en el límite dinámico
+		while (notesAddedCount < preloadedNotes.length && noteLimitCount < dynamicNoteLimit)
+		{
+			targetNote = preloadedNotes[notesAddedCount];
+
+			if (targetNote == null)
+			{
+				notesAddedCount++;
+				continue;
+			}
+
+			// Calcular distancia hasta la nota
+			var timeUntilNote:Float = targetNote.strumTime - currentSongPos;
+
+			// Si la nota está fuera del rango de spawn (aún muy lejana), detener
+			if (timeUntilNote > NOTE_SPAWN_TIME)
+				break;
+
+			// Si la nota ya pasó y no fue ejecutada, marcarla como ejecutada
+			if (timeUntilNote < -200) // 200ms de margen para misses
+			{
+				targetNote.wasHit = true;
+				notesAddedCount++;
+				continue;
+			}
+
+			// Crear la nota visual con la relación parent correcta
+			var newNote:Note = new Note(targetNote.strumTime, targetNote.noteData, lastNote, targetNote.isSustainNote);
+			newNote.gfNote = targetNote.gfNote;
+			newNote.animSuffix = targetNote.animSuffix;
+			newNote.mustPress = targetNote.mustPress;
+			newNote.isOpponentMode = targetNote.isOpponentMode;
+			newNote.sustainLength = targetNote.sustainLength;
+			newNote.noteType = targetNote.noteType;
+			newNote.scrollFactor.set();
+
+			// Si es una sustain note y tiene un parent, agregarlo a la cola del parent
+			if (targetNote.isSustainNote && lastNote != null && lastNote.isSustainNote)
+			{
+				lastNote.tail.push(newNote);
+				newNote.parent = lastNote;
+			}
+
+			// Agregar a la lista de notas activas
+			notes.add(newNote);
+			spawnedCount++;
+			targetNote.wasHit = true; // Marcar como que ya fue spawneada
+			lastNote = newNote; // Actualizar lastNote para la siguiente iteración
+			noteLimitCount++; // Incrementar el contador
+
+			notesAddedCount++;
+		}
+	}
 }
+

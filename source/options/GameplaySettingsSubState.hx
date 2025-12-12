@@ -162,6 +162,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			['Psych', 'Codename']); // No V-Slice here :frowning_face:
 		addOption(option);
 
+		var option:Option = new Option('Heavy Charts Mode',
+			"If checked, enables the Heavy Charts system for better performance\nwith charts that have many notes (1000+).",
+			'heavyCharts',
+			BOOL);
+		addOption(option);
+		option.onChange = onChangeHeavyCharts;
+
 		super();
 	}
 
@@ -175,5 +182,10 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 	{
 		if(ClientPrefs.data.gameOverVibration)
 			lime.ui.Haptic.vibrate(0, 500);
+	}
+
+	function onChangeHeavyCharts()
+	{
+		trace('Heavy Charts Mode: ${ClientPrefs.data.heavyCharts ? "ENABLED" : "DISABLED"}');
 	}
 }

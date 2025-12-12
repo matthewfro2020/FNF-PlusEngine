@@ -132,6 +132,7 @@ import states.TitleState;
 	public var loadingScreen:Bool = true;
 	public var language:String = 'en-US';
 	public var abbreviateScore:Bool = true;
+	public var heavyCharts:Bool = false; // Heavy Charts Mode para charts pesados
 }
 
 class ClientPrefs {
