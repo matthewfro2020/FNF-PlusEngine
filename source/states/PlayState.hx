@@ -224,6 +224,11 @@ class PlayState extends MusicBeatState
 	public var noteLimitCount:Int = 0; // Cuenta de notas activas en memoria
 	public var dynamicNoteLimit:Int = 200; // Límite dinámico basado en RAM
 
+	// Rendering optimization variables (from JS Engine)
+	public var amountOfRenderedNotes:Float = 0; // Tracks total rendering cost this frame
+	public var maxRenderedNotes:Float = 0; // Peak rendering cost
+	public var maxNotesOnScreen:Int = 0; // For limiting visible notes (set to 0 = unlimited)
+
 	public var camFollow:FlxObject;
 	private static var prevCamFollow:FlxObject;
 
@@ -2538,7 +2543,7 @@ class PlayState extends MusicBeatState
 	{
 		if(finishTimer != null) return;
 
-		trace('resynced vocals at ' + Math.floor(Conductor.songPosition));
+		trace('resynced vocals at ' + (Math.floor(Conductor.songPosition / 10) / 100) + 's');
 
 		FlxG.sound.music.play();
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
@@ -2809,12 +2814,19 @@ class PlayState extends MusicBeatState
 				{
 					if(startedCountdown)
 					{
+						// Reset rendering counter each frame (like JS Engine)
+						amountOfRenderedNotes = 0;
+						
 						var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 						var i:Int = 0;
 						while(i < notes.length)
 						{
 							var daNote:Note = notes.members[i];
 							if(daNote == null) continue;
+
+							// Track rendering cost (JS Engine optimization)
+							amountOfRenderedNotes += daNote.noteDensity;
+							if (maxRenderedNotes < amountOfRenderedNotes) maxRenderedNotes = amountOfRenderedNotes;
 
 							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 							if(!daNote.mustPress) strumGroup = opponentStrums;
@@ -5907,15 +5919,16 @@ class PlayState extends MusicBeatState
 		var NOTE_SPAWN_TIME:Float = 1600 / songSpeed;
 		var currentSongPos:Float = Conductor.songPosition;
 
-		// Contar cuántas notas activas hay en memoria ahora
-		noteLimitCount = notes.countLiving();
+		// Contar cuántas notas activas hay en memoria ahora (solo una vez antes del loop)
+		var limitNC:Int = notes.countLiving();
 
 		var targetNote:PreloadedChartNote = null;
 		var spawnedCount:Int = 0;
 		var lastNote:Note = null; // Rastrear la última nota para sustains
+		var maxNotesPerFrame:Int = 50; // Limitar a 50 notas por frame para evitar lag spikes
 
 		// Spawnear notas mientras haya espacio en el límite dinámico
-		while (notesAddedCount < preloadedNotes.length && noteLimitCount < dynamicNoteLimit)
+		while (notesAddedCount < preloadedNotes.length && limitNC < dynamicNoteLimit && spawnedCount < maxNotesPerFrame)
 		{
 			targetNote = preloadedNotes[notesAddedCount];
 
@@ -5962,7 +5975,7 @@ class PlayState extends MusicBeatState
 			spawnedCount++;
 			targetNote.wasHit = true; // Marcar como que ya fue spawneada
 			lastNote = newNote; // Actualizar lastNote para la siguiente iteración
-			noteLimitCount++; // Incrementar el contador
+			limitNC++; // Incrementar el contador local
 
 			notesAddedCount++;
 		}
