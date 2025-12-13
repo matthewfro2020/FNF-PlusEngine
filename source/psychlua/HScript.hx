@@ -137,12 +137,22 @@ class HScript extends Iris
 				returnValue = ret;
 			} catch(e:IrisError) {
 				returnValue = null;
-				this.destroy();
-				// Show error in debug text instead of throwing
+				// Show error in debug text
 				if(PlayState.instance != null) {
 					var errorMsg = Printer.errorToString(e, false);
 					PlayState.instance.addTextToDebug(errorMsg, FlxColor.RED);
 				}
+				// Relanzar la excepción para que PlayState pueda manejarla correctamente
+				throw e;
+			}
+			catch(e:Dynamic) {
+				returnValue = null;
+				// Show warning in debug text
+				if(PlayState.instance != null) {
+					PlayState.instance.addTextToDebug('WARNING: $e', FlxColor.YELLOW);
+				}
+				// Relanzar la excepción para que PlayState pueda manejarla correctamente
+				throw e;
 			}
 		}
 	}

@@ -557,6 +557,12 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.bpm = SONG.bpm;
 
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
+		luaDebugGroup.cameras = [camOther];
+		add(luaDebugGroup);
+		#end
+
 		#if DISCORD_ALLOWED
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		storyDifficultyText = Difficulty.getString();
@@ -1071,12 +1077,6 @@ class PlayState extends MusicBeatState
 
 		cacheCountdown();
 		cachePopUpScore();
-
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		luaDebugGroup = new FlxTypedGroup<psychlua.DebugLuaText>();
-		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
-		#end
 		
 		add(versionText);
 
@@ -5200,15 +5200,22 @@ class PlayState extends MusicBeatState
 		try
 		{
 			newScript = new HScript(null, file);
-			if (newScript.exists('onCreate')) newScript.call('onCreate');
-			trace('HScript (Psych 1.0.x) file loaded successfully: $file');
-			hscriptArray.push(newScript);
+			if (newScript != null)
+			{
+				if (newScript.exists('onCreate')) newScript.call('onCreate');
+				trace('HScript (Psych 1.0.x) file loaded successfully: $file');
+				hscriptArray.push(newScript);
+			}
 		}
 		catch(e:IrisError)
 		{
 			var pos:HScriptInfos = cast {fileName: file, showLine: false};
 			Iris.error(Printer.errorToString(e, false), pos);
-			var newScript:HScript = cast (Iris.instances.get(file), HScript);
+			if(newScript != null)
+				newScript.destroy();
+		}
+		catch(e:Dynamic)
+		{
 			if(newScript != null)
 				newScript.destroy();
 		}

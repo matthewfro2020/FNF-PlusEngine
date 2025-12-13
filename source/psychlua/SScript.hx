@@ -42,7 +42,18 @@ class SScriptCompat extends SScript
 		if(parent.sscript == null)
 		{
 			trace('SScript (Psych 0.7.x) file loaded successfully: ${parent.scriptName}');
-			parent.sscript = new SScriptCompat(parent);
+			try {
+				parent.sscript = new SScriptCompat(parent);
+			} catch(e:Dynamic) {
+				trace('Error creating SScript for ${parent.scriptName}: $e');
+				if(PlayState.instance != null) {
+					PlayState.instance.addTextToDebug('WARNING: $e', FlxColor.YELLOW);
+				}
+				sscript_Errors++;
+				if(sscriptErrorHandler != null) {
+					sscriptErrorHandler('Error creating SScript: $e', parent.scriptName);
+				}
+			}
 		}
 	}
 
@@ -52,7 +63,18 @@ class SScriptCompat extends SScript
 		if(ss == null)
 		{
 			trace('SScript (Psych 0.7.x) file loaded successfully: ${parent.scriptName}');
-			parent.sscript = new SScriptCompat(parent, code, varsToBring);
+			try {
+				parent.sscript = new SScriptCompat(parent, code, varsToBring);
+			} catch(e:Dynamic) {
+				trace('Error creating SScript for ${parent.scriptName}: $e');
+				if(PlayState.instance != null) {
+					PlayState.instance.addTextToDebug('WARNING: $e', FlxColor.YELLOW);
+				}
+				sscript_Errors++;
+				if(sscriptErrorHandler != null) {
+					sscriptErrorHandler('Error creating SScript: $e', parent.scriptName);
+				}
+			}
 		}
 		else
 		{
