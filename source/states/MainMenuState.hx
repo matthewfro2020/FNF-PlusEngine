@@ -134,7 +134,7 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 0.15);
 
-		addTouchPad('NONE', 'E');
+		addTouchPad('NONE', 'E_X');
 	}
 
 	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
@@ -355,6 +355,13 @@ class MainMenuState extends MusicBeatState
 				FlxG.mouse.visible = false;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+
+			#if mobile
+			if (touchPad.buttonX.justPressed)
+			{
+				lime.system.System.exit(0);
+			}
+			#end
 		}
 
 		super.update(elapsed);
