@@ -495,6 +495,8 @@ class EsLA
         "images/pixelUI/shit-pixel" => "images/es-LA/pixelUI/shit-pixel",
         "images/pixelUI/date-pixel" => "images/es-LA/pixelUI/date-pixel",
         "images/pixelui/sick-pixel" => "images/es-LA/pixelUI/sick-pixel",
+        "images/pixelui/flawless-pixel" => "images/pixelUI/flawless-pixel",
+
         
 
         // Story Menu
