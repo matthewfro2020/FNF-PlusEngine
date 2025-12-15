@@ -330,7 +330,7 @@ class StoryMenuState extends MusicBeatState
 				PlayState.campaignScore = 0;
 				PlayState.campaignMisses = 0;			
 			// Resetear estadísticas de la semana
-			PlayState.campaignEpics = 0;
+			PlayState.campaignFlawlesss = 0;
 			PlayState.campaignSicks = 0;
 			PlayState.campaignGoods = 0;
 			PlayState.campaignBads = 0;

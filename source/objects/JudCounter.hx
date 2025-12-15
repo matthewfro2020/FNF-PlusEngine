@@ -16,7 +16,7 @@ import backend.Language;
 class JudCounter extends FlxTypedGroup<FlxText>
 {
     // Textos individuales para cada judgment
-    var epicsText:FlxText;
+    var flawlesssText:FlxText;
     var sicksText:FlxText;
     var goodsText:FlxText;
     var badsText:FlxText;
@@ -26,7 +26,7 @@ class JudCounter extends FlxTypedGroup<FlxText>
     var maxComboText:FlxText;
 
     // Colores para cada judgment
-    static final EPICS_COLOR:FlxColor = 0xFFA17FFF;  // Púrpura
+    static final FLAWLESSS_COLOR:FlxColor = 0xFF7FE1FF;  // Púrpura
     static final SICKS_COLOR:FlxColor = 0xFF7FC9FF;  // Cyan
     static final GOODS_COLOR:FlxColor = 0xFF7FFF8E;  // Verde
     static final BADS_COLOR:FlxColor = 0xFF888888;   // Gris
@@ -69,11 +69,11 @@ class JudCounter extends FlxTypedGroup<FlxText>
     // ← NUEVA FUNCIÓN PARA CACHEAR TRADUCCIONES - AHORA OPTIMIZADA
     function cacheLabels():Void {
         var keys = [
-            'judgement_epics', 'judgement_sicks', 'judgement_goods', 'judgement_bads',
+            'judgement_flawlesss', 'judgement_sicks', 'judgement_goods', 'judgement_bads',
             'judgement_shits', 'judgement_misses', 'judgement_combo', 'judgement_max_combo'
         ];
         var defaults = [
-            'Epics', 'Sicks', 'Goods', 'Bads', 'Shits', 'Misses', 'Combo', 'M. Combo'
+            'Flawlesss', 'Sicks', 'Goods', 'Bads', 'Shits', 'Misses', 'Combo', 'M. Combo'
         ];
         
         // ← USAR LA NUEVA FUNCIÓN OPTIMIZADA DEL SISTEMA Language
@@ -83,7 +83,7 @@ class JudCounter extends FlxTypedGroup<FlxText>
     function createTexts()
     {
         // ← USAR CACHE EN LUGAR DE LLAMADAS REPETIDAS A Language.getPhrase
-        epicsText = createJudgmentText(cachedLabels[0] + ':  0', EPICS_COLOR, 0);
+        flawlesssText = createJudgmentText(cachedLabels[0] + ':  0', FLAWLESSS_COLOR, 0);
         sicksText = createJudgmentText(cachedLabels[1] + ':  0', SICKS_COLOR, 1);
         goodsText = createJudgmentText(cachedLabels[2] + ':  0', GOODS_COLOR, 2);
         badsText = createJudgmentText(cachedLabels[3] + ':   0', BADS_COLOR, 3);
@@ -93,7 +93,7 @@ class JudCounter extends FlxTypedGroup<FlxText>
         maxComboText = createJudgmentText(cachedLabels[7] + ': 0', MAX_COMBO_COLOR, 7);
 
         // Agregar al grupo
-        add(epicsText);
+        add(flawlesssText);
         add(sicksText);
         add(goodsText);
         add(badsText);
@@ -148,7 +148,7 @@ class JudCounter extends FlxTypedGroup<FlxText>
     // ← NUEVA FUNCIÓN OPTIMIZADA PARA ACTUALIZAR TEXTOS INDIVIDUALES
     function updateSingleText(index:Int, value:Int):Void {
         switch (index) {
-            case 0: epicsText.text = cachedLabels[0] + ': $value';
+            case 0: flawlesssText.text = cachedLabels[0] + ': $value';
             case 1: sicksText.text = cachedLabels[1] + ': $value';
             case 2: goodsText.text = cachedLabels[2] + ': $value';
             case 3: badsText.text = cachedLabels[3] + ': $value';
@@ -176,7 +176,7 @@ class JudCounter extends FlxTypedGroup<FlxText>
         var targetText:FlxText = null;
         
         switch(judgmentIndex) {
-            case 0: targetText = epicsText;
+            case 0: targetText = flawlesssText;
             case 1: targetText = sicksText;
             case 2: targetText = goodsText;
             case 3: targetText = badsText;

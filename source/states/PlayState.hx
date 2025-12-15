@@ -103,7 +103,7 @@ class PlayState extends MusicBeatState
 		['Good', 0.8], //From 70% to 79%
 		['Great', 0.9], //From 80% to 89%
 		['Sick!', 0.95], //From 90% to 94%
-		['Epic!!', 1], //From 95% to 99%
+		['Flawless!!', 1], //From 95% to 99%
 		['Perfect!!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
 
@@ -122,7 +122,7 @@ class PlayState extends MusicBeatState
 			[Language.getPhrase('rating_good', 'Good'), 0.8],
 			[Language.getPhrase('rating_great', 'Great'), 0.9],
 			[Language.getPhrase('rating_sick', 'Sick!'), 0.95],
-			[Language.getPhrase('rating_epic', 'Epic!!'), 1],
+			[Language.getPhrase('rating_flawless', 'Flawless!!'), 1],
 			
 			// Ratings Superiores (>100%) - Alcanzables con sistema de bonus
 			[Language.getPhrase('rating_perfect', 'Perfect!!!'), 1.05], // 100% - 105%
@@ -360,7 +360,7 @@ class PlayState extends MusicBeatState
 	public static var deathCounter:Int = 0;
 	
 	// Variables para acumular estadísticas de toda la semana
-	public static var campaignEpics:Int = 0;
+	public static var campaignFlawlesss:Int = 0;
 	public static var campaignSicks:Int = 0;
 	public static var campaignGoods:Int = 0;
 	public static var campaignBads:Int = 0;
@@ -1873,7 +1873,7 @@ class PlayState extends MusicBeatState
 		
 		// Mapeo de ratings FNF a sprites StepMania
 		var smSprite:String = switch(ratingName.toLowerCase()) {
-			case 'epic': 'fantastic';
+			case 'flawless': 'fantastic';
 			case 'sick': 'excellent';
 			case 'good': 'great';
 			case 'bad': 'decent';
@@ -1908,7 +1908,7 @@ class PlayState extends MusicBeatState
 
 	public dynamic function fullComboFunction()
 	{
-		var epics:Int = ratingsData[0].hits;  
+		var flawlesss:Int = ratingsData[0].hits;  
 		var sicks:Int = ratingsData[1].hits;
 		var goods:Int = ratingsData[2].hits;
 		var bads:Int = ratingsData[3].hits;
@@ -1922,7 +1922,7 @@ class PlayState extends MusicBeatState
 			else if (bads > 0) ratingFC = Language.getPhrase('rating_bfc', 'BFC');
 			else if (goods > 0) ratingFC = Language.getPhrase('rating_gfc', 'GFC');
 			else if (sicks > 0) ratingFC = Language.getPhrase('rating_sfc', 'SFC');
-			else if (epics > 0) ratingFC = Language.getPhrase('rating_efc', 'EFC');
+			else if (flawlesss > 0) ratingFC = Language.getPhrase('rating_efc', 'FFC');
 		} else {
 			if (songMisses < 2) ratingFC = Language.getPhrase('rating_smc', 'SMC');
 			else if (songMisses < 5) ratingFC = Language.getPhrase('rating_lmc', 'LMC');
@@ -3640,7 +3640,7 @@ class PlayState extends MusicBeatState
 					score: songScore,
 					prevHighScore: Highscore.getScore(Song.loadedSongName, storyDifficulty),
 					accuracy: ratingPercent,
-					epics: ratingsData[0].hits,
+					flawlesss: ratingsData[0].hits,
 					sicks: ratingsData[1].hits,
 					goods: ratingsData[2].hits,
 					bads: ratingsData[3].hits,
@@ -3672,7 +3672,7 @@ class PlayState extends MusicBeatState
 				campaignMisses += songMisses;
 				
 				// Acumular estadísticas de la canción actual
-				campaignEpics += ratingsData[0].hits;
+				campaignFlawlesss += ratingsData[0].hits;
 				campaignSicks += ratingsData[1].hits;
 				campaignGoods += ratingsData[2].hits;
 				campaignBads += ratingsData[3].hits;
@@ -3758,7 +3758,7 @@ class PlayState extends MusicBeatState
 						score: campaignScore,
 						prevHighScore: Highscore.getWeekScore(WeekData.getWeekFileName(), storyDifficulty),
 						accuracy: weekAccuracy,
-						epics: campaignEpics,
+						flawlesss: campaignFlawlesss,
 						sicks: campaignSicks,
 						goods: campaignGoods,
 						bads: campaignBads,
@@ -3935,13 +3935,13 @@ class PlayState extends MusicBeatState
 		totalNotesHit += daRating.ratingMod;
 		
 		// 3. Simple Accuracy System
-		if (daRating.name == 'epic' || daRating.name == 'sick' || daRating.name == 'good') {
+		if (daRating.name == 'flawless' || daRating.name == 'sick' || daRating.name == 'good') {
 			notesHitSimple++;
 		}
 		
 		// 4. osu!mania Accuracy System
 		switch(daRating.name) {
-			case 'epic' | 'sick': osuMania_n300++;
+			case 'flawless' | 'sick': osuMania_n300++;
 			case 'good': osuMania_n200++;
 			case 'bad': osuMania_n100++;
 			case 'shit': osuMania_n50++;
@@ -3949,7 +3949,7 @@ class PlayState extends MusicBeatState
 		
 		// 5. DJMAX Accuracy System
 		switch(daRating.name) {
-			case 'epic': djmax_maxPerfect++;
+			case 'flawless': djmax_maxPerfect++;
 			case 'sick': djmax_perfect++;
 			case 'good': djmax_great++;
 			case 'bad': djmax_good++;
@@ -3959,7 +3959,7 @@ class PlayState extends MusicBeatState
 		// 6. ITG (Dance Points) System
 		// Mapeo de ratings a ventanas ITG
 		switch(daRating.name) {
-			case 'epic': 
+			case 'flawless': 
 				itg_FantasticPlus++; // W0
 				itg_DP += 10; // Máximo score
 			case 'sick': 
@@ -4006,7 +4006,7 @@ class PlayState extends MusicBeatState
 				RecalculateRating(false);
 				
 				// Perfect Mode: Miss on anything below Sick!
-				if (perfectMode && !practiceMode && daRating.name != 'epic' && daRating.name != 'sick')
+				if (perfectMode && !practiceMode && daRating.name != 'flawless' && daRating.name != 'sick')
 				{
 					doDeathCheck(true);
 				}

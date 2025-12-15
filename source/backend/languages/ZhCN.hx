@@ -28,7 +28,7 @@ class ZhCN
         "rating_good" => "好",
         "rating_great" => "很棒",
         "rating_sick" => "超棒！",
-        "rating_epic" => "史诗！！",
+        "rating_flawless" => "史诗！！",
         "rating_perfect" => "完美！！！",
 
         // Dialogues
@@ -162,7 +162,7 @@ class ZhCN
         "description_disable_reset_button" => "如果选中，按重置不会做任何事。",
         "description_hitsound_volume" => '有趣的音符在你击中时发出"滴答"声。',
         "description_rating_offset" => '改变击中"超棒！"需要多晚/多早\n更高的值意味着你需要击中得更晚。',
-        "description_epic_hit_window" => '改变你击中"史诗！"的时间量（毫秒）。',
+        "description_flawless_hit_window" => '改变你击中"史诗！"的时间量（毫秒）。',
         "description_sick_hit_window" => '改变你击中"超棒！"的时间量（毫秒）。',
         "description_good_hit_window" => '改变你击中"好"的时间量（毫秒）。',
         "description_bad_hit_window" => '改变你击中"差"的时间量（毫秒）。',
@@ -241,7 +241,7 @@ class ZhCN
         "results_practice_mode" => "在练习模式下游戏",
 
         // Judgment counters  
-        "judgement_epics" => "史诗   ",
+        "judgement_flawlesss" => "史诗   ",
         "judgement_sicks" => "超棒   ", 
         "judgement_goods" => "好     ",
         "judgement_bads" => "差     ",

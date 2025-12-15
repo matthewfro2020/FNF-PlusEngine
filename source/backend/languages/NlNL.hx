@@ -28,7 +28,7 @@ class NlNL
         "rating_good" => "Goed",
         "rating_great" => "Geweldig",
         "rating_sick" => "Ziek!",
-        "rating_epic" => "Episch!!",
+        "rating_flawless" => "Foutloos!!",
         "rating_perfect" => "Perfect!!!",
 
         // Dialogues
@@ -267,8 +267,8 @@ class NlNL
         "description_hitsound_volume" => "Leuke noten maken \"tik!\" wanneer je ze raakt",
         "setting_rating_offset" => "Beoordeling offset",
         "description_rating_offset" => "Verandert hoe laat/vroeg je moet raken voor een \"Sick!\"\nHogere waarden betekenen dat je later moet raken",
-        "setting_epic_hit_window" => "\"Epic!\" raak venster",
-        "description_epic_hit_window" => "Verandert de hoeveelheid tijd die je hebt om een \"Epic!\" te raken in milliseconden.",
+        "setting_flawless_hit_window" => "\"Flawless!\" raak venster",
+        "description_flawless_hit_window" => "Verandert de hoeveelheid tijd die je hebt om een \"Flawless!\" te raken in milliseconden.",
         "setting_sick_hit_window" => "\"Sick!\" raak venster",
         "description_sick_hit_window" => "Verandert de hoeveelheid tijd die je hebt om een \"Sick!\" te raken in milliseconden.",
         "setting_good_hit_window" => "\"Good\" raak venster",
@@ -369,7 +369,7 @@ class NlNL
         "results_practice_mode" => "Gespeeld in oefen modus",
 
         // Judgment counters  
-        "judgement_epics" => "Episch ",
+        "judgement_flawlesss" => "Episch ",
         "judgement_sicks" => "Ziek   ", 
         "judgement_goods" => "Goed   ",
         "judgement_bads" => "Slecht ",
@@ -389,7 +389,7 @@ class NlNL
         "images/combo" => "images/nl-NL/combo",
         "images/go" => "images/nl-NL/go",
         "images/good" => "images/nl-NL/good",
-        "images/epic" => "images/nl-NL/marvelous",
+        "images/flawless" => "images/nl-NL/marvelous",
         "images/menu_tracks" => "images/nl-NL/Menu_Tracks",
         "images/miss" => "images/nl-NL/miss",
         "images/ready" => "images/nl-NL/ready",

@@ -30,7 +30,7 @@ class EsES
         "rating_good" => "Bueno",
         "rating_great" => "Genial",
         "rating_sick" => "¡Excelente!",
-        "rating_epic" => "¡¡Épico!!",
+        "rating_flawless" => "¡¡Impecable!!",
         "rating_perfect" => "¡¡¡Perfecto!!!",
 
         // Dialogues
@@ -277,8 +277,8 @@ class EsES
         "description_hitsound_volume" => "Las notas divertidas hacen \"¡tic!\" cuando las tocas",
         "setting_rating_offset" => "Desfase de calificación",
         "description_rating_offset" => "Cambia qué tan tarde/temprano tienes que golpear para un \"¡Sick!\"\nLos valores más altos significan que tienes que golpear más tarde",
-        "setting_epic_hit_window" => "Ventana de golpe \"Epic!\"",
-        "description_epic_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Epic!\" en milisegundos.",
+        "setting_flawless_hit_window" => "Ventana de golpe \"Flawless!\"",
+        "description_flawless_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Flawless!\" en milisegundos.",
         "setting_sick_hit_window" => "Ventana de golpe \"Sick!\"",
         "description_sick_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Sick!\" en milisegundos.",
         "setting_good_hit_window" => "Ventana de golpe \"Good\"",
@@ -384,7 +384,7 @@ class EsES
         "results_practice_mode" => "Jugado en modo práctica",
 
         // Judgment counters  
-        "judgement_epics" => "Épicos ",
+        "judgement_flawlesss" => "Impecables",
         "judgement_sicks" => "Geniales", 
         "judgement_goods" => "Buenos ",
         "judgement_bads" => "Malos  ",
@@ -404,7 +404,7 @@ class EsES
         "images/combo" => "images/es-ES/combo",
         "images/go" => "images/es-ES/go",
         "images/good" => "images/es-ES/good",
-        "images/epic" => "images/es-ES/marvelous",
+        "images/flawless" => "images/flawless",
         "images/menu_tracks" => "images/es-ES/Menu_Tracks",
         "images/miss" => "images/es-ES/miss",
         "images/ready" => "images/es-ES/ready",

@@ -122,7 +122,7 @@ import states.TitleState;
 	public var keyViewerColor:String = 'Gray'; // Color name for key viewer
 	public var ratingOffset:Int = 0;
 	public var judgeDiff:String = 'J4'; // Judge Difficulty: J1 (easiest) to JUSTICE (hardest)
-	public var epicWindow:Float = 20.0;
+	public var flawlessWindow:Float = 20.0;
 	public var sickWindow:Float = 45.0;
 	public var goodWindow:Float = 90.0;
 	public var badWindow:Float = 135.0;

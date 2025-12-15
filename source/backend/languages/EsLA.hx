@@ -44,7 +44,7 @@ class EsLA
         "rating_good" => "Ta bien",
         "rating_great" => "Cool",
         "rating_sick" => "¡Excelente!",
-        "rating_epic" => "¡¡Épico!!",
+        "rating_flawless" => "¡¡Impecable!!",
         "rating_perfect" => "¡¡¡Perfecto!!!",
 
         // Dialogues
@@ -310,8 +310,8 @@ class EsLA
         "description_hitsound_volume" => "Las notas divertidas hacen \"¡tick!\" cuando las tocas",
         "setting_rating_offset" => "Retraso de calificación",
         "description_rating_offset" => "Cambia qué tan tarde/temprano tienes que golpear para un \"¡Sick!\"\nLos valores más altos significan que tienes que golpear más tarde",
-        "setting_epic_hit_window" => "Ventana de golpe \"Epic!\"",
-        "description_epic_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Epic!\" en milisegundos.",
+        "setting_flawless_hit_window" => "Ventana de golpe \"Flawless!\"",
+        "description_flawless_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Flawless!\" en milisegundos.",
         "setting_sick_hit_window" => "Ventana de golpe \"Sick!\"",
         "description_sick_hit_window" => "Cambia la cantidad de tiempo que tienes para golpear un \"Sick!\" en milisegundos.",
         "setting_good_hit_window" => "Ventana de golpe \"Good\"",
@@ -457,7 +457,7 @@ class EsLA
         "results_practice_mode" => "Jugado en modo práctica",
 
         // Judgment counters  
-        "judgement_epics" => "Épicos ",
+        "judgement_flawlesss" => "Impecables",
         "judgement_sicks" => "Cools  ", 
         "judgement_goods" => "Buenos ",
         "judgement_bads" => "Malos  ",
@@ -483,7 +483,7 @@ class EsLA
         "images/set" => "images/es-LA/set",
         "images/shit" => "images/es-LA/shit",
         "images/sick" => "images/es-LA/sick",
-        "images/epic" => "images/es-LA/epic",
+        "images/flawless" => "images/flawless",
 
         // UI Pixel
         "images/pixelUI/comboBroken-pixel" => "images/es-LA/pixelUI/comboBroken-pixel",

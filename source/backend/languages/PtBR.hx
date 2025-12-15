@@ -30,7 +30,7 @@ class PtBR
         "rating_good" => "Bom",
         "rating_great" => "Ótimo",
         "rating_sick" => "Manda Ver!",
-        "rating_epic" => "Épico!!",
+        "rating_flawless" => "Impecável!!",
         "rating_perfect" => "Perfeito!!",
 
         // Dialogues
@@ -280,8 +280,8 @@ class PtBR
         "description_hitsound_volume" => "As notas fazem um som de \"Tick!\" quando você as apertam",
         "setting_rating_offset" => "Offset de Acerto",
         "description_rating_offset" => "Adianta/atrasa o tempo de acertar, valores altos farão com que você acerte mais cedo/tarde.",
-        "setting_epic_hit_window" => "Janela de Acerto \"Epic!\"",
-        "description_epic_hit_window" => "Muda o tempo máximo para acertar uma classificação de \"Epic!\" em milisegundos.",
+        "setting_flawless_hit_window" => "Janela de Acerto \"flawless!\"",
+        "description_flawless_hit_window" => "Muda o tempo máximo para acertar uma classificação de \"flawless!\" em milisegundos.",
         "setting_sick_hit_window" => "Janela de Acerto \"Sick!\"",
         "description_sick_hit_window" => "Muda o tempo máximo para acertar uma classificação de \"Sick!\" em milisegundos.",
         "setting_good_hit_window" => "Janela de Acerto \"Good\"",
@@ -382,7 +382,7 @@ class PtBR
         "results_practice_mode" => "Jogado no modo prática",
 
         // Judgment counters  
-        "judgement_epics" => "Épicos ",
+        "judgement_flawlesss" => "Épicos ",
         "judgement_sicks" => "Sicks  ", 
         "judgement_goods" => "Goods  ",
         "judgement_bads" => "Bads   ",

@@ -454,7 +454,7 @@ class FunkinLua {
 			}
 		});
 
-		//shitass stuff for epic coders like me B)  *image of obama giving himself a medal*
+		//shitass stuff for flawless coders like me B)  *image of obama giving himself a medal*
 		Lua_helper.add_callback(lua, "getObjectOrder", function(obj:String, ?group:String = null) {
 			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);
 			if(leObj != null)

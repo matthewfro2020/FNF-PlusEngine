@@ -28,7 +28,7 @@ class ZhHK
         "rating_good" => "好",
         "rating_great" => "很棒",
         "rating_sick" => "超棒！",
-        "rating_epic" => "史詩！！",
+        "rating_flawless" => "史詩！！",
         "rating_perfect" => "完美！！！",
 
         // Dialogues
@@ -163,7 +163,7 @@ class ZhHK
         "description_disable_reset_button" => "如果選中，按重置不會做任何事。",
         "description_hitsound_volume" => "有趣的音符在你擊中時發出\"滴答\"聲。",
         "description_rating_offset" => "改變擊中\"超棒！\"需要多晚/多早\n更高的值意味著你需要擊中得更晚。",
-        "description_epic_hit_window" => "改變你擊中史詩！的時間量（毫秒）。",
+        "description_flawless_hit_window" => "改變你擊中史詩！的時間量（毫秒）。",
         "description_sick_hit_window" => "改變你擊中\"超棒！\"的時間量（毫秒）。",
         "description_good_hit_window" => "改變你擊中\"好\"的時間量（毫秒）。",
         "description_bad_hit_window" => "改變你擊中\"差\"的時間量（毫秒）。",
@@ -230,7 +230,7 @@ class ZhHK
         "time_hours" => "小時",
 
         // Judgment counters  
-        "judgement_epics" => "史詩   ",
+        "judgement_flawlesss" => "史詩   ",
         "judgement_sicks" => "超棒   ", 
         "judgement_goods" => "好     ",
         "judgement_bads" => "差     ",

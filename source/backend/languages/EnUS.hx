@@ -30,7 +30,7 @@ class EnUS
         "rating_good" => "Good",
         "rating_great" => "Great",
         "rating_sick" => "Sick!",
-        "rating_epic" => "Epic!!",
+        "rating_flawless" => "Flawless!!",
         "rating_perfect" => "Perfect!!!",
 
         // Dialogues
@@ -278,8 +278,8 @@ class EnUS
         "description_hitsound_volume" => "Funny notes go \"Tick!\" when you hit them.",
         "setting_rating_offset" => "Rating Offset",
         "description_rating_offset" => "Changes how late/early you have to hit for a \"Sick!\"\nHigher values mean you have to hit later.",
-        "setting_epic_hit_window" => "Epic! Hit Window",
-        "description_epic_hit_window" => "Changes how much time you have to hit a Epic! in milliseconds.",
+        "setting_flawless_hit_window" => "flawless! Hit Window",
+        "description_flawless_hit_window" => "Changes how much time you have to hit a flawless! in milliseconds.",
         "setting_sick_hit_window" => "Sick! Hit Window",
         "description_sick_hit_window" => "Changes the amount of time you have\nfor hitting a \"Sick!\" in milliseconds.",
         "setting_good_hit_window" => "Good Hit Window",
@@ -385,7 +385,7 @@ class EnUS
         "results_practice_mode" => "Played in practice mode",
 
         // Judgment counters  
-        "judgement_epics" => "Epics  ",
+        "judgement_flawlesss" => "Flawlesss  ",
         "judgement_sicks" => "Sicks  ", 
         "judgement_goods" => "Goods  ",
         "judgement_bads" => "Bads   ",
@@ -406,7 +406,7 @@ class EnUS
         "images/combo" => "images/combo",
         "images/go" => "images/go",
         "images/good" => "images/good",
-        "images/epic" => "images/epic",
+        "images/flawless" => "images/Flawless",
         "images/menu_tracks" => "images/Menu_Tracks",
         "images/miss" => "images/miss",
         "images/ready" => "images/ready",

@@ -27,7 +27,7 @@ class ResultsState extends MusicBeatState
     var params:Dynamic;
 
     var animatedScore:Int = 0;
-    var animatedEpics:Int = 0;
+    var animatedFlawlesss:Int = 0;
     var animatedSicks:Int = 0;
     var animatedGoods:Int = 0;
     var animatedBads:Int = 0;
@@ -37,7 +37,7 @@ class ResultsState extends MusicBeatState
     var animatedAccuracy:Float = 0;
 
     var scoreText:FlxText;
-    var epics:FlxText;
+    var flawlesss:FlxText;
     var sicks:FlxText;
     var goods:FlxText;
     var bads:FlxText;
@@ -131,9 +131,9 @@ class ResultsState extends MusicBeatState
         var judgY = 235;
         var judgSpacing = 90; // Más espacio
 
-        epics = new FlxText(leftX, judgY, 340, Language.getPhrase('judgement_epics', 'Epics') + ': 0', 32);
-        epics.setFormat(Paths.font("aller.ttf"), 32, 0xFFA17FFF, "left");
-        add(epics);
+        flawlesss = new FlxText(leftX, judgY, 340, Language.getPhrase('judgement_flawlesss', 'flawlesss') + ': 0', 32);
+        flawlesss.setFormat(Paths.font("aller.ttf"), 32, 0xFFA17FFF, "left");
+        add(flawlesss);
 
         sicks = new FlxText(rightX, judgY, 340, Language.getPhrase('judgement_sicks', 'Sicks') + ': 0', 32);
         sicks.setFormat(Paths.font("aller.ttf"), 32, 0xFF7FC9FF, "left");
@@ -214,13 +214,12 @@ class ResultsState extends MusicBeatState
         }
         scoreText.text = StringTools.lpad(Std.string(animatedScore), "0", 8);
 
-        if (animatedEpics < params.epics) {
-            animatedEpics = animateInt(animatedEpics, params.epics);
-            epics.text = Language.getPhrase('judgement_epics', 'Epics') + ': $animatedEpics';
+        if (animatedFlawlesss < params.flawlesss) {
+            animatedFlawlesss = animateInt(animatedFlawlesss, params.flawlesss);
+            flawlesss.text = Language.getPhrase('judgement_flawlesss', 'Flawlesss') + ': $animatedFlawlesss';
             return;
         }
-        epics.text = Language.getPhrase('judgement_epics', 'Epics') + ': $animatedEpics';
-
+        flawlesss.text = Language.getPhrase('judgement_flawlesss', 'Flawlesss') + ': $animatedFlawlesss';
         if (animatedSicks < params.sicks) {
             animatedSicks = animateInt(animatedSicks, params.sicks);
             sicks.text = Language.getPhrase('judgement_sicks', 'Sicks') + ': $animatedSicks';

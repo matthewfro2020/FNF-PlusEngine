@@ -28,7 +28,7 @@ class ItIT
         "rating_good" => "Buono",
         "rating_great" => "Ottimo",
         "rating_sick" => "Fantastico!",
-        "rating_epic" => "Epico!!",
+        "rating_flawless" => "Flawlesso!!",
         "rating_perfect" => "Perfetto!!!",
 
         // Dialogues
@@ -274,8 +274,8 @@ class ItIT
         "description_hitsound_volume" => "Le note divertenti fanno \"tic!\" quando le colpisci",
         "setting_rating_offset" => "Offset valutazione",
         "description_rating_offset" => "Cambia quanto tardi/presto devi colpire per un \"Sick!\"\nValori più alti significano che devi colpire più tardi",
-        "setting_epic_hit_window" => "Finestra colpo \"Epic!\"",
-        "description_epic_hit_window" => "Cambia la quantità di tempo che hai per colpire un \"Epic!\" in millisecondi.",
+        "setting_flawless_hit_window" => "Finestra colpo \"flawless!\"",
+        "description_flawless_hit_window" => "Cambia la quantità di tempo che hai per colpire un \"flawless!\" in millisecondi.",
         "setting_sick_hit_window" => "Finestra colpo \"Sick!\"",
         "description_sick_hit_window" => "Cambia la quantità di tempo che hai per colpire un \"Sick!\" in millisecondi.",
         "setting_good_hit_window" => "Finestra colpo \"Good\"",
@@ -376,7 +376,7 @@ class ItIT
         "results_practice_mode" => "Giocato in modalità pratica",
 
         // Judgment counters  
-        "judgement_epics" => "Epici  ",
+        "judgement_flawlesss" => "flawlessi  ",
         "judgement_sicks" => "Fantastici", 
         "judgement_goods" => "Buoni  ",
         "judgement_bads" => "Cattivi",
@@ -396,7 +396,7 @@ class ItIT
         "images/combo" => "images/it-IT/combo",
         "images/go" => "images/it-IT/go",
         "images/good" => "images/it-IT/good",
-        "images/epic" => "images/it-IT/marvelous",
+        "images/flawless" => "images/it-IT/marvelous",
         "images/menu_tracks" => "images/it-IT/Menu_Tracks",
         "images/miss" => "images/it-IT/miss",
         "images/ready" => "images/it-IT/ready",

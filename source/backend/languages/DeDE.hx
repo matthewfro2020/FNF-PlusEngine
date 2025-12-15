@@ -28,7 +28,7 @@ class DeDE
         "rating_good" => "Gut",
         "rating_great" => "Großartig",
         "rating_sick" => "Fantastisch!",
-        "rating_epic" => "Episch!!",
+        "rating_flawless" => "Makellos!!",
         "rating_perfect" => "Perfekt!!!",
 
         // Dialogues
@@ -274,8 +274,8 @@ class DeDE
         "description_hitsound_volume" => "Lustige Noten machen \"tick!\" wenn du sie triffst",
         "setting_rating_offset" => "Bewertungs-Versatz",
         "description_rating_offset" => "Ändert wie spät/früh du treffen musst für ein \"Sick!\"\nHöhere Werte bedeuten dass du später treffen musst",
-        "setting_epic_hit_window" => "\"Epic!\"-Treffer-Fenster",
-        "description_epic_hit_window" => "Ändert die Zeit die du hast um ein \"Epic!\" zu treffen in Millisekunden.",
+        "setting_flawless_hit_window" => "\"flawless!\"-Treffer-Fenster",
+        "description_flawless_hit_window" => "Ändert die Zeit die du hast um ein \"flawless!\" zu treffen in Millisekunden.",
         "setting_sick_hit_window" => "\"Sick!\"-Treffer-Fenster",
         "description_sick_hit_window" => "Ändert die Zeit die du hast um ein \"Sick!\" zu treffen in Millisekunden.",
         "setting_good_hit_window" => "\"Good\"-Treffer-Fenster",
@@ -376,7 +376,7 @@ class DeDE
         "results_practice_mode" => "Im Übungsmodus gespielt",
 
         // Judgment counters  
-        "judgement_epics" => "Episch ",
+        "judgement_flawlesss" => "Episch ",
         "judgement_sicks" => "Fantastisch", 
         "judgement_goods" => "Gut    ",
         "judgement_bads" => "Schlecht",
@@ -396,7 +396,7 @@ class DeDE
         "images/combo" => "images/de-DE/combo",
         "images/go" => "images/de-DE/go",
         "images/good" => "images/de-DE/good",
-        "images/epic" => "images/de-DE/marvelous",
+        "images/flawless" => "images/de-DE/marvelous",
         "images/menu_tracks" => "images/de-DE/Menu_Tracks",
         "images/miss" => "images/de-DE/miss",
         "images/ready" => "images/de-DE/ready",

@@ -28,7 +28,7 @@ class FrFR
         "rating_good" => "Bon",
         "rating_great" => "Super",
         "rating_sick" => "Excellent !",
-        "rating_epic" => "Épique !!",
+        "rating_flawless" => "Impeccable !!",
         "rating_perfect" => "Parfait !!!",
 
         // Dialogues
@@ -274,8 +274,8 @@ class FrFR
         "description_hitsound_volume" => "Les notes amusantes font \"tic !\" quand vous les touchez",
         "setting_rating_offset" => "Décalage de notation",
         "description_rating_offset" => "Change à quel point tard/tôt vous devez frapper pour un \"Sick!\"\nLes valeurs plus élevées signifient que vous devez frapper plus tard",
-        "setting_epic_hit_window" => "Fenêtre de frappe \"Epic!\"",
-        "description_epic_hit_window" => "Change la quantité de temps que vous avez pour frapper un \"Epic!\" en millisecondes.",
+        "setting_flawless_hit_window" => "Fenêtre de frappe \"flawless!\"",
+        "description_flawless_hit_window" => "Change la quantité de temps que vous avez pour frapper un \"flawless!\" en millisecondes.",
         "setting_sick_hit_window" => "Fenêtre de frappe \"Sick!\"",
         "description_sick_hit_window" => "Change la quantité de temps que vous avez pour frapper un \"Sick!\" en millisecondes.",
         "setting_good_hit_window" => "Fenêtre de frappe \"Good\"",
@@ -376,7 +376,7 @@ class FrFR
         "results_practice_mode" => "Joué en mode pratique",
 
         // Judgment counters  
-        "judgement_epics" => "Épiques",
+        "judgement_flawlesss" => "Épiques",
         "judgement_sicks" => "Excellents", 
         "judgement_goods" => "Bons   ",
         "judgement_bads" => "Mauvais",
@@ -396,7 +396,7 @@ class FrFR
         "images/combo" => "images/fr-FR/combo",
         "images/go" => "images/fr-FR/go",
         "images/good" => "images/fr-FR/good",
-        "images/epic" => "images/fr-FR/marvelous",
+        "images/flawless" => "images/fr-FR/marvelous",
         "images/menu_tracks" => "images/fr-FR/Menu_Tracks",
         "images/miss" => "images/fr-FR/miss",
         "images/ready" => "images/fr-FR/ready",

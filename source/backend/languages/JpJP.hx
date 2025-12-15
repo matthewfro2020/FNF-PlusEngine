@@ -28,7 +28,7 @@ class JpJP
         "rating_good" => "良い",
         "rating_great" => "すごい",
         "rating_sick" => "最高！",
-        "rating_epic" => "エピック！！",
+        "rating_flawless" => "エピック！！",
         "rating_perfect" => "パーフェクト！！！",
 
         // Dialogues
@@ -163,7 +163,7 @@ class JpJP
         "description_disable_reset_button" => "チェックすると、リセットを押しても何もしません。",
         "description_hitsound_volume" => "ノートをヒットすると面白い「ティック！」音がします。",
         "description_rating_offset" => "「最高！」をヒットするタイミングの遅い/早いを変更\n高い値はより遅くヒットする必要があることを意味します。",
-        "description_epic_hit_window" => "エピック！をヒットできる時間をミリ秒で変更します。",
+        "description_flawless_hit_window" => "エピック！をヒットできる時間をミリ秒で変更します。",
         "description_sick_hit_window" => "「最高！」をヒットできる時間を\nミリ秒で変更します。",
         "description_good_hit_window" => "「良い」をヒットできる時間を\nミリ秒で変更します。",
         "description_bad_hit_window" => "「悪い」をヒットできる時間を\nミリ秒で変更します。",
@@ -230,7 +230,7 @@ class JpJP
         "time_hours" => "時間",
 
         // Judgment counters  
-        "judgement_epics" => "エピック ",
+        "judgement_flawlesss" => "エピック ",
         "judgement_sicks" => "最高   ", 
         "judgement_goods" => "良い   ",
         "judgement_bads" => "悪い   ",
