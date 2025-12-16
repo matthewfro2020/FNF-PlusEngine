@@ -69,8 +69,19 @@ class MobileScaleMode extends BaseScaleMode
 	@:noCompletion
 	private static function set_allowWideScreen(value:Bool):Bool
 	{
+		if (allowWideScreen == value)
+			return value;
+			
 		allowWideScreen = value;
-		FlxG.scaleMode = new MobileScaleMode();
+
+		if (Std.isOfType(FlxG.scaleMode, MobileScaleMode))
+		{
+			if (FlxG.game != null)
+			{
+				FlxG.game.onResize(null);
+			}
+		}
+		
 		return value;
 	}
 }
