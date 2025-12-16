@@ -424,7 +424,7 @@ class IdID
         "file_save_success" => "{1} telah disimpan.",
         "file_save_fail" => "{1} tidak dapat disimpan.\n({2})",
         "permissions_message" => "Izin penyimpanan diperlukan untuk menyimpan data game dan mod.\nSilakan berikan izin yang diminta saat diminta.",
-        "create_directory_error" => "Gagal membuat direktori berikut:\n{1}\nSilakan periksa izin penyimpanan atau ruang yang tersedia.\nAplikasi mungkin tidak berfungsi dengan benar tanpa direktori-direktori ini.'",
+        "create_directory_error" => "Gagal membuat direktori berikut:\n{1}\nSilakan periksa izin penyimpanan atau ruang yang tersedia.\nAplikasi mungkin tidak berfungsi dengan benar tanpa direktori-direktori ini.",
 
         // Mobile Options
         "setting_extra_controls" => "Kontrol Ekstra",
