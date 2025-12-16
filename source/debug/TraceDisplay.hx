@@ -96,7 +96,7 @@ class TraceDisplay extends TextField
         
         // Verificar singleton - solo permitir una instancia
         if (instance != null) {
-            trace("TraceDisplay: There is already an instance, destroying the previous one");
+            trace("TraceDisplay: Ya existe una instancia, destruyendo la anterior");
             instance.destroy();
         }
         
