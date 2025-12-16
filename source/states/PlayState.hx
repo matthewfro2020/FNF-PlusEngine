@@ -142,6 +142,10 @@ class PlayState extends MusicBeatState
 	public var hscriptArray:Array<HScript> = [];
 	#end
 
+	#if LUA_ALLOWED
+	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
+	#end
+
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
 	public var DAD_X:Float = 100;
@@ -3125,6 +3129,10 @@ class PlayState extends MusicBeatState
 				FlxTimer.globalManager.clear();
 				FlxTween.globalManager.clear();
 				FlxG.camera.setFilters([]);
+
+				#if LUA_ALLOWED
+				modchartTweens.clear();
+				#end
 
 				if(GameOverSubstate.deathDelay > 0)
 				{
