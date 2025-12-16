@@ -251,17 +251,20 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	function addCharacter(reload:Bool = false)
 	{
 		var pos:Int = -1;
-		if(character != null)
-		{
-			pos = members.indexOf(character);
-			remove(character);
-			character.destroy();
-		}
+			if(character != null)
+			{
+				pos = members.indexOf(character);
+				var wasAnimatedIcon = character.animatedIcon;
+				remove(character);
+				character.destroy();
+			}
 
-		var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
-		character = new Character(0, 0, _char, isPlayer);
-		if(!reload && character.editorIsPlayer != null && isPlayer != character.editorIsPlayer)
-		{
+			var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
+			character = new Character(0, 0, _char, isPlayer);
+
+			if(reload && animatedIconCheckBox != null) {
+				character.animatedIcon = animatedIconCheckBox.checked;
+			}
 			character.isPlayer = !character.isPlayer;
 			character.flipX = (character.originalFlipX != character.isPlayer);
 			if(check_player != null) check_player.checked = character.isPlayer;
@@ -890,6 +893,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		positionYStepper.value = character.positionArray[1];
 		positionCameraXStepper.value = character.cameraPosition[0];
 		positionCameraYStepper.value = character.cameraPosition[1];
+
+		animatedIconCheckBox.checked = character.animatedIcon == true;
 		reloadAnimationDropDown();
 		updateHealthBar();
 	}
@@ -1182,7 +1187,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		healthColorStepperG.value = character.healthColorArray[1];
 		healthColorStepperB.value = character.healthColorArray[2];
 		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1], character.healthColorArray[2]);
-		healthIcon.changeIcon(character.healthIcon, false);
+		healthIcon.changeIcon(character.healthIcon, false, character.animatedIcon == true);
 		updatePresence();
 	}
 
