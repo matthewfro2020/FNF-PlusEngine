@@ -116,6 +116,38 @@ class MobileFunctions
 			return Haptic.vibrate(period, duration);
 		});
 
+		Lua_helper.add_callback(lua, "vibratePattern", function(pattern:Array<Int>, repeat:Int = -1) {
+			if (pattern == null || pattern.length == 0) {
+				FunkinLua.luaTrace('vibratePattern: No pattern specified.');
+				return false;
+			}
+			#if android
+			return PsychJNI.vibratePattern(pattern, repeat);
+			#else
+			Haptic.vibrate(pattern[0], pattern.length > 1 ? pattern[1] : 250);
+			return true;
+			#end
+	    });
+
+		Lua_helper.add_callback(lua, "vibrateIntensity", function(duration:Int, intensity:Float) {
+			if (intensity < 0 || intensity > 1) {
+				FunkinLua.luaTrace('vibrateIntensity: Intensity must be between 0 and 1.');
+				return false;
+			}
+			#if android
+			return PsychJNI.vibrateWithIntensity(duration, intensity);
+			#else
+			Haptic.vibrate(0, duration);
+			return true;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "cancelVibration", function() {
+			#if android
+			PsychJNI.cancelVibration();
+			#end
+		});
+
 		Lua_helper.add_callback(lua, "addTouchPad", (DPadMode:String, ActionMode:String, ?addToCustomSubstate:Bool = false, ?posAtCustomSubstate:Int = -1) ->
 		{
 			PlayState.instance.makeLuaTouchPad(DPadMode, ActionMode);
@@ -177,6 +209,38 @@ class MobileFunctions
 				return false;
 			}
 			return PlayState.instance.luaTouchPadReleased(button);
+		});
+
+		Lua_helper.add_callback(lua, "setTouchPadOpacity", function(opacity:Float) {
+			if (PlayState.instance.luaTouchPad == null) {
+				FunkinLua.luaTrace('setTouchPadOpacity: Touch Pad does not exist.');
+				return;
+			}
+			PlayState.instance.luaTouchPad.alpha = opacity;
+		});
+
+		Lua_helper.add_callback(lua, "setTouchPadScale", function(scale:Float) {
+			if (PlayState.instance.luaTouchPad == null) {
+				FunkinLua.luaTrace('setTouchPadScale: Touch Pad does not exist.');
+				return;
+			}
+			PlayState.instance.luaTouchPad.scale.set(scale, scale);
+		});
+
+		Lua_helper.add_callback(lua, "enableTouchPadButton", function(button:String, enable:Bool = true) {
+			if (PlayState.instance.luaTouchPad == null) {
+				FunkinLua.luaTrace('enableTouchPadButton: Touch Pad does not exist.');
+				return;
+			}
+			PlayState.instance.luaTouchPad.enableButton(button, enable);
+		});
+
+		Lua_helper.add_callback(lua, "setTouchPadPosition", function(x:Float, y:Float) {
+			if (PlayState.instance.luaTouchPad == null) {
+				FunkinLua.luaTrace('setTouchPadPosition: Touch Pad does not exist.');
+				return;
+			}
+			PlayState.instance.luaTouchPad.setPosition(x, y);
 		});
 
 		Lua_helper.add_callback(lua, "touchJustPressed", TouchUtil.justPressed);
@@ -325,17 +389,14 @@ class MobileFunctions
 #if android
 class AndroidFunctions
 {
-	// static var spicyPillow:AndroidBatteryManager = new AndroidBatteryManager();
 	public static function implement(funk:FunkinLua)
 	{
 		var lua:State = funk.lua;
-		// Lua_helper.add_callback(lua, "isRooted", AndroidTools.isRooted());
 		Lua_helper.add_callback(lua, "isDolbyAtmos", AndroidTools.isDolbyAtmos());
 		Lua_helper.add_callback(lua, "isAndroidTV", AndroidTools.isAndroidTV());
 		Lua_helper.add_callback(lua, "isTablet", AndroidTools.isTablet());
 		Lua_helper.add_callback(lua, "isChromebook", AndroidTools.isChromebook());
 		Lua_helper.add_callback(lua, "isDeXMode", AndroidTools.isDeXMode());
-		// Lua_helper.add_callback(lua, "isCharging", spicyPillow.isCharging());
 
 		Lua_helper.add_callback(lua, "backJustPressed", FlxG.android.justPressed.BACK);
 		Lua_helper.add_callback(lua, "backPressed", FlxG.android.pressed.BACK);
@@ -366,6 +427,30 @@ class AndroidFunctions
 			PsychJNI.setOrientation(FlxG.stage.stageWidth, FlxG.stage.stageHeight, false, hint);
 		});
 
+		Lua_helper.add_callback(lua, "getScreenBrightness", function():Float {
+			#if android
+			return PsychJNI.getScreenBrightness();
+			#else
+			return 1.0;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "setScreenBrightness", function(brightness:Float) {
+			if (brightness < 0 || brightness > 1) {
+				FunkinLua.luaTrace('setScreenBrightness: Brightness must be between 0 and 1.');
+				return;
+			}
+			#if android
+			PsychJNI.setScreenBrightness(brightness);
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "keepScreenOn", function(enable:Bool = true) {
+			#if android
+			PsychJNI.keepScreenOn(enable);
+			#end
+		});
+
 		Lua_helper.add_callback(lua, "minimizeWindow", () -> AndroidTools.minimizeWindow());
 
 		Lua_helper.add_callback(lua, "showToast", function(text:String, ?duration:Int, ?xOffset:Int, ?yOffset:Int) /* , ?gravity:Int*/
@@ -381,6 +466,96 @@ class AndroidFunctions
 				yOffset = 0;
 
 			AndroidToast.makeText(text, duration, -1, xOffset, yOffset);
+		});
+
+		Lua_helper.add_callback(lua, "getNetworkType", function():String {
+			#if android
+			return PsychJNI.getNetworkType();
+			#else
+			return "unknown";
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "isConnected", function():Bool {
+			#if android
+			return PsychJNI.isNetworkConnected();
+			#else
+			return true;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "isMeteredConnection", function():Bool {
+			#if android
+			return PsychJNI.isActiveNetworkMetered();
+			#else
+			return false;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "getTouchPosition", function(touchIndex:Int = 0):Array<Float> {
+			var touches = TouchUtil.getTouches();
+			if (touches.length > touchIndex) {
+				return [touches[touchIndex].screenX, touches[touchIndex].screenY];
+			}
+			return [0, 0];
+		});
+
+		Lua_helper.add_callback(lua, "getTouchPressure", function(touchIndex:Int = 0):Float {
+			#if android
+			return PsychJNI.getTouchPressure(touchIndex);
+			#else
+			return 1.0;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "getMultiTouchCount", function():Int {
+			return TouchUtil.getTouches().length;
+		});
+
+		Lua_helper.add_callback(lua, "getBatteryLevel", function():Int {
+			#if android
+			return PsychJNI.getBatteryLevel();
+			#else
+			return 100;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "isBatteryCharging", function():Bool {
+			#if android
+			return PsychJNI.isBatteryCharging();
+			#else
+			return false;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "getBatteryHealth", function():String {
+			#if android
+			return PsychJNI.getBatteryHealth();
+			#else
+			return "unknown";
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "getMediaVolume", function():Float {
+			#if android
+			return PsychJNI.getMediaVolume();
+			#else
+			return 1.0;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "setMediaVolume", function(volume:Float) {
+			#if android
+			PsychJNI.setMediaVolume(volume);
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "isHeadphonesConnected", function():Bool {
+			#if android
+			return PsychJNI.isHeadphonesConnected();
+			#else
+			return false;
+			#end
 		});
 
 		Lua_helper.add_callback(lua, "isScreenKeyboardShown", () -> PsychJNI.isScreenKeyboardShown());
@@ -403,6 +578,52 @@ class AndroidFunctions
 			PsychJNI.setActivityTitle(text);
 		});
 	}
+}
+
+class DeviceInfoFunctions {
+    public static function implement(funk:FunkinLua) {
+        var lua:State = funk.lua;
+        
+        Lua_helper.add_callback(lua, "getDeviceModel", function():String {
+            #if android
+            return PsychJNI.getDeviceModel();
+            #else
+            return "Non-Android Device";
+            #end
+        });
+        
+        Lua_helper.add_callback(lua, "getAndroidVersion", function():String {
+            #if android
+            return PsychJNI.getAndroidVersion();
+            #else
+            return "0";
+            #end
+        });
+        
+        Lua_helper.add_callback(lua, "getRAMSize", function():Float {
+            #if android
+            return PsychJNI.getTotalRAM() / (1024 * 1024 * 1024);
+            #else
+            return 0;
+            #end
+        });
+        
+        Lua_helper.add_callback(lua, "getFreeStorage", function():Float {
+            #if android
+            return PsychJNI.getFreeStorageSpace() / (1024 * 1024 * 1024);
+            #else
+            return 0;
+            #end
+        });
+        
+        Lua_helper.add_callback(lua, "hasNotch", function():Bool {
+            #if android
+            return PsychJNI.hasDisplayCutout();
+            #else
+            return false;
+            #end
+        });
+    }
 }
 #end
 #end
