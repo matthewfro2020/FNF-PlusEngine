@@ -78,7 +78,7 @@ class MobileScaleMode extends BaseScaleMode
 		{
 			if (FlxG.game != null)
 			{
-				FlxG.game.onResize(null);
+				FlxG.resizeGame(FlxG.width, FlxG.height);
 			}
 		}
 		
