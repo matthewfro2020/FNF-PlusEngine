@@ -5,7 +5,9 @@ import debug.TraceDisplay;
 import debug.TraceButton;
 import debug.DebugButton;
 import backend.Highscore;
+import backend.ClientPrefs;
 import flixel.FlxGame;
+import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.Bitmap;
@@ -178,7 +180,22 @@ class Main extends Sprite
 			FlxG.scaleMode = new MobileScaleMode();
 		});
 		#end
-		addChild(new FlxGame(game.width, game.height, #if COPYSTATE_ALLOWED !CopyState.checkExistingFiles() ? CopyState : #end game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		
+		// Determine initial state based on preloader preference
+		var initialState:Class<FlxState> = game.initialState;
+		#if COPYSTATE_ALLOWED
+		if (!CopyState.checkExistingFiles()) {
+			initialState = CopyState;
+		} else
+		#end
+		{
+			// Load prefs early to check preloader setting
+			if (ClientPrefs.data.enablePreloader) {
+				initialState = backend.Preloader;
+			}
+		}
+		
+		addChild(new FlxGame(game.width, game.height, initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
