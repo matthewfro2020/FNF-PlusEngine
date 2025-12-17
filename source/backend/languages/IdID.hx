@@ -274,6 +274,8 @@ class IdID
         "description_framerate" => "Cukup jelas, bukan?",
         "setting_fps_rework" => "Pembenahan FPS",
         "description_fps_rework" => "Jika dicentang, ini mencegah game menjadi \"lebih lambat\" dan \"lebih halus\" saat FPS saat ini lebih rendah dari batas framerate.",
+        "setting_enable_preloader" => "Aktifkan Preloader",
+        "description_enable_preloader" => "Jika diaktifkan, akan memuat terlebih dahulu aset umum (gambar, suara, musik) saat startup untuk meningkatkan kinerja.\nDapat memperpanjang waktu pemuatan awal.",
 
         // Visuals Settings
         "setting_note_skins" => "Note Skins:",
@@ -414,7 +416,7 @@ class IdID
         "setting_holds_behind_strums" => "Hold Di Belakang Strum",
         "description_holds_behind_strums" => "Menampilkan hold di belakang reseptor, sederhana :)",
 
-        // Mobilee
+        // Mobile
         "mobile_notice" => "Pemberitahuan!",
         "mobile_success" => "Sukses!",
         "mobile_error" => "Kesalahan!",
