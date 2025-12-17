@@ -19,6 +19,7 @@ import states.TitleState;
 	public var popUpRating:Bool = true;
 	public var vsync:Bool = false;
 	public var gameOverVibration:Bool = false;
+	public var littleTimmyMode:Bool = false;
 	public var fpsRework:Bool = false;
 	
 	// Sistema de Accuracy/Rating
@@ -115,7 +116,8 @@ import states.TitleState;
 		'botplay' => false,
 		'opponentplay' => false,
 		'perfect' => false, // Perfect Mode - insta-kill on any judgement below Sick
-		'nodroppenalty' => false // Hold drops don't cause misses
+		'nodroppenalty' => false, // Hold drops don't cause misses
+		'littletimmymode' => false
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
