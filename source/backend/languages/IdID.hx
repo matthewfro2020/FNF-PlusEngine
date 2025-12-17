@@ -63,7 +63,7 @@ class IdID
         "rating_good" => "Bagus",
         "rating_great" => "Hebat",
         "rating_sick" => "Sick!",
-        "rating_flawless" => "Tanpa Cela!!",
+        "rating_flawless" => "Mulus!!",
         "rating_perfect" => "Sempurna!!!",
         "rating_marvelous" => "LUAR BIASA!!!!",
         "rating_legendary" => "★ LEGENDARIS ★",
@@ -363,8 +363,8 @@ class IdID
         "description_hitsound_volume" => "Notes lucu berbunyi \"Tick!\" saat Anda hit.",
         "setting_rating_offset" => "Penyesuaian Rating",
         "description_rating_offset" => "Mengubah seberapa terlambat/awal Anda harus menekan untuk mendapatkan \"Sick!\"\nNilai yang lebih tinggi berarti Anda harus menekan lebih terlambat.",
-        "setting_flawless_hit_window" => "Flawless! Jendela Hit",
-        "description_flawless_hit_window" => "Mengubah berapa lama waktu yang Anda miliki untuk mencapai Flawless! dalam milidetik.",
+        "setting_flawless_hit_window" => "Mulus! Jendela Hit",
+        "description_flawless_hit_window" => "Mengubah berapa lama waktu yang Anda miliki untuk mencapai Mulus! dalam milidetik.",
         "setting_sick_hit_window" => "Sick! Jendela Hit",
         "description_sick_hit_window" => "Mengubah jumlah waktu yang Anda miliki\nuntuk menekan tombol \"Sick!\" dalam milidetik.",
         "setting_good_hit_window" => "Baik Jendela Hit",
@@ -414,16 +414,17 @@ class IdID
         "setting_holds_behind_strums" => "Hold Di Belakang Strum",
         "description_holds_behind_strums" => "Menampilkan hold di belakang reseptor, sederhana :)",
 
-        // Mobile
+        // Mobilee
         "mobile_notice" => "Pemberitahuan!",
         "mobile_success" => "Sukses!",
         "mobile_error" => "Kesalahan!",
+        "mobile_warning" => "Peringatan!",
         "touchpad_dpadmode_missing" => "touchPad dpadMode \"{1}\" tidak ada.",
         "touchpad_actionmode_missing" => "touchPad actionMode \"{1}\" tidak ada.",
         "file_save_success" => "{1} telah disimpan.",
         "file_save_fail" => "{1} tidak dapat disimpan.\n({2})",
-        "permissions_message" => "Jika Anda telah menerima izin, semuanya baik-baik saja!\nJika tidak, bersiaplah untuk mengalami crash\nTekan OK untuk melihat apa yang terjadi",
-        "create_directory_error" => "Silakan buat direktori ke\n{1}\nTekan OK untuk menutup permainan",
+        "permissions_message" => "Izin penyimpanan diperlukan untuk menyimpan data game dan mod.\nSilakan berikan izin yang diminta saat diminta.",
+        "create_directory_error" => "Gagal membuat direktori berikut:\n{1}\nSilakan periksa izin penyimpanan atau ruang yang tersedia.\nAplikasi mungkin tidak berfungsi dengan benar tanpa direktori-direktori ini.",
 
         // Mobile Options
         "setting_extra_controls" => "Kontrol Ekstra",
@@ -539,7 +540,7 @@ class IdID
         "fnf_version" => "Malam Jumat Funkin\' v",
 
         // Judgment counters  
-        "judgement_flawlesss" => "Flawless",
+        "judgement_flawlesss" => "Mulus",
         "judgement_sicks" => "Sick", 
         "judgement_goods" => "Baik",
         "judgement_bads" => "Buruk",
@@ -561,7 +562,7 @@ class IdID
         "images/comboBroken" => "images/id-ID/comboBroken",
         "images/go" => "images/id-ID/go",
         "images/good" => "images/id-ID/good",
-        "images/flawless" => "images/flawless",
+        "images/flawless" => "images/id-ID/flawless",
         "images/menu_tracks" => "images/id-ID/Menu_Tracks",
         "images/miss" => "images/id-ID/miss",
         "images/ready" => "images/id-ID/ready",
@@ -572,6 +573,7 @@ class IdID
         // Pixel UI
         "images/pixelUI/bad-pixel" => "images/id-ID/pixelUI/bad-pixel",
         "images/pixelUI/good-pixel" => "images/id-ID/pixelUI/good-pixel",
+        "images/pixelUI/flawless-pixel" => "images/id-ID/pixelUI/flawless-pixel",
         "images/pixelUI/ready-pixel" => "images/id-ID/pixelUI/ready-pixel",
         "images/pixelUI/set-pixel" => "images/pixelUI/set-pixel", 
         "images/pixelUI/shit-pixel" => "images/id-ID/pixelUI/shit-pixel",

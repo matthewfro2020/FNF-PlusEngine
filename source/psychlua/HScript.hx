@@ -179,9 +179,19 @@ class HScript extends Iris
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
+
+		// Backwards compatibility: older mods expect a global `modchartTweens` map
+		// that stores tweens by tag. Use the shared PlayState instance so all
+		// scripts access the same map across the game (matches legacy behaviour).
+		#if LUA_ALLOWED
+		set('modchartTweens', PlayState.instance != null ? PlayState.instance.modchartTweens : null);
+		#else
+		set('modchartTweens', null);
+		#end
 		set('FlxFlicker', flixel.effects.FlxFlicker);
 		set('FlxColor', CustomFlxColor);
 		set('FlxAxes', CustomFlxAxes);
+		set('FlxSpriteGroup', flixel.group.FlxSpriteGroup);
 		set('FlxTypedGroup', flixel.group.FlxTypedGroup);
 		set('FlxGroup', flixel.group.FlxGroup);
 		set('Capabilities', openfl.system.Capabilities);
