@@ -190,6 +190,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			['None', 'Tea Time', 'Breakfast', 'Breakfast (Pico)']);
 		addOption(option);
 		option.onChange = onChangePauseMusic;
+
+		var option:Option = new Option('Intro Video',
+		    'Show intro video when starting the game',
+			'showIntroVideo',
+			BOOL);
+		addOption(option);
 		
 		#if CHECK_FOR_UPDATES
 		var option:Option = new Option('Check for Updates',
