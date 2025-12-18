@@ -19,12 +19,8 @@ import shaders.ColorSwap;
 import states.StoryMenuState;
 import states.MainMenuState;
 
-#if hxvlc
-import hxvlc.flixel.FlxVideoSprite;
-#end
-
 #if mobile
-import mobile.backend.TouchUtil
+import mobile.backend.TouchUtil;
 #end
 
 typedef TitleData =
@@ -76,7 +72,7 @@ class TitleState extends MusicBeatState
 	var easterEggKeysBuffer:String = '';
 	#end
 
-	var introVideo:FlxVideoSprite;
+	var introVideo:FlxVideo;
 	var skipText:FlxText;
 	var showingIntro:Bool = false;
 	var introFinished:Bool = false;
@@ -177,7 +173,7 @@ class TitleState extends MusicBeatState
 		skipText.alpha = 0;
 		add(skipText);
 
-		introVideo = new FlxVideoSprite();
+		introVideo = new FlxVideo();
 		introVideo.onEndReached.add(function() {
 			onIntroFinished();
 		});
