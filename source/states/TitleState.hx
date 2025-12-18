@@ -87,6 +87,7 @@ class TitleState extends MusicBeatState
 		{
 			ClientPrefs.loadPrefs();
 			Language.reloadPhrases();
+			shaders.ColorblindFilter.UpdateColors();
 		}
 
 		#if CHECK_FOR_UPDATES

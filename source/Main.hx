@@ -8,6 +8,7 @@ import backend.Highscore;
 import backend.ClientPrefs;
 import flixel.FlxGame;
 import flixel.FlxState;
+import shaders.ColorblindFilter;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.Bitmap;

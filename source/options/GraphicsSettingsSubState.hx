@@ -44,6 +44,10 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'colorblindMode',
 			STRING,
 			['None', 'Protanopia', 'Protanomaly', 'Deuteranopia', 'Deuteranomaly', 'Tritanopia', 'Tritanomaly', 'Achromatopsia', 'Achromatomaly']);
+		option.onChange = () -> {
+			ClientPrefs.saveSettings();
+			shaders.ColorblindFilter.UpdateColors();
+		};
 		addOption(option);
 
 		var option:Option = new Option('GPU Caching', //Name
