@@ -2,13 +2,13 @@ package states;
 
 import backend.WeekData;
 import backend.ClientPrefs;
-import flixel.FlxVideo;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
+import flixel.video.FlxVideo;
 import haxe.Json;
 
 import openfl.Assets;
