@@ -36,6 +36,7 @@ import sys.thread.Tls;
 
 #if android
 import lime.system.System;
+import lime.app.Application;
 #end
 
 /**
@@ -51,7 +52,7 @@ class CopyState extends MusicBeatState
 	public static var maxLoopTimes:Int = 0;
 
 	private static var fileCopyMutex:Mutex = new Mutex();
-	private var loopTimes:AtomicInt = 0;
+	private var loopTimes:AtomicInt = new AtomicInt(0);
 	private var failedFiles:MutexArray<String> = new MutexArray<String>();
 	private var failedFilesStack:MutexArray<String> = new MutexArray<String>();
 	private var filesToRetry:MutexArray<String> = new MutexArray<String>();
@@ -303,10 +304,11 @@ class CopyState extends MusicBeatState
 	#if android
 	private function getAndroidModsPath():String
 	{
+		var appId = getApplicationID();
 		var possiblePaths = [
-			Sys.getEnv("EXTERNAL_STORAGE") + "/Android/data/" + System.applicationID + "/mods/",
+			Sys.getEnv("EXTERNAL_STORAGE") + "/Android/data/" + appId + "/mods/",
 			Sys.getEnv("EXTERNAL_STORAGE") + "/mods/",
-			"/sdcard/Android/data/" + System.applicationID + "/mods/",
+			"/sdcard/Android/data/" + appId + "/mods/",
 			"/sdcard/mods/"
 		];
 		
@@ -338,6 +340,15 @@ class CopyState extends MusicBeatState
 			trace('Failed to create directory: $path - $e');
 			return false;
 		}
+	}
+	
+	private function getApplicationID():String
+	{
+		#if (lime >= "8.0.0")
+		return Application.current.meta.get("packageName");
+		#else
+		return System.applicationID;
+		#end
 	}
 	#end
 
@@ -442,10 +453,11 @@ class CopyState extends MusicBeatState
 	#if android
 	private static function getAndroidModsPathStatic():String
 	{
+		var appId = getApplicationIDStatic();
 		var possiblePaths = [
-			Sys.getEnv("EXTERNAL_STORAGE") + "/Android/data/" + System.applicationID + "/mods/",
+			Sys.getEnv("EXTERNAL_STORAGE") + "/Android/data/" + appId + "/mods/",
 			Sys.getEnv("EXTERNAL_STORAGE") + "/mods/",
-			"/sdcard/Android/data/" + System.applicationID + "/mods/",
+			"/sdcard/Android/data/" + appId + "/mods/",
 			"/sdcard/mods/"
 		];
 		
@@ -458,6 +470,15 @@ class CopyState extends MusicBeatState
 		}
 		
 		return possiblePaths[0];
+	}
+	
+	private static function getApplicationIDStatic():String
+	{
+		#if (lime >= "8.0.0")
+		return Application.current.meta.get("packageName");
+		#else
+		return System.applicationID;
+		#end
 	}
 	#end
 	
