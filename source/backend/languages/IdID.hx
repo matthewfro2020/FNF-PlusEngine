@@ -345,7 +345,7 @@ class IdID
         "setting_pause_music-none" => "Tidak ada",
         "setting_pause_music-tea-time" => "Waktu minum teh",
         "setting_pause_music-breakfast" => "Sarapan",
-        "setting_pause_music-breakfast-pico" "Sarapan (Pico)",
+        "setting_pause_music-breakfast-pico" => "Sarapan (Pico)",
         "description_pause_music" => "Lagu apa yang Anda sukai untuk layar jeda?",
         "setting_check_for_updates" => "Periksa Pembaruan",
         "description_check_for_updates" => "Pada versi rilis, aktifkan opsi ini untuk memeriksa pembaruan saat Anda memulai game.",
