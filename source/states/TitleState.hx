@@ -8,7 +8,6 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
-import flixel.video.FlxVideo;
 import haxe.Json;
 
 import openfl.Assets;
@@ -19,6 +18,10 @@ import shaders.ColorSwap;
 
 import states.StoryMenuState;
 import states.MainMenuState;
+
+#if VIDEOS_ALLOWED
+import hxvlc.flixel.FlxVideoSprite;
+#end
 
 #if mobile
 import mobile.backend.TouchUtil;
@@ -73,7 +76,7 @@ class TitleState extends MusicBeatState
 	var easterEggKeysBuffer:String = '';
 	#end
 
-	var introVideo:FlxVideo;
+	var introVideo:FlxVideoSprite;
 	var skipText:FlxText;
 	var showingIntro:Bool = false;
 	var introFinished:Bool = false;
@@ -86,22 +89,14 @@ class TitleState extends MusicBeatState
 		super.create();
 		Paths.clearUnusedMemory();
 
-		// Si viene del substate, forzar reinicio completo
-		if(fromSubstate)
-		{
-			initialized = false;
-			fromSubstate = false;
-			forceShowIntro = true; // Marcar que debe mostrar la intro
-			closedState = false; // Resetear para que las letras aparezcan
-			trace('TitleState: Coming from substate, forcing full restart with intro');
-		}
-
 		if(!initialized)
 		{
 			ClientPrefs.loadPrefs();
 			Language.reloadPhrases();
 			shaders.ColorblindFilter.UpdateColors();
 		}
+
+		if(FlxG.save.data.introFinished == null) FlxG.save.data.introFinished = false;
 
 		#if CHECK_FOR_UPDATES
 		if (ClientPrefs.data.checkForUpdates) {
@@ -135,7 +130,7 @@ class TitleState extends MusicBeatState
 
 		FlxG.mouse.visible = false;
 
-		var shouldShowIntro:Bool = (!initialized || forceShowIntro) && ClientPrefs.data.showIntroVideo && !introFinished;
+		var shouldShowIntro:Bool = (!initialized || forceShowIntro) && ClientPrefs.data.showIntroVideo && !FlxG.save.data.introFinished;
 		
 		if(shouldShowIntro)
 		{
@@ -174,16 +169,16 @@ class TitleState extends MusicBeatState
 		skipText.alpha = 0;
 		add(skipText);
 
-		introVideo = new FlxVideo();
-		introVideo.onEndReached.add(function() {
+		introVideo = new FlxVideoSprite();
+		introVideo.bitmap.onEndReached.add(function() {
 			onIntroFinished();
 		});
 
 		var videoPath:String = Paths.video('titleIntro');
-		if(Paths.exists(videoPath))
+		if(videoPath != null)
 		{
-			introVideo.play(videoPath);
-			introVideo.volume = 0;
+			introVideo.load(videoPath);
+			introVideo.play();
 			add(introVideo);
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
@@ -218,10 +213,12 @@ class TitleState extends MusicBeatState
 		
 		showingIntro = false;
 		introFinished = true;
+		FlxG.save.data.introFinished = true;
+		FlxG.save.flush();
 
 		if (introVideo != null)
 		{
-			introVideo.dispose();
+			introVideo.destroy();
 			introVideo = null;
 		}
 
