@@ -185,8 +185,12 @@ class Main extends Sprite
 		// Determine initial state based on preloader preference
 		var initialState:Class<FlxState> = game.initialState;
 		#if COPYSTATE_ALLOWED
-		if (!CopyState.checkExistingFiles()) {
-			initialState = CopyState;
+		var needsCopy:Bool = false;
+		#if sys
+		needsCopy = !sys.FileSystem.exists("path/to/required/file.txt");
+		#end
+		if (needsCopy) {
+			initialState = states.CopyState;
 		} else
 		#end
 		{
