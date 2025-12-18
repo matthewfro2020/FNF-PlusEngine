@@ -2,6 +2,8 @@ package states;
 
 import backend.WeekData;
 import backend.ClientPrefs;
+import backend.Conductor;
+import backend.Language;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -9,6 +11,16 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import haxe.Json;
+
+import flixel.util.FlxColor;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
+import flixel.text.FlxText;
+import flixel.FlxSprite;
+import flixel.util.FlxTimer;
+import flixel.FlxG;
 
 import openfl.Assets;
 import openfl.display.Bitmap;
@@ -24,7 +36,8 @@ import hxvlc.flixel.FlxVideoSprite;
 #end
 
 #if mobile
-import mobile.backend.TouchUtil
+import mobile.backend.TouchUtil;
+import mobile.backend.MobileData;
 #end
 
 typedef TitleData =
@@ -182,22 +195,20 @@ class TitleState extends MusicBeatState
 			onIntroFinished();
 		});
 
-		var videoPath:String = Paths.video('titleIntro');
-		if(Paths.exists(videoPath))
-		{
-			introVideo.play(videoPath);
-			introVideo.volume = 0;
-			add(introVideo);
-
-			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				canSkip = true;
-				FlxTween.tween(skipText, {alpha: 1}, 0.5);
-				updateSkipText();
-			});
-		}
-		else
-		{
-			trace('Intro video not found, skipping to normal intro');
+		try {
+			var videoPath:String = Paths.video('titleIntro');
+			if(Paths.exists(videoPath))
+			{
+				introVideo.play(videoPath);
+				introVideo.volume = 0;
+				add(introVideo);
+			}
+			else
+			{
+				throw 'Video not found';
+			}
+		} catch(e:Dynamic) {
+			trace('Error loading intro video: ' + e);
 			onIntroFinished();
 		}
 	}
@@ -295,9 +306,8 @@ class TitleState extends MusicBeatState
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
 		// Si viene del substate y la música existe pero no está sonando, reiniciarla
-		else if (!initialized && FlxG.sound.music != null)
+		else if (initialized && FlxG.sound.music == null)
 		{
-			FlxG.sound.music.stop();
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
@@ -347,7 +357,8 @@ class TitleState extends MusicBeatState
 			titleText.animation.findByPrefix(animFrames, "ENTER FREEZE");
 		}
 		
-		if (newTitle = animFrames.length > 0)
+		newTitle = (animFrames.length > 0);
+		if (newTitle)
 		{
 			titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
 			titleText.animation.addByPrefix('press', ClientPrefs.data.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
@@ -573,7 +584,7 @@ class TitleState extends MusicBeatState
 
 			if (initialized && !transitioning && skippedIntro)
 			{
-				if (newTitle && !pressedEnter)
+				if (newTitle && !pressedEnter && skippedIntro)
 				{
 					var timer:Float = titleTimer;
 					if (timer >= 1)
@@ -710,7 +721,6 @@ class TitleState extends MusicBeatState
 	}
 
 	private var sickBeats:Int = 0; //Basically curBeat but won't be skipped if you hold the tab or resize the screen
-	public static var closedState:Bool = false;
 	override function beatHit()
 	{
 		super.beatHit();
@@ -731,7 +741,7 @@ class TitleState extends MusicBeatState
 			else if(curBeat % 2 == 0) gfDance.animation.play('idle', true);
 		}
 
-		if(!closedState && !showingIntro)
+		if(!closedState && !showingIntro && credGroup != null && textGroup != null)
 		{
 			sickBeats++;
 			switch (sickBeats)
