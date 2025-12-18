@@ -4643,6 +4643,10 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note):Void
 	{
+		if (!ClientPrefs.data.disableHoldAnimations || !note.isSustainNote) {
+            dad.holdTimer = 0;
+        }
+		
 		var result:Dynamic = callOnLuas('opponentNoteHitPre', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 		if(result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll) result = callOnHScript('opponentNoteHitPre', [note]);
 
@@ -4700,6 +4704,10 @@ class PlayState extends MusicBeatState
 	}
 	public function goodNoteHit(note:Note):Void
 	{
+		if (!ClientPrefs.data.disableHoldAnimations || !note.isSustainNote) {
+            boyfriend.holdTimer = 0;
+        }
+
 		if(note.wasGoodHit) return;
 		if(cpuControlled && note.ignoreNote) return;
 

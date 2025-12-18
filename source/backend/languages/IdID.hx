@@ -284,7 +284,7 @@ class IdID
 
         // Visuals Settings
         "setting_note_skins" => "Note Skins:",
-        "setting_note_skins-default" => "Default",
+        "setting_note_skins-default" => "Bawaan",
         "setting_note_skins-future" => "Masa Depan",
         "setting_note_skins-chip" => "Chip",
         "description_note_skins" => "Pilih Note skin yang Anda sukai",
@@ -375,6 +375,8 @@ class IdID
         "description_pop_up_score" => "Jika dicentang, akan menampilkan pop-up kombo dan rating saat Anda menekan note.",
         "setting_disable_reset_button" => "Nonaktifkan Tombol Reset",
         "description_disable_reset_button" => "Jika dicentang, menekan tombol Reset tidak akan melakukan apa-apa.",
+        "setting_disable_hold_animations" => "Nonaktifkan Animasi Hold",
+        "description_disable_hold_animations" => "Jika dicentang, note holds tidak akan memicu animasi karakter,\nmemungkinkan gameplay yang lebih lancar pada note yang banyak menggunakan menyusut.",
         "setting_game_over_vibration" => "Getar Game Over",
         "description_game_over_vibration" => "Jika dicentang, perangkat Anda akan bergetar saat kalah.",
         "setting_hitsound_volume" => "Hitsound Volume",
