@@ -146,8 +146,7 @@ class MusicBeatState extends FlxState
 		super.create();
 
 		if(!skip) {
-			CustomFadeTransition.requestTransition(0.7, true, function() {
-			});
+			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -269,14 +268,11 @@ class MusicBeatState extends FlxState
 		if(nextState == null)
 			nextState = FlxG.state;
 
-		var transitionCallback:Void->Void;
-		if(nextState == FlxG.state) {
-			transitionCallback = function() FlxG.resetState();
-		} else {
-			transitionCallback = function() FlxG.switchState(nextState);
-		}
-
-		CustomFadeTransition.requestTransition(0.7, false, transitionCallback);
+		FlxG.state.openSubState(new CustomFadeTransition(0.7, false));
+		if(nextState == FlxG.state)
+			CustomFadeTransition.finishCallback = function() FlxG.resetState();
+		else
+			CustomFadeTransition.finishCallback = function() FlxG.switchState(nextState);
 	}
 
 	public static function getState():MusicBeatState {
