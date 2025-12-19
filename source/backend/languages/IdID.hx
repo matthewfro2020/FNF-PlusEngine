@@ -105,6 +105,14 @@ class IdID
         "no_score" => "Tidak ada skor.",
 
         // Mods Menu
+        "no_mods_installed" => "TIDAK ADA MOD YANG DIINSTAL\nTEKAN TOMBOL KEMBALI UNTUK KELUAR ATAU INSTAL MOD",
+        "no_mods_found" => "Tidak ditemukan mod.",
+        "mod_restart" => "* Mengaktifkan atau menonaktifkan mod ini akan me-restart permainan.",
+        "reload_button" => "MUAT ULANG",
+        "enable_all_button" => "AKTIFKAN SEMUA",
+        "disable_all_button" => "MATIKAN SEMUA",
+
+        // Mods Menu (Bulid)
         "mods_count" => "Mods: {0} total, {1} diaktifkan",
         "mods_footer_hint" => "Gunakan tombol panah untuk navigasi, tekan ENTER untuk memilih, tekan ESC untuk kembali",
         "mods_list_title" => "MODS TERINSTAL",
@@ -200,7 +208,6 @@ class IdID
         "note_colors_notitg" => "Shader RGB Dinonaktifkan - Skin NotITG mempertahankan warna asli",
         "note_colors_tip" => "Tekan RESET untuk mereset Bagian Note dipilih.",
         "note_colors_hold_tip" => "Tahan {1} + Tekan RESET key untuk mereset Note dipilih sepenuhnya.",
-        "note_colors_shift" => "Shift",
         "note_colors_lb" => "Tombol Bahu Kiri",
 
         // Adjust Delay and Combo Menu

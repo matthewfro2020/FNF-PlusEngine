@@ -4,171 +4,258 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.util.FlxGradient;
 import flixel.FlxCamera;
 import states.MainMenuState;
+import haxe.ds.List;
 
 class CustomFadeTransition extends MusicBeatSubstate {
-	public static var finishCallback:Void->Void;
-	var isTransIn:Bool = false;
-    
-    // ← MEJORADO: Sistema de bloqueo más robusto
-    public static var isTransitioning:Bool = false;
-    public static var currentTransition:CustomFadeTransition = null; // ← NUEVO: Referencia global
-    
-    // Elementos de la puerta morada
-    var topDoor:FlxSprite;
-    var bottomDoor:FlxSprite;
-    var waterMark:FlxText;
-    var eventText:FlxText;
-    var iconSprite:FlxSprite;
-    
-    // Colores morados inspirados en Psych Engine para gradientes
-    static final DOOR_COLOR_LIGHT:FlxColor = 0xFF8B5CF6;   // Morado claro
-    static final DOOR_COLOR_MAIN:FlxColor = 0xFF6B46C1;    // Morado principal
-    static final DOOR_COLOR_DARK:FlxColor = 0xFF4C1D95;    // Morado oscuro
-    static final DOOR_COLOR_DARKER:FlxColor = 0xFF2D1B69;  // Morado muy oscuro
+    public var finishCallback:Void->Void;
 
-	var duration:Float;
-    
-    // Tweens para mejor control
-    var topDoorTween:FlxTween;
-    var bottomDoorTween:FlxTween;
-    var textTween:FlxTween;
-    var iconTween:FlxTween;
-    
-    var isDestroyed:Bool = false;
-    var isClosing:Bool = false;
-    
-    // Lista de todos los tweens activos
-    var activeTweens:Array<FlxTween> = [];
-    
-    // ← NUEVO: ID único para cada transición
-    var transitionId:String;
-    
-    // ← NUEVO: Función para generar ID único
-    static function generateId():String {
-        return 'transition_' + Date.now().getTime() + '_' + Math.floor(Math.random() * 1000);
-    }
-    
-    // ← NUEVO: Función estática para cancelar transición actual
-    public static function cancelCurrentTransition():Void {
-        if (currentTransition != null && !currentTransition.isDestroyed) {
-            trace('Canceling current transition: ${currentTransition.transitionId}');
-            currentTransition.forceClose();
-        }
-        
-        // ← RESETEAR ESTADOS GLOBALES
-        isTransitioning = false;
-        currentTransition = null;
-        finishCallback = null;
-    }
-    
-    // Función para registrar tweens
-    function addTween(tween:FlxTween):FlxTween {
-        if (tween != null) {
-            activeTweens.push(tween);
-        }
-        return tween;
+    private static var transitionQueue:List<TransitionRequest> = new List();
+    private static var queueMutex:Bool = false; // Simple mutex
+
+    private static var cameraPool:Array<FlxCamera> = [];
+    private static var MAX_CAMERA_POOL:Int = 2;
+
+    public static var currentTransition(default, null):CustomFadeTransition = null;
+
+    private typedef TransitionRequest = {
+        var duration:Float;
+        var isTransIn:Bool;
+        var callback:Void->Void;
+        var id:String;
     }
 
-    public function new(duration:Float = 0.5, isTransIn:Bool)
-	{
-		this.duration = duration;
-		this.isTransIn = isTransIn;
-        this.activeTweens = [];
-        this.transitionId = generateId();
+    private var state:TransitionState = NONE;
+    private enum TransitionState {
+        NONE;
+        CREATING;
+        ACTIVE;
+        CLOSING;
+        DESTROYED;
+    }
+
+    private var topDoor:FlxSprite;
+    private var bottomDoor:FlxSprite;
+    private var waterMark:FlxText;
+    private var eventText:FlxText;
+    private var iconSprite:FlxSprite;
+
+    static final DOOR_COLOR_LIGHT:FlxColor = 0xFF8B5CF6;
+    static final DOOR_COLOR_MAIN:FlxColor = 0xFF6B46C1;
+    static final DOOR_COLOR_DARK:FlxColor = 0xFF4C1D95;
+    static final DOOR_COLOR_DARKER:FlxColor = 0xFF2D1B69;
+    
+    private var duration:Float;
+    private var isTransIn:Bool;
+    private var transitionId:String;
+
+    private var activeTweens:Array<FlxTween> = [];
+
+    public static function requestTransition(duration:Float = 0.5, isTransIn:Bool, callback:Void->Void = null):String {
+        var id = generateId();
         
-        // ← CANCELAR TRANSICIÓN ANTERIOR ANTES DE CREAR NUEVA
-        if (currentTransition != null && currentTransition != this) {
-            trace('Canceling previous transition before creating new one');
-            cancelCurrentTransition();
+        queueTransition({
+            duration: duration,
+            isTransIn: isTransIn,
+            callback: callback,
+            id: id
+        });
+        
+        return id;
+    }
+
+    public static function cancelTransition(id:String):Bool {
+        if (currentTransition != null && currentTransition.transitionId == id) {
+            currentTransition.unifiedCleanup();
+            return true;
+        }
+
+        acquireMutex();
+        var removed = false;
+        for (req in transitionQueue) {
+            if (req.id == id) {
+                transitionQueue.remove(req);
+                removed = true;
+                break;
+            }
+        }
+        releaseMutex();
+        
+        return removed;
+    }
+
+    public static function cancelAllTransitions():Void {
+        if (currentTransition != null) {
+            currentTransition.unifiedCleanup();
         }
         
-        // ← ESTABLECER COMO TRANSICIÓN ACTUAL
-        currentTransition = this;
-        isTransitioning = true;
-        
-		super();
-	}
+        acquireMutex();
+        transitionQueue = new List();
+        releaseMutex();
+    }
 
-	override function create()
-	{
+    private static function generateId():String {
+        static var counter:Int = 0;
+        return 'transition_${counter++}_${Date.now().getTime()}';
+    }
+    
+    private static function acquireMutex():Void {
+        while (queueMutex) {
+            Sys.sleep(0.001);
+        }
+        queueMutex = true;
+    }
+    
+    private static function releaseMutex():Void {
+        queueMutex = false;
+    }
+    
+    private static function queueTransition(request:TransitionRequest):Void {
+        acquireMutex();
+        transitionQueue.add(request);
+        releaseMutex();
+
+        if (currentTransition == null) {
+            processNextTransition();
+        }
+    }
+    
+    private static function processNextTransition():Void {
+        if (currentTransition != null) return;
+        
+        acquireMutex();
+        var request = transitionQueue.pop();
+        releaseMutex();
+        
+        if (request != null) {
+            var transition = new CustomFadeTransition();
+            transition.setup(request.duration, request.isTransIn, request.callback, request.id);
+            currentTransition = transition;
+
+            if (FlxG.state != null) {
+                FlxG.state.openSubState(transition);
+            }
+        }
+    }
+    
+    private static function getCameraFromPool():FlxCamera {
+        if (cameraPool.length > 0) {
+            return cameraPool.pop();
+        }
+
+        var cam = new FlxCamera();
+        cam.bgColor = 0x00;
+        cam.followLerp = 0;
+        cam.pixelPerfectRender = false;
+        cam.antialiasing = ClientPrefs.data.antialiasing;
+        
+        return cam;
+    }
+    
+    private static function returnCameraToPool(cam:FlxCamera):Void {
+        if (cam != null && cameraPool.length < MAX_CAMERA_POOL) {
+            cam.clearEffects();
+            cam.clearFlash();
+            cam.clearShake();
+            cam.target = null;
+            cam.follow();
+            cam.scroll.set();
+            cam.zoom = 1;
+            cam.alpha = 1;
+            cam.angle = 0;
+            
+            cameraPool.push(cam);
+        } else {
+            cam.destroy();
+        }
+    }
+
+    private function new() {
+        super();
+        state = CREATING;
+    }
+
+    private function setup(duration:Float, isTransIn:Bool, callback:Void->Void, id:String):Void {
+        this.duration = duration;
+        this.isTransIn = isTransIn;
+        this.finishCallback = callback;
+        this.transitionId = id;
+    }
+    
+    override function create():Void {
         super.create();
         
-        // ← VERIFICAR QUE SEGUIMOS SIENDO LA TRANSICIÓN ACTUAL
-        if (currentTransition != this) {
-            trace('This transition is no longer current, destroying');
-            forceClose();
+        if (state != CREATING) {
+            unifiedCleanup();
             return;
         }
+        
         try {
-            // Crear cámara dedicada con configuración móvil mejorada
-            var cam:FlxCamera = new FlxCamera();
-            cam.bgColor = 0x00;
-            
-            #if mobile
-            // Configuración específica para móviles para evitar problemas de input
-            cam.followLerp = 0;
-            cam.pixelPerfectRender = false;
-            #end
-            
+            var cam = getCameraFromPool();
             FlxG.cameras.add(cam, false);
-            cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+            cameras = [cam];
             
-            var width:Int = FlxG.width;
-            var height:Int = FlxG.height;
-            
-            // Crear puertas con imágenes personalizadas
-            topDoor = new FlxSprite();
-            topDoor.loadGraphic(Paths.image('ui/transUp'));
-            topDoor.scrollFactor.set();
-            topDoor.setGraphicSize(width, height);
-            topDoor.updateHitbox();
-            topDoor.antialiasing = ClientPrefs.data.antialiasing;
-            
-            bottomDoor = new FlxSprite();
-            bottomDoor.loadGraphic(Paths.image('ui/transDown'));
-            bottomDoor.scrollFactor.set();
-            bottomDoor.setGraphicSize(width, height);
-            bottomDoor.updateHitbox();
-            bottomDoor.antialiasing = ClientPrefs.data.antialiasing;
-            
-            // Crear ícono central
-            iconSprite = new FlxSprite();
-            iconSprite.loadGraphic(Paths.image('loading_screen/icon'));
-            iconSprite.scrollFactor.set();
-            iconSprite.scale.set(0.5, 0.5);
-            iconSprite.screenCenter();
-            
-            // Crear textos informativos
-            waterMark = new FlxText(0, height - 140, 300, 'Plus Engine\nv${MainMenuState.plusEngineVersion}', 32);
-            waterMark.x = (width - waterMark.width) / 2;
-            waterMark.setFormat(Paths.font("aller.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-            waterMark.scrollFactor.set();
-            waterMark.borderSize = 2;
-            
-            eventText = new FlxText(50, height - 60, 300, '', 28);
-            eventText.x = (width - eventText.width) / 2;
-            eventText.setFormat(Paths.font("aller.ttf"), 28, FlxColor.YELLOW, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-            eventText.scrollFactor.set();
-            eventText.borderSize = 2;
-            
-            if(isTransIn) {
-                // TRANSITION IN: Empezar cerrado, luego abrir
+            var width = FlxG.width;
+            var height = FlxG.height;
+
+            createVisualElements(width, height);
+
+            if (isTransIn) {
                 createTransitionIn(width, height);
             } else {
-                // TRANSITION OUT: Empezar abierto, luego cerrar
                 createTransitionOut(width, height);
             }
             
-        } catch(e:Dynamic) {
+            state = ACTIVE;
+            
+        } catch (e:Dynamic) {
             trace('Error creating transition: $e');
-            forceUnlock();
+            unifiedCleanup();
         }
     }
     
-    function createTransitionIn(width:Int, height:Int):Void {
+    private function createVisualElements(width:Int, height:Int):Void {
+        topDoor = new FlxSprite();
+        topDoor.loadGraphic(Paths.image('ui/transUp'));
+        topDoor.scrollFactor.set();
+        topDoor.setGraphicSize(width, height);
+        topDoor.updateHitbox();
+        topDoor.antialiasing = ClientPrefs.data.antialiasing;
+
+        bottomDoor = new FlxSprite();
+        bottomDoor.loadGraphic(Paths.image('ui/transDown'));
+        bottomDoor.scrollFactor.set();
+        bottomDoor.setGraphicSize(width, height);
+        bottomDoor.updateHitbox();
+        bottomDoor.antialiasing = ClientPrefs.data.antialiasing;
+
+        iconSprite = new FlxSprite();
+        iconSprite.loadGraphic(Paths.image('loading_screen/icon'));
+        iconSprite.scrollFactor.set();
+        iconSprite.scale.set(0.5, 0.5);
+        iconSprite.screenCenter();
+
+        waterMark = new FlxText(0, height - 140, 300, 'Plus Engine\nv${MainMenuState.plusEngineVersion}', 32);
+        waterMark.x = (width - waterMark.width) / 2;
+        waterMark.setFormat(Paths.font("aller.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        waterMark.scrollFactor.set();
+        waterMark.borderSize = 2;
+
+        eventText = new FlxText(50, height - 60, 300, '', 28);
+        eventText.x = (width - eventText.width) / 2;
+        eventText.setFormat(Paths.font("aller.ttf"), 28, FlxColor.YELLOW, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        eventText.scrollFactor.set();
+        eventText.borderSize = 2;
+        
+        add(topDoor);
+        add(bottomDoor);
+        add(iconSprite);
+        add(waterMark);
+        add(eventText);
+    }
+    
+    private function createTransitionIn(width:Int, height:Int):Void {
         topDoor.y = 0;
         bottomDoor.y = 0;
         iconSprite.alpha = 1;
@@ -176,300 +263,194 @@ class CustomFadeTransition extends MusicBeatSubstate {
         waterMark.alpha = 1;
         eventText.alpha = 1;
         eventText.text = Language.getPhrase('trans_opening', 'Opening...');
-        
-        add(topDoor);
-        add(bottomDoor);
-        add(iconSprite);
-        add(waterMark);
-        add(eventText);
-        
-        // Sonido de apertura
+
         try {
             FlxG.sound.play(Paths.sound('FadeTransition'), 0.4);
-        } catch(e:Dynamic) {}
-        
-        // Tweens de apertura
-        topDoorTween = addTween(FlxTween.tween(topDoor, {y: -height}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0,
-            onStart: function(tween:FlxTween) {
-                if(isValidTransition() && eventText != null) 
-                    eventText.text = Language.getPhrase('trans_completed', 'Completed!');
-            }
+        } catch (e:Dynamic) {}
+
+        addTween(FlxTween.tween(topDoor, {y: -height}, duration, {
+            ease: FlxEase.expoInOut
         }));
         
-        bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: height}, duration, {
+        addTween(FlxTween.tween(bottomDoor, {y: height}, duration, {
             ease: FlxEase.expoInOut,
-            startDelay: 0,
             onComplete: function(tween:FlxTween) {
-                if(isValidTransition()) {
-                    safeClose();
-	}
+                safeTransitionComplete();
             }
         }));
         
-        textTween = addTween(FlxTween.tween(waterMark, {y: waterMark.y + 100, alpha: 0}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+        addTween(FlxTween.tween(waterMark, {y: waterMark.y + 100, alpha: 0}, duration, {
+            ease: FlxEase.expoInOut
         }));
         
         addTween(FlxTween.tween(eventText, {y: eventText.y + 100, alpha: 0}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+            ease: FlxEase.expoInOut
         }));
         
-        iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 0}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+        addTween(FlxTween.tween(iconSprite, {alpha: 0}, duration, {
+            ease: FlxEase.expoInOut
         }));
     }
     
-    function createTransitionOut(width:Int, height:Int):Void {
+    private function createTransitionOut(width:Int, height:Int):Void {
         topDoor.y = -height;
         bottomDoor.y = height;
         iconSprite.alpha = 0;
+        
         eventText.text = Language.getPhrase('trans_loading', 'Loading...');
-        
-        var originalWaterMarkY = height - 140;
-        var originalEventTextY = height - 60;
-        waterMark.y = originalWaterMarkY + 100;
+        waterMark.y = waterMark.y + 100;
         waterMark.alpha = 0;
-        eventText.y = originalEventTextY + 100;
+        eventText.y = eventText.y + 100;
         eventText.alpha = 0;
-        
-        add(topDoor);
-        add(bottomDoor);
-        add(iconSprite);
-        add(waterMark);
-        add(eventText);
-        
-        // Tweens de cierre
-        textTween = addTween(FlxTween.tween(waterMark, {y: originalWaterMarkY, alpha: 1}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+
+        addTween(FlxTween.tween(waterMark, {y: waterMark.y - 100, alpha: 1}, duration, {
+            ease: FlxEase.expoInOut
         }));
         
-        addTween(FlxTween.tween(eventText, {y: originalEventTextY, alpha: 1}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+        addTween(FlxTween.tween(eventText, {y: eventText.y - 100, alpha: 1}, duration, {
+            ease: FlxEase.expoInOut
         }));
         
-        topDoorTween = addTween(FlxTween.tween(topDoor, {y: 0}, duration, {
-            ease: FlxEase.expoInOut,
-            startDelay: 0
+        addTween(FlxTween.tween(topDoor, {y: 0}, duration, {
+            ease: FlxEase.expoInOut
         }));
         
-        bottomDoorTween = addTween(FlxTween.tween(bottomDoor, {y: 0}, duration, {
+        addTween(FlxTween.tween(bottomDoor, {y: 0}, duration, {
             ease: FlxEase.expoInOut,
-            startDelay: 0,
             onComplete: function(tween:FlxTween) {
-                if(!isValidTransition()) return;
-                
-                iconTween = addTween(FlxTween.tween(iconSprite, {alpha: 1}, 0.3, {
+                addTween(FlxTween.tween(iconSprite, {alpha: 1}, 0.3, {
                     ease: FlxEase.sineIn,
-                    startDelay: 0,
                     onComplete: function(tween:FlxTween) {
-                        if(isValidTransition()) {
-                            safeFinishCallback();
-                        }
+                        safeTransitionComplete();
                     }
                 }));
             }
         }));
     }
-    
-    // ← NUEVO: Verificar si esta transición sigue siendo válida
-    function isValidTransition():Bool {
-        return !isDestroyed && !isClosing && currentTransition == this;
-    }
-    
-    // ← NUEVO: Función para forzar desbloqueo
-    function forceUnlock():Void {
-        trace('Force unlocking transition: $transitionId');
-        
-        if (currentTransition == this) {
-            isTransitioning = false;
-            currentTransition = null;
-        }
-        
-        finishCallback = null;
-        
-        cancelAllTweens();
-        
-        if (!isDestroyed) {
-            forceClose();
-        }
-    }
-    
-    // ← NUEVO: Función para forzar cierre inmediato
-    function forceClose():Void {
-        if ( isDestroyed || isClosing) return;
-        
-        isClosing = true;
-        
-        trace('Force closing transition: $transitionId');
-        
-        // Desbloquear si somos la transición actual
-        if (currentTransition == this) {
-            isTransitioning = false;
-            currentTransition = null;
-        }
-        
-        cancelAllTweens();
-        
-        try {
-			close();
-        } catch(e:Dynamic) {
-            trace('Error force closing: $e');
-		}
-	}
 
-    // Función segura para ejecutar callback
-    function safeFinishCallback():Void {
-        if(!isValidTransition()) return;
+    private function unifiedCleanup():Void {
+        if (state == DESTROYED) return;
+
+        var previousState = state;
+        state = CLOSING;
         
-        
-        // ← DESBLOQUEAR ANTES DEL CALLBACK
-        if (currentTransition == this) {
-            isTransitioning = false;
-            currentTransition = null;
-        }
-        
-        if(finishCallback != null) {
-            var callback = finishCallback;
-            finishCallback = null;
+        trace('Cleaning up transition: $transitionId (from state: $previousState)');
+
+        cancelAllTweens();
+
+        if (previousState == ACTIVE && finishCallback != null) {
             try {
-                callback();
-            } catch(e:Dynamic) {
+                finishCallback();
+            } catch (e:Dynamic) {
                 trace("Error in finish callback: " + e);
             }
         }
-    }
 
-    // Función segura para cerrar
-    function safeClose():Void {
-        if(!isValidTransition()) return;
-        
-        isClosing = true;
-        
-        // Desbloquear si somos la transición actual
+        finishCallback = null;
+
+        if (cameras != null && cameras.length > 0) {
+            var cam = cameras[0];
+            if (cam != null) {
+                FlxG.cameras.remove(cam, false);
+                returnCameraToPool(cam);
+            }
+            cameras = [];
+        }
+
+        destroyVisualElements();
+
         if (currentTransition == this) {
-            isTransitioning = false;
             currentTransition = null;
+
+            processNextTransition();
+        }
+
+        if (previousState != DESTROYED) {
+            try {
+                super.close();
+            } catch (e:Dynamic) {
+                trace("Error in super.close(): " + e);
+            }
         }
         
-        cancelAllTweens();
-        
-        try {
-            close();
-        } catch(e:Dynamic) {
-            trace("Error closing transition: " + e);
+        state = DESTROYED;
+    }
+    
+    private function safeTransitionComplete():Void {
+        if (state == ACTIVE) {
+            unifiedCleanup();
         }
     }
+    
+    private function destroyVisualElements():Void {
+        var elements = [topDoor, bottomDoor, iconSprite, waterMark, eventText];
+        for (element in elements) {
+            if (element != null) {
+                try {
+                    if (exists) remove(element);
+                    element.destroy();
+                } catch (e:Dynamic) {
+                    trace("Error destroying element: " + e);
+                }
+            }
+        }
+        
+        topDoor = null;
+        bottomDoor = null;
+        iconSprite = null;
+        waterMark = null;
+        eventText = null;
+    }
 
-    // Cancelar todos los tweens de forma segura
-    function cancelAllTweens():Void {
+    private function addTween(tween:FlxTween):FlxTween {
+        if (tween != null && state == ACTIVE) {
+            activeTweens.push(tween);
+        }
+        return tween;
+    }
+    
+    private function cancelAllTweens():Void {
         try {
-            for(tween in activeTweens) {
-                if(tween != null && !tween.finished) {
+            for (tween in activeTweens) {
+                if (tween != null && !tween.finished) {
                     tween.cancel();
                 }
             }
             activeTweens = [];
-            
-            // También cancelar tweens individuales por si acaso
-            if(topDoorTween != null) {
-                topDoorTween.cancel();
-                topDoorTween = null;
-            }
-            if(bottomDoorTween != null) {
-                bottomDoorTween.cancel();
-                bottomDoorTween = null;
-            }
-            if(textTween != null) {
-                textTween.cancel();
-                textTween = null;
-            }
-            if(iconTween != null) {
-                iconTween.cancel();
-                iconTween = null;
-            }
-        } catch(e:Dynamic) {
+        } catch (e:Dynamic) {
             trace("Error canceling tweens: " + e);
         }
     }
+    
+    override function update(elapsed:Float):Void {
+        super.update(elapsed);
 
-	override function close():Void
-	{
-        if(isDestroyed) return;
-        
-        isDestroyed = true;
-        isClosing = true;
-        
-        // Desbloquear si somos la transición actual
-        if (currentTransition == this) {
-            isTransitioning = false;
-            currentTransition = null;
-        }
-        
-        try {
-            cancelAllTweens();
-            finishCallback = null;
-		super.close();
-        } catch(e:Dynamic) {
-            trace("Error in close: " + e);
-            // Forzar desbloqueo en caso de error
-            isTransitioning = false;
-            currentTransition = null;
+        if (state == ACTIVE && currentTransition != this) {
+            trace('Transition $transitionId orphaned, cleaning up');
+            unifiedCleanup();
         }
     }
+    
+    override function close():Void {
+        unifiedCleanup();
+    }
+    
+    override function destroy():Void {
+        unifiedCleanup();
+        super.destroy();
+    }
 
-    override function destroy():Void
-    {
-        if(isDestroyed) return;
-        
-        isDestroyed = true;
-        isClosing = true;
-        
-        // Desbloquear si somos la transición actual
-        if (currentTransition == this) {
-            isTransitioning = false;
-            currentTransition = null;
+    public function getId():String {
+        return transitionId;
+    }
+    
+    public function getState():String {
+        return switch(state) {
+            case NONE: "none";
+            case CREATING: "creating";
+            case ACTIVE: "active";
+            case CLOSING: "closing";
+            case DESTROYED: "destroyed";
         }
-        
-        try {
-            cancelAllTweens();
-			finishCallback = null;
-            
-            // Limpiar objetos de forma segura
-            if(topDoor != null) {
-                topDoor.destroy();
-                topDoor = null;
-            }
-            if(bottomDoor != null) {
-                bottomDoor.destroy();
-                bottomDoor = null;
-            }
-            if(waterMark != null) {
-                waterMark.destroy();
-                waterMark = null;
-            }
-            if(eventText != null) {
-                eventText.destroy();
-                eventText = null;
-            }
-            if(iconSprite != null) {
-                iconSprite.destroy();
-                iconSprite = null;
-            }
-            
-            super.destroy();
-            
-        } catch(e:Dynamic) {
-            trace("Error in destroy: " + e);
-            // Forzar desbloqueo incluso en error
-            isTransitioning = false;
-            currentTransition = null;
-		}
-	}
+    }
 }
