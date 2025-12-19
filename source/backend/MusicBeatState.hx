@@ -117,8 +117,7 @@ class MusicBeatState extends FlxState
 
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public var videoHandlers:Map<String, Dynamic> = new Map<String, Dynamic>(); // Separar videos de variables normales
-	
-	// TraceDisplay global
+
 	public static var traceDisplay:TraceDisplay;
 	
 	public static function getVariables()
@@ -148,7 +147,8 @@ class MusicBeatState extends FlxState
 		super.create();
 
 		if(!skip) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			CustomFadeTransition.requestTransition(0.7, true, function() {
+			});
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -270,11 +270,14 @@ class MusicBeatState extends FlxState
 		if(nextState == null)
 			nextState = FlxG.state;
 
-		FlxG.state.openSubState(new CustomFadeTransition(0.7, false));
-		if(nextState == FlxG.state)
-			CustomFadeTransition.finishCallback = function() FlxG.resetState();
-		else
-			CustomFadeTransition.finishCallback = function() FlxG.switchState(nextState);
+		var transitionCallback:Void->Void;
+		if(nextState == FlxG.state) {
+			transitionCallback = function() FlxG.resetState();
+		} else {
+			transitionCallback = function() FlxG.switchState(nextState);
+		}
+
+		CustomFadeTransition.requestTransition(0.7, false, transitionCallback);
 	}
 
 	public static function getState():MusicBeatState {

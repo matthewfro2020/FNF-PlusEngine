@@ -156,11 +156,11 @@ class CustomFadeTransition extends MusicBeatSubstate {
     
     private static function returnCameraToPool(cam:FlxCamera):Void {
         if (cam != null && cameraPool.length < MAX_CAMERA_POOL) {
-            cam.clearEffects();
-            cam.clearFlash();
-            cam.clearShake();
+            cam.flash(0x0, 0, null, true);
+            cam.shake(0, 0, null, true);
+            
             cam.target = null;
-            cam.follow();
+            cam.follow(null);
             cam.scroll.set();
             cam.zoom = 1;
             cam.alpha = 1;
