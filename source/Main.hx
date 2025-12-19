@@ -196,7 +196,7 @@ class Main extends Sprite
 		{
 			// Load prefs early to check preloader setting
 			if (ClientPrefs.data.enablePreloader) {
-				initialState = backend.Preloader;
+				initialState = FunkinPreloader;
 			}
 		}
 		
