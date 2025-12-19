@@ -85,6 +85,11 @@ class FPSCounter extends Sprite
 		Text display field
 	**/
 	private var textDisplay:TextField;
+	
+	/**
+		FPS number display (large size)
+	**/
+	private var fpsNumberDisplay:TextField;
 
 	/**
 		Last GitHub commit info
@@ -176,7 +181,18 @@ class FPSCounter extends Sprite
 
 		currentFPS = 0;
 		
-		// Create text display field
+		// Create FPS number display field (large)
+		fpsNumberDisplay = new TextField();
+		fpsNumberDisplay.selectable = false;
+		fpsNumberDisplay.mouseEnabled = false;
+		fpsNumberDisplay.defaultTextFormat = new TextFormat('Monsterrat', 30, color);
+		fpsNumberDisplay.antiAliasType = openfl.text.AntiAliasType.NORMAL;
+		fpsNumberDisplay.sharpness = 100;
+		fpsNumberDisplay.autoSize = openfl.text.TextFieldAutoSize.LEFT;
+		fpsNumberDisplay.text = "0";
+		addChild(fpsNumberDisplay);
+		
+		// Create text display field (normal size)
 		textDisplay = new TextField();
 		textDisplay.selectable = false;
 		textDisplay.mouseEnabled = false;
@@ -186,7 +202,7 @@ class FPSCounter extends Sprite
 		textDisplay.width = 350;
 		textDisplay.height = 550;
 		textDisplay.multiline = true;
-		textDisplay.text = "FPS: ";
+		textDisplay.text = "FPS";
 		textDisplay.wordWrap = false;
 		textDisplay.autoSize = openfl.text.TextFieldAutoSize.LEFT;
 		addChild(textDisplay);
@@ -243,7 +259,9 @@ class FPSCounter extends Sprite
 			textColorValue = 0xFF0000; // Red
 		}
 		
-		// Update text format with the color
+		// Update text format with the color for both displays
+		fpsNumberDisplay.defaultTextFormat = new TextFormat('Monsterrat', 28, textColorValue);
+		fpsNumberDisplay.setTextFormat(fpsNumberDisplay.defaultTextFormat);
 		textDisplay.defaultTextFormat = new TextFormat('Monsterrat', 14, textColorValue);
 		textDisplay.setTextFormat(textDisplay.defaultTextFormat);
 
@@ -254,10 +272,13 @@ class FPSCounter extends Sprite
 
 		var displayText:String = "";
 
+		// Update FPS number display (large)
+		fpsNumberDisplay.text = Std.string(currentFPS);
+		
 		switch (debugLevel) {
 			case 0:
 				// Normal mode - FPS + Delay + Memory WITHOUT background
-				displayText = currentFPS + ' FPS';
+				displayText = '            FPS';
 				displayText += '\n' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
 				displayText += '\n' + currentMemoryStr + ' / ' + peakMemoryStr;
 				
@@ -268,7 +289,7 @@ class FPSCounter extends Sprite
 			
 			case 1:
 				// Normal mode WITH background
-				displayText = currentFPS + ' FPS';
+				displayText = '            FPS';
 				displayText += '\n' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
 				displayText += '\n' + currentMemoryStr + ' / ' + peakMemoryStr;
 				
@@ -279,7 +300,7 @@ class FPSCounter extends Sprite
 			
 			case 2:
 				// Basic debug mode - with background and basic data
-				displayText = currentFPS + ' FPS';
+				displayText = '            FPS';
 				displayText += '\nDelay: ' + formatFloat(frameTimeMs, 1) + ' ms';
 				displayText += '\nAvg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
 				displayText += '\nMemory: ' + currentMemoryStr;
@@ -326,7 +347,7 @@ class FPSCounter extends Sprite
 				}
 				
 				// Build dynamic text (updated every frame for modders)
-				displayText = currentFPS + ' FPS';
+				displayText = '            FPS';
 				displayText += '\nDelay: ' + formatFloat(frameTimeMs, 1) + ' ms';
 				displayText += '\nAvg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
 				displayText += '\nMemory: ' + currentMemoryStr;
@@ -352,6 +373,8 @@ class FPSCounter extends Sprite
 
 		// Use simple text
 		textDisplay.text = displayText;
+		
+		textDisplay.y = fpsNumberDisplay.y + 18;
 
 		// Update the background
 		updateBackground();
@@ -692,6 +715,10 @@ class FPSCounter extends Sprite
 		
 		if (bgShape != null && bgShape.parent != null) {
 			removeChild(bgShape);
+		}
+		
+		if (fpsNumberDisplay != null && fpsNumberDisplay.parent != null) {
+			removeChild(fpsNumberDisplay);
 		}
 		
 		if (textDisplay != null && textDisplay.parent != null) {

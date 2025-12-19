@@ -98,7 +98,7 @@ import states.TitleState;
 	public var showIntroVideo:Bool = true;
 	public var checkForUpdates:Bool = true;
 	public var comboStacking:Bool = true;
-	public var enablePreloader:Bool = true; // Enable global asset preloader on startup
+	public var enablePreloader:Bool = false; // Enable global asset preloader on startup
 	public var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 

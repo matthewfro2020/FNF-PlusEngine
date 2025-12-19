@@ -29,7 +29,7 @@ class FunkinPreloader extends MusicBeatState
 	var loadedText:FlxText;
 	var stageText:FlxText;
 	
-	var assetsToLoad:Array<String> = [];
+	var assetsToLoad:Array<{song:String, modFolder:String}> = [];
 	var currentAsset:Int = 0;
 	var totalAssets:Int = 0;
 	
@@ -148,9 +148,6 @@ class FunkinPreloader extends MusicBeatState
 	{
 		trace('Collecting assets to preload...');
 
-		// Only preload instrumentals to save memory
-		var allSongs:Array<String> = [];
-
 		// Base game songs
 		#if (MODS_ALLOWED)
 		for (weekName in WeekData.weeksList)
@@ -158,11 +155,30 @@ class FunkinPreloader extends MusicBeatState
 			var week:WeekData = WeekData.weeksLoaded.get(weekName);
 			if (week != null)
 			{
+				var modFolder = week.folder != null ? week.folder : '';
+				trace('[Preloader]: Week "$weekName" - Mod: ${modFolder != '' ? modFolder : "BASE_GAME"}');
 				for (song in week.songs)
 				{
 					if (song != null && song.length > 0)
 					{
-						allSongs.push(song[0]); // song[0] is the song name
+						var songName = song[0]; // song[0] is the song name
+						trace('[Preloader]:   Song: "$songName" from week "$weekName" (Mod: $modFolder)');
+						
+						// Check if already added
+						var alreadyExists = false;
+						for (asset in assetsToLoad)
+						{
+							if (asset.song == songName)
+							{
+								alreadyExists = true;
+								break;
+							}
+						}
+						
+						if (!alreadyExists)
+						{
+							assetsToLoad.push({song: songName, modFolder: modFolder});
+						}
 					}
 				}
 			}
@@ -177,19 +193,25 @@ class FunkinPreloader extends MusicBeatState
 				{
 					if (song != null && song.length > 0)
 					{
-						allSongs.push(song[0]);
+						var alreadyExists = false;
+						for (asset in assetsToLoad)
+						{
+							if (asset.song == song[0])
+							{
+								alreadyExists = true;
+								break;
+							}
+						}
+						
+						if (!alreadyExists)
+						{
+							assetsToLoad.push({song: song[0], modFolder: ''});
+						}
 					}
 				}
 			}
 		}
 		#end
-
-		// Add Inst instrumentals for each song (avoid duplicates)
-		for (songName in allSongs)
-		{
-			if (!assetsToLoad.contains('inst:' + songName))
-				assetsToLoad.push('inst:' + songName);
-		}
 
 		totalAssets = assetsToLoad.length;
 		trace('Total assets to load: $totalAssets');
@@ -211,47 +233,54 @@ class FunkinPreloader extends MusicBeatState
 				// Load instrumentals one per frame for smooth animation
 				if (currentAsset < totalAssets)
 				{
-					var asset:String = assetsToLoad[currentAsset];
-					var parts:Array<String> = asset.split(':');
-					var type:String = parts[0];
-					var path:String = parts[1];
+					var asset = assetsToLoad[currentAsset];
+					var songName:String = asset.song;
+					var modFolder:String = asset.modFolder;
 					
 					stageText.text = 'Caching Instrumentals... (${currentAsset + 1}/$totalAssets)';
-					loadedText.text = 'Loading: $path';
+					loadedText.text = 'Loading: $songName';
 					
-					// Only process inst type
-					if (type == 'inst')
+					// Set the current mod directory before loading
+					#if MODS_ALLOWED
+					var oldModDirectory = Mods.currentModDirectory;
+					if (modFolder != null && modFolder.length > 0)
 					{
-						try
-						{
-							var loadedInst = Paths.inst(path);
-							if (loadedInst != null)
-							{
-								preloadedInsts.set(path, loadedInst);
-								trace('[Preloader]: Cached inst: $path');
-								loadedAssets++;
-							}
-							else
-							{
-								trace('[Preloader]: Inst returned null: $path');
-								failedAssets++;
-							}
-						}
-						catch (e:Dynamic)
-						{
-							// Detect "SOUND NOT FOUND" error from Paths
-							var errorMsg:String = Std.string(e);
-							if (errorMsg.indexOf('SOUND NOT FOUND') != -1 || errorMsg.indexOf('not found') != -1)
-							{
-								trace('[Preloader]: SOUND NOT FOUND: $path - counted as failed');
-								failedAssets++;
-							}
-							else
-							{
-								trace('[Preloader]: Error loading inst $path: $e');
-								failedAssets++;
-							}
-						}
+						Mods.currentModDirectory = modFolder;
+						trace('[Preloader]: Setting mod directory to: $modFolder');
+					}
+					#end
+					
+					// Attempt to load the instrumental
+					var formattedPath = Paths.formatToSongPath(songName);
+					var soundKey = '$formattedPath/Inst';
+					
+					trace('[Preloader]: Attempting to load inst for: $songName');
+					trace('[Preloader]: Formatted path: $formattedPath');
+					trace('[Preloader]: Sound key: $soundKey');
+					trace('[Preloader]: Mod folder: ${modFolder != '' ? modFolder : "BASE_GAME"}');
+					
+					// Get the full file path to see where it's searching
+					var fullPath = Paths.getPath('$soundKey.${Paths.SOUND_EXT}', SOUND, 'songs', true);
+					trace('[Preloader]: Full path attempt: $fullPath');
+					
+					var loadedInst = Paths.returnSound(soundKey, 'songs', true, false);
+					
+					#if MODS_ALLOWED
+					// Restore old mod directory
+					Mods.currentModDirectory = oldModDirectory;
+					#end
+					
+					if (loadedInst != null)
+					{
+						preloadedInsts.set(songName, loadedInst);
+						trace('[Preloader]: ✓ Cached inst: $songName');
+						loadedAssets++;
+					}
+					else
+					{
+						// Only log as failed if truly not found (null returned)
+						trace('[Preloader]: ✗ Inst not found: $songName');
+						failedAssets++;
 					}
 					
 					currentAsset++;
