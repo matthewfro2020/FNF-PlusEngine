@@ -315,8 +315,6 @@ class IdID
         "description_health_bar_opacity" => "Seberapa transparan seharusnya bar kesehatan dan ikon-ikon tersebut.",
         "setting_smooth_health_bar" => "Bar Kesehatan Halus",
         "description_smooth_health_bar" => "Jika dicentang, bar kesehatan akan bergerak dengan halus alih-alih bergerak secara tiba-tiba.",
-        "setting_fps_counter" => "Penghitung FPS",
-        "description_fps_counter" => "Jika tidak dicentang, akan menyebunyikan Penghitung FPS.",
         "setting_show_watermark" => "Tampilkan Watermark",
         "description_show_watermark" => "Jika dicentang, menampilkan watermark engine di pojok kanan bawah.",
         "setting_vsync" => "VSync",
