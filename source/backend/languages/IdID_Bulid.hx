@@ -104,16 +104,35 @@ class IdID
         "musicplayer_tip" => "Tekan SPACE untuk jeda / Tekan ESCAPE untuk keluar / Tekan R untuk mereset lagu",
         "no_score" => "Tidak ada skor.",
 
-        // Mods Menu
-        "no_mods_installed" => "TIDAK ADA MOD YANG DIINSTAL\nTEKAN TOMBOL KEMBALI UNTUK KELUAR ATAU INSTAL MOD",
-        "no_mods_found" => "Tidak ditemukan mod.",
-        "mod_restart" => "* Mengaktifkan atau menonaktifkan mod ini akan me-restart permainan.",
-        "reload_button" => "MUAT ULANG",
-        "enable_all_button" => "AKTIFKAN SEMUA",
-        "disable_all_button" => "MATIKAN SEMUA",
+        // Mods Menu (Bulid)
+        "mods_count" => "Mods: {0} total, {1} diaktifkan",
+        "mods_footer_hint" => "Gunakan tombol panah untuk navigasi, tekan ENTER untuk memilih, tekan ESC untuk kembali",
+        "mods_list_title" => "MODS TERINSTAL",
+        "no_mods_installed" => "Tidak ada mod yang terpasang\n\nTambahkan mod ke folder \"mods\"\ndan restart game",
+        "mod_restart_warning" => "* Perubahan pada mod ini memerlukan restart",
+        "enable_all_short" => "AKTIF SEMUA",
+        "disable_all_short" => "MATI SEMUA",
+        "back" => "KEMBALI",
+        "description" => "DESKRIPSI",
+        "author" => "Penulis: ",
+        "version" => "Versi: ",
+        "status_enabled" => "AKTIF",
+        "status_disabled" => "MATI",
+        "priority" => "Prioritas: {0}",
+        "disable" => "MATI",
+        "enable" => "AKTIF",
+
+        // Restart Menu
+        "restart_required_title" => "DIPERLUKAN RESTART",
+        "restart_required_message" => "Perubahan mod memerlukan restart untuk berlaku.\n\nApakah Anda ingin melakukan restart sekarang?\n\nGame akan restart secara otomatis dalam {0} detik.",
+        "restart_now" => "RESTART SEKARANG",
+        "restart_later" => "RESTART NANTI",
+        "restarting" => "Mulai ulang...",
 
         // Credits
         "description_shadow_mario" => "Tim Psych Engine",
+        "credits_title" => "KREDIT",
+        "link_hint" => "Tekan A/ENTER untuk buka tautan | B/ESC untuk kembali",
 
         // Reset Score/Achievement
         "reset_score" => "Reset skor dari",
