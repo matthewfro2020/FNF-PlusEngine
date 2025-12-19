@@ -8,23 +8,23 @@ import flixel.FlxCamera;
 import states.MainMenuState;
 import haxe.ds.List;
 
+typedef TransitionRequest = {
+    var duration:Float;
+    var isTransIn:Bool;
+    var callback:Void->Void;
+    var id:String;
+}
+
 class CustomFadeTransition extends MusicBeatSubstate {
     public var finishCallback:Void->Void;
 
     private static var transitionQueue:List<TransitionRequest> = new List();
-    private static var queueMutex:Bool = false; // Simple mutex
+    private static var queueMutex:Bool = false;
 
     private static var cameraPool:Array<FlxCamera> = [];
     private static var MAX_CAMERA_POOL:Int = 2;
 
     public static var currentTransition(default, null):CustomFadeTransition = null;
-
-    private typedef TransitionRequest = {
-        var duration:Float;
-        var isTransIn:Bool;
-        var callback:Void->Void;
-        var id:String;
-    }
 
     private var state:TransitionState = NONE;
     private enum TransitionState {
