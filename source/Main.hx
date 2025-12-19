@@ -207,7 +207,6 @@ class Main extends Sprite
 		
 		traceDisplay = new TraceDisplay(10, 100, 0xFFFFFF);
 		addChild(traceDisplay);
-		traceDisplay.setupBackground();
 		
 		// Agregar los botones de TraceDisplay y Debug para móvil
 		#if mobile
@@ -220,13 +219,12 @@ class Main extends Sprite
 		
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if(fpsVar != null) {
-			fpsVar.visible = ClientPrefs.data.showFPS;
-			// Posicionamiento inicial con márgenes constantes
-			var marginX = 10;
-			var marginY = 3;
-			fpsVar.positionFPS(marginX, marginY, 1.0);
-		}
+		   if(fpsVar != null) {
+			   // Posicionamiento inicial con márgenes constantes
+			   var marginX = 10;
+			   var marginY = 3;
+			   fpsVar.positionFPS(marginX, marginY, 1.0);
+		   }
 
 		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
 		var icon = Image.fromFile("icon.png");

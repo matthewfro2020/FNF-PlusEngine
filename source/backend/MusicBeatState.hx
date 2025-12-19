@@ -137,7 +137,6 @@ class MusicBeatState extends FlxState
 			traceDisplay = new TraceDisplay();
 			if(FlxG.stage != null) {
 				FlxG.stage.addChild(traceDisplay);
-				traceDisplay.setupBackground();
 			}
 		} else if (TraceDisplay.instance != null) {
 			// Usar la instancia existente

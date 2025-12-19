@@ -160,12 +160,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			BOOL);
 		addOption(option);
 		
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
-			'showFPS',
-			BOOL);
-		addOption(option);
-		option.onChange = onChangeFPSCounter;
 
 		var option:Option = new Option('Show Watermark',
 			'If checked, shows the watermark on screen.',
@@ -393,11 +387,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		super.destroy();
 	}
 
-	function onChangeFPSCounter()
-	{
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-	}
+	   // function onChangeFPSCounter() eliminado: FPSCounter ahora siempre visible, control solo por F2
 
 	function onChangeWatermark()
 	{

@@ -8,6 +8,7 @@ import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 import openfl.display.Graphics;
 import openfl.display.Shape;
+import openfl.display.Sprite;
 import haxe.Log;
 import haxe.PosInfos;
 import backend.Paths;
@@ -51,7 +52,7 @@ enum TraceType {
  * TraceDisplay - Sistema para mostrar traces/logs dentro del juego
  * Se activa/desactiva con F4 y muestra los últimos traces en pantalla
  */
-class TraceDisplay extends TextField
+class TraceDisplay extends Sprite
 {
     /**
      * Lista de traces almacenados con información de color y tipo
@@ -67,6 +68,11 @@ class TraceDisplay extends TextField
      * Si el display está visible o no
      */
     public var isVisible:Bool = false;
+    
+    /**
+     * TextField para mostrar el texto
+     */
+    private var textDisplay:TextField;
     
     /**
      * Fondo semi-transparente para mejor legibilidad
@@ -105,15 +111,22 @@ class TraceDisplay extends TextField
         
         this.x = x;
         this.y = y;
-        this.selectable = false;
-        this.mouseEnabled = false;
-        this.defaultTextFormat = new TextFormat(Paths.font("aller.ttf"), 14, textColor);
-        this.autoSize = openfl.text.TextFieldAutoSize.LEFT;
-        this.multiline = true;
-        this.wordWrap = false;
+        
+        // Create text display field
+        textDisplay = new TextField();
+        textDisplay.selectable = false;
+        textDisplay.mouseEnabled = false;
+        textDisplay.defaultTextFormat = new TextFormat('Monsterrat', 14, textColor);
+        textDisplay.antiAliasType = openfl.text.AntiAliasType.NORMAL;
+        textDisplay.sharpness = 100;
+        textDisplay.autoSize = openfl.text.TextFieldAutoSize.LEFT;
+        textDisplay.multiline = true;
+        textDisplay.wordWrap = false;
         
         // Crear fondo
         backgroundShape = new Shape();
+        addChildAt(backgroundShape, 0); // Add background behind text
+        addChild(textDisplay); // Add text on top
         
         // Interceptar traces y errores solo si no se ha hecho antes
         if (originalTrace == null) {
@@ -127,7 +140,7 @@ class TraceDisplay extends TextField
         }
         
         // Inicialmente oculto
-        this.visible = false;
+        textDisplay.visible = false;
         backgroundShape.visible = false;
     }
     
@@ -309,16 +322,6 @@ class TraceDisplay extends TextField
     }
     
     /**
-     * Configurar el fondo después de ser agregado al parent
-     */
-    public function setupBackground():Void
-    {
-        if (parent != null && backgroundShape != null) {
-            parent.addChildAt(backgroundShape, parent.getChildIndex(this));
-        }
-    }
-    
-    /**
      * Actualizar el contenido mostrado
      */
     private function updateDisplay():Void
@@ -346,7 +349,7 @@ class TraceDisplay extends TextField
             }
         }
         
-        this.text = displayText;
+        textDisplay.text = displayText;
         updateBackground();
     }
     
@@ -357,9 +360,20 @@ class TraceDisplay extends TextField
     {
         if (!isVisible || backgroundShape == null) return;
         
+        final INNER_DIFF:Int = 3;
+        var bgWidth = textDisplay.textWidth + 10;
+        var bgHeight = textDisplay.textHeight + 10;
+        
         backgroundShape.graphics.clear();
-        backgroundShape.graphics.beginFill(0x000000, 0.7);
-        backgroundShape.graphics.drawRect(x - 5, y - 5, textWidth + 10, textHeight + 10);
+        
+        // Outer rectangle (border color) with 50% opacity
+        backgroundShape.graphics.beginFill(0x3d3f41, 0.5);
+        backgroundShape.graphics.drawRect(0, 0, bgWidth + (INNER_DIFF * 2), bgHeight + (INNER_DIFF * 2));
+        backgroundShape.graphics.endFill();
+        
+        // Inner rectangle (main background) with 50% opacity
+        backgroundShape.graphics.beginFill(0x2c2f30, 0.5);
+        backgroundShape.graphics.drawRect(INNER_DIFF, INNER_DIFF, bgWidth, bgHeight);
         backgroundShape.graphics.endFill();
     }
     
@@ -379,7 +393,7 @@ class TraceDisplay extends TextField
     public function toggleDisplay():Void
     {
         isVisible = !isVisible;
-        this.visible = isVisible;
+        textDisplay.visible = isVisible;
         backgroundShape.visible = isVisible;
         
         if (isVisible) {
@@ -393,7 +407,7 @@ class TraceDisplay extends TextField
     public function show():Void
     {
         isVisible = true;
-        this.visible = true;
+        textDisplay.visible = true;
         backgroundShape.visible = true;
         updateDisplay();
     }
@@ -404,7 +418,7 @@ class TraceDisplay extends TextField
     public function hide():Void
     {
         isVisible = false;
-        this.visible = false;
+        textDisplay.visible = false;
         backgroundShape.visible = false;
     }
     
@@ -458,13 +472,15 @@ class TraceDisplay extends TextField
         
         // Limpiar
         traces = null;
+        
         if (backgroundShape != null && backgroundShape.parent != null) {
-            backgroundShape.parent.removeChild(backgroundShape);
+            removeChild(backgroundShape);
         }
         backgroundShape = null;
         
-        if (this.parent != null) {
-            this.parent.removeChild(this);
+        if (textDisplay != null && textDisplay.parent != null) {
+            removeChild(textDisplay);
         }
+        textDisplay = null;
     }
 }

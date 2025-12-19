@@ -11,6 +11,7 @@ import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 import openfl.display.Graphics;
 import openfl.display.Shape;
+import openfl.display.Sprite;
 import haxe.Http;
 import haxe.Json;
 import states.MainMenuState;
@@ -28,7 +29,7 @@ import states.MainMenuState;
 @:headerInclude('sys/utsname.h')
 #end
 #end
-class FPSCounter extends TextField
+class FPSCounter extends Sprite
 {
 	/**
 		The current frame rate, expressed using frames-per-second
@@ -46,7 +47,7 @@ class FPSCounter extends TextField
 	public var memoryPeak(default, null):Float = 0;
 
 	/**
-		Debug level for FPS counter (0: normal, 1: with background + debug info, 2: extended debug info)
+		Debug level for FPS counter (0: normal without bg, 1: normal with bg, 2: basic debug, 3: extended debug)
 	**/
 	public var debugLevel:Int = 0;
 
@@ -79,6 +80,11 @@ class FPSCounter extends TextField
 		Background shape for debug mode
 	**/
 	private var bgShape:Shape;
+	
+	/**
+		Text display field
+	**/
+	private var textDisplay:TextField;
 
 	/**
 		Last GitHub commit info
@@ -145,12 +151,19 @@ class FPSCounter extends TextField
 
 	public var os:String = '';
 
-	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
-	{
-		super();
+	   public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
+	   {
+		   super();
 
-		// Asignar singleton
-		instance = this;
+		   // Asignar singleton
+		   instance = this;
+
+		   // Leer nivel de debug guardado
+		   #if (ClientPrefs && ClientPrefs.data)
+		   if (Reflect.hasField(ClientPrefs.data, "fpsDebugLevel")) {
+			   debugLevel = ClientPrefs.data.fpsDebugLevel;
+		   }
+		   #end
 
 		#if officialBuild
 		if (LimeSystem.platformName == LimeSystem.platformVersion || LimeSystem.platformVersion == null)
@@ -162,20 +175,21 @@ class FPSCounter extends TextField
 		positionFPS(x, y);
 
 		currentFPS = 0;
-		selectable = false;
-		mouseEnabled = false;
-		defaultTextFormat = new TextFormat(Paths.font("aller.ttf"), 14, color);
-		width = 350; // Ancho fijo para evitar reorganización
-		height = 550; // Altura aumentada para acomodar toda la información
-		multiline = true;
-		text = "FPS: ";
-		wordWrap = false; // Evitar que las palabras se corten
-		autoSize = openfl.text.TextFieldAutoSize.NONE; // Desactivar auto-size para evitar saltos
-
-		// Habilitar formato HTML para diferentes tamaños de texto
-		#if !flash
-		embedFonts = true; // Habilitar fuentes embebidas para usar aller.ttf
-		#end
+		
+		// Create text display field
+		textDisplay = new TextField();
+		textDisplay.selectable = false;
+		textDisplay.mouseEnabled = false;
+		textDisplay.defaultTextFormat = new TextFormat('Monsterrat', 14, color);
+		textDisplay.antiAliasType = openfl.text.AntiAliasType.NORMAL;
+		textDisplay.sharpness = 100;
+		textDisplay.width = 350;
+		textDisplay.height = 550;
+		textDisplay.multiline = true;
+		textDisplay.text = "FPS: ";
+		textDisplay.wordWrap = false;
+		textDisplay.autoSize = openfl.text.TextFieldAutoSize.LEFT;
+		addChild(textDisplay);
 
 		times = [];
 		lastFramerateUpdateTime = Timer.stamp();
@@ -186,11 +200,9 @@ class FPSCounter extends TextField
 		lastFrameTime = Timer.stamp();
 		frameTimesArray = [];
 
-		// Crear el fondo para el modo debug
+		// Create background for debug mode
 		bgShape = new Shape();
-		
-		// Agregar el fondo al stage después de que este TextField esté agregado
-		// Lo haremos en updateBackground para asegurar que esté visible
+		addChildAt(bgShape, 0); // Add background behind text
 
 		// Agregar listener para F2
 		if (FlxG.stage != null) {
@@ -208,26 +220,6 @@ class FPSCounter extends TextField
 		cachedCurrentState = "Unknown";
 	}
 
-	// Función para interpolar entre dos colores ARGB
-	function lerpColor(color1:Int, color2:Int, t:Float):Int {
-		var a1 = (color1 >> 24) & 0xFF;
-		var r1 = (color1 >> 16) & 0xFF;
-		var g1 = (color1 >> 8) & 0xFF;
-		var b1 = color1 & 0xFF;
-
-		var a2 = (color2 >> 24) & 0xFF;
-		var r2 = (color2 >> 16) & 0xFF;
-		var g2 = (color2 >> 8) & 0xFF;
-		var b2 = color2 & 0xFF;
-
-		var a = Std.int(a1 + (a2 - a1) * t);
-		var r = Std.int(r1 + (r2 - r1) * t);
-		var g = Std.int(g1 + (g2 - g1) * t);
-		var b = Std.int(b1 + (b2 - b1) * t);
-
-		return (a << 24) | (r << 16) | (g << 8) | b;
-	}
-
 	public dynamic function updateText():Void // so people can override it in hscript
 	{
 		// Actualizar memoria pico
@@ -240,28 +232,23 @@ class FPSCounter extends TextField
 		var currentMemoryStr = flixel.util.FlxStringUtil.formatBytes(currentMemory);
 		var peakMemoryStr = flixel.util.FlxStringUtil.formatBytes(memoryPeak);
 
-		// Interpolación de color según FPS
+		// White or red color based on FPS
 		var targetFPS = #if (ClientPrefs && ClientPrefs.data && ClientPrefs.data.framerate) ClientPrefs.data.framerate #else FlxG.stage.window.frameRate #end;
 		var halfFPS = targetFPS * 0.5;
-		var colorHex:String;
+		var textColorValue:Int;
 
-		if (currentFPS >= targetFPS) {
-			colorHex = "#00FF00"; // Verde
-		} else if (currentFPS <= halfFPS) {
-			colorHex = "#FF0000"; // Rojo
+		if (currentFPS >= halfFPS) {
+			textColorValue = 0xFFFFFF; // White
 		} else {
-			// Interpola de verde a amarillo a rojo
-			var t = (targetFPS - currentFPS) / (targetFPS - halfFPS);
-			var interpolatedColor = lerpColor(0xFF00FF00, 0xFFFFFF00, Math.min(t, 1.0));
-			if (currentFPS < halfFPS * 1.5) {
-				t = (halfFPS * 1.5 - currentFPS) / (halfFPS * 0.5);
-				interpolatedColor = lerpColor(0xFFFFFF00, 0xFFFF0000, Math.min(t, 1.0));
-			}
-			colorHex = "#" + StringTools.hex(interpolatedColor & 0xFFFFFF, 6);
+			textColorValue = 0xFF0000; // Red
 		}
+		
+		// Update text format with the color
+		textDisplay.defaultTextFormat = new TextFormat('Monsterrat', 14, textColorValue);
+		textDisplay.setTextFormat(textDisplay.defaultTextFormat);
 
 		// Actualizar contadores para modo debug extendido (siempre, sin intervalo)
-		if (debugLevel == 2) {
+		if (debugLevel == 3) {
 			updateCountersOptimized();
 		}
 
@@ -269,135 +256,105 @@ class FPSCounter extends TextField
 
 		switch (debugLevel) {
 			case 0:
-				// Modo normal - FPS + Delay + Memory
-				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
-						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + currentMemoryStr + ' / ' + peakMemoryStr + '</font>';
+				// Normal mode - FPS + Delay + Memory WITHOUT background
+				displayText = currentFPS + ' FPS';
+				displayText += '\n' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
+				displayText += '\n' + currentMemoryStr + ' / ' + peakMemoryStr;
 				
-				// Agregar texto del autor del mod si está disponible
+				// Add mod author text if available
 				if (modAuthor != null && modAuthor.length > 0) {
-					displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="16" color="' + colorHex + '">' + modAuthor + '</font>';
+					displayText += '\n' + modAuthor;
 				}
 			
 			case 1:
-				// Modo debug básico - con fondo y datos básicos (fuentes más grandes)
-				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
-						   	'<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
-						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Delay: ' + formatFloat(frameTimeMs, 1) + ' ms</font>' +
-						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Avg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
-						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
-						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>' +
-						   	'\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
-						   	'\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Commit: ' + lastCommit + '</font>';
+				// Normal mode WITH background
+				displayText = currentFPS + ' FPS';
+				displayText += '\n' + formatFloat(frameTimeMs, 1) + ' / ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
+				displayText += '\n' + currentMemoryStr + ' / ' + peakMemoryStr;
+				
+				// Add mod author text if available
+				if (modAuthor != null && modAuthor.length > 0) {
+					displayText += '\n' + modAuthor;
+				}
 			
 			case 2:
+				// Basic debug mode - with background and basic data
+				displayText = currentFPS + ' FPS';
+				displayText += '\nDelay: ' + formatFloat(frameTimeMs, 1) + ' ms';
+				displayText += '\nAvg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
+				displayText += '\nMemory: ' + currentMemoryStr;
+				displayText += '\nPeak: ' + peakMemoryStr;
+				displayText += '\n\n' + os.substring(1);
+				displayText += '\nCommit: ' + lastCommit;
+			
+			case 3:
 				// Modo debug extendido - optimizado para mejor rendimiento
 				var currentTime = Timer.stamp();
 			
-				// Actualizar texto estático solo cada textUpdateInterval segundos
+				// Update static text only every textUpdateInterval seconds
 				if (cachedStaticText == "" || (currentTime - lastTextUpdateTime) >= textUpdateInterval) {
 					lastTextUpdateTime = currentTime;
 					
-					// Construir texto estático (que no cambia frecuentemente)
-					cachedStaticText = '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">' + os.substring(1) + '</font>' +
-									 '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Last Commit: ' + lastCommit + '</font>';
+					// Build static text (that doesn't change frequently)
+					cachedStaticText = os.substring(1);
+					cachedStaticText += '\nLast Commit: ' + lastCommit;
 					
-					// Mostrar la fecha y hora del commit si están disponibles
+					// Show commit date and time if available
 					if (commitDate != null && commitDate.length > 0) {
-						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Date: ' + commitDate + '</font>';
+						cachedStaticText += '\nDate: ' + commitDate;
 					}
 					if (commitTime != null && commitTime.length > 0) {
-						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Time: ' + commitTime + ' UTC</font>';
+						cachedStaticText += '\nTime: ' + commitTime + ' UTC';
 					}
 					
-					cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Objects: ' + FlxG.state.members.length + '</font>';
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Uptime: ' + getUptime() + '</font>';
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">State: ' + cachedCurrentState + '</font>';
+					cachedStaticText += '\nUptime: ' + getUptime();
+					cachedStaticText += '\nState: ' + cachedCurrentState;
 					
-					// Información de scripts (se actualiza poco)
+					// Script information (updated infrequently)
 					var totalScripts = luaScriptsLoaded + hscriptsLoaded;
 					var totalFailed = luaScriptsFailed + hscriptsFailed;
-					cachedStaticText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FF00">Scripts: ' + totalScripts + '</font>';
+					cachedStaticText += '\n\nScripts: ' + totalScripts;
 					if (totalFailed > 0) {
-						cachedStaticText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF8800">(Failed: ' + totalFailed + ')</font>';
+						cachedStaticText += ' (Failed: ' + totalFailed + ')';
 					}
 					if (sscriptsErrors > 0) {
-						cachedStaticText += ' <font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF4444">(SScript Errors: ' + sscriptsErrors + ')</font>';
+						cachedStaticText += ' (SScript Errors: ' + sscriptsErrors + ')';
 					}
 					if (totalScripts > 0) {
-						cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="12" color="#888888">  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded + '</font>';
+						cachedStaticText += '\n  Lua: ' + luaScriptsLoaded + ' | HScript: ' + hscriptsLoaded;
 					}
-					
-					cachedStaticText += '\n\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Plus Engine v'+ MainMenuState.plusEngineVersion +'</font>';
-					cachedStaticText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Psych v'+ MainMenuState.psychEngineVersion +'</font>';
 				}
 				
-				// Construir texto dinámico (actualizado en cada frame para modders)
-				displayText = '<font face="' + Paths.font("aller.ttf") + '" size="24" color="' + colorHex + '">' + currentFPS + '</font>' +
-						   '<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '"> FPS</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Delay: ' + formatFloat(frameTimeMs, 1) + ' ms</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Avg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Memory: ' + currentMemoryStr + '</font>' +
-						   '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="' + colorHex + '">Peak: ' + peakMemoryStr + '</font>';
+				// Build dynamic text (updated every frame for modders)
+				displayText = currentFPS + ' FPS';
+				displayText += '\nDelay: ' + formatFloat(frameTimeMs, 1) + ' ms';
+				displayText += '\nAvg: ' + formatFloat(avgFrameTimeMs, 1) + ' ms';
+				displayText += '\nMemory: ' + currentMemoryStr;
+				displayText += '\nPeak: ' + peakMemoryStr;
 				
 				displayText += '\n\n' + cachedStaticText;
 				
-				// Información crítica para modders - SIEMPRE actualizada en tiempo real
-				// Step, Beat y Section (CYAN)
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Step: ' + currentStep + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Beat: ' + currentBeat + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#00FFFF">Section: ' + currentSection + '</font>';
+				// Critical information for modders - ALWAYS updated in real time
+				// Step, Beat and Section
+				displayText += '\n\nStep: ' + currentStep;
+				displayText += '\nBeat: ' + currentBeat;
+				displayText += '\nSection: ' + currentSection;
 				
-				// PlayState debug info (YELLOW)
+				// PlayState debug info
 				var healthPercent = Math.floor((playerHealth / 2) * 100);
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Speed: ' + formatFloat(songSpeed, 2) + 'x</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">BPM: ' + currentBPM + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FFFF00">Health: ' + healthPercent + '%</font>';
-				
-				// Rating y Combo (MAGENTA)
-				displayText += '\n\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Rating: ' + lastRating + '</font>';
-				displayText += '\n<font face="' + Paths.font("aller.ttf") + '" size="14" color="#FF00FF">Combo: x' + comboCount + '</font>';
+				displayText += '\n\nSpeed: ' + formatFloat(songSpeed, 2) + 'x';
+				displayText += '\nBPM: ' + currentBPM;
+				displayText += '\nHealth: ' + healthPercent + '%';
+					
+				displayText += '\n\n\nPlus Engine v'+ MainMenuState.plusEngineVersion;
+				displayText += '\nPsych v'+ MainMenuState.psychEngineVersion;
 		}
 
-		// Usar htmlText para diferentes tamaños de fuente
-		htmlText = displayText;
+		// Use simple text
+		textDisplay.text = displayText;
 
-		// Actualizar el fondo
+		// Update the background
 		updateBackground();
-
-		// Fallback para plataformas que no soportan htmlText
-		#if flash
-		var fallbackText = switch (debugLevel) {
-			case 0:
-				var baseText = 'FPS: $currentFPS\nMemory: ${currentMemoryStr} / ${peakMemoryStr}';
-				if (modAuthor != null && modAuthor.length > 0) {
-					baseText += '\n$modAuthor';
-				}
-				baseText;
-			case 1:
-				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}';
-			case 2:
-				var healthPercent = Math.floor((playerHealth / 2) * 100);
-				'FPS: $currentFPS\nMemory: ${currentMemoryStr}\nPeak: ${peakMemoryStr}${os}\nCommit: ${lastCommit}\nObjects: ${FlxG.state.members.length}\nUptime: ${getUptime()}\nState: ${cachedCurrentState}\n\nStep: ${currentStep}\nBeat: ${currentBeat}\nSection: ${currentSection}\n\nSpeed: ${formatFloat(songSpeed, 2)}x\nBPM: ${currentBPM}\nHealth: ${healthPercent}%';
-		}
-		text = fallbackText;
-		
-		// Aplicar el color interpolado también al fallback
-		if (currentFPS >= targetFPS) {
-			textColor = 0xFF00FF00; // Verde
-		} else if (currentFPS <= halfFPS) {
-			textColor = 0xFFFF0000; // Rojo
-		} else {
-			var t = (targetFPS - currentFPS) / (targetFPS - halfFPS);
-			var interpolatedColor = lerpColor(0xFF00FF00, 0xFFFFFF00, Math.min(t, 1.0));
-			if (currentFPS < halfFPS * 1.5) {
-				t = (halfFPS * 1.5 - currentFPS) / (halfFPS * 0.5);
-				interpolatedColor = lerpColor(0xFFFFFF00, 0xFFFF0000, Math.min(t, 1.0));
-			}
-			textColor = interpolatedColor;
-		}
-		#end
 	}
 
 	var deltaTimeout:Float = 0.0;
@@ -469,14 +426,18 @@ class FPSCounter extends TextField
 	}
 
 	// Función para manejar el evento de F2
-	private function onKeyDown(event:KeyboardEvent):Void {
-		if (event.keyCode == Keyboard.F2) {
-			debugLevel = (debugLevel + 1) % 3;
-			
-			// Forzar actualización inmediata del texto y fondo
-			updateText();
-		}
-	}
+	   private function onKeyDown(event:KeyboardEvent):Void {
+		   if (event.keyCode == Keyboard.F2) {
+			   debugLevel = (debugLevel + 1) % 4; // Cycle: 0, 1, 2, 3
+			   #if (ClientPrefs && ClientPrefs.data)
+			   ClientPrefs.data.fpsDebugLevel = debugLevel;
+			   ClientPrefs.save();
+			   #end
+			   updateBackground();
+			   // Forzar actualización inmediata del texto y fondo
+			   updateText();
+		   }
+	   }
 
 	// Función para actualizar el fondo
 	private function updateBackground():Void {
@@ -485,35 +446,34 @@ class FPSCounter extends TextField
 		var g:Graphics = bgShape.graphics;
 		g.clear();
 
-		if (debugLevel > 0) {
-			// Asegurar que el fondo esté agregado al stage
-			if (bgShape.parent == null && this.parent != null) {
-				this.parent.addChildAt(bgShape, this.parent.getChildIndex(this));
-			}
-
-		// Calcular el tamaño del fondo basado en el texto
-		var lines = switch (debugLevel) {
-			case 1: 7; // FPS, Delay, Memory, Peak, espacio, OS, Commit
-			case 2: 32; // FPS, Delay, Avg, Memory, Peak + resto de info
-			default: 0;
+		if (debugLevel >= 1) {
+			// Calculate background size based on text
+			var lines = switch (debugLevel) {
+				case 1: 3; // Normal with bg: FPS, Delay, Memory, (optional modAuthor)
+				case 2: 7; // Basic debug info
+				case 3: 26; // Extended debug info
+				default: 0;
 			}
 			
-			var bgWidth = 325; // Ancho suficiente
-			var bgHeight = lines * 18 + 20; // Altura calculada + padding
+			final INNER_DIFF:Int = 3;
+			var bgWidth = 325;
+			var bgHeight = lines * 18 + 20;
 
-			// Dibujar fondo semi-transparente negro
-			g.beginFill(0x000000, 0.7);
-			g.drawRect(x - 10, y, bgWidth, bgHeight);
+			// Outer rectangle (border color) with 50% opacity
+			g.beginFill(0x3d3f41, 0.5);
+			g.drawRect(0, 0, bgWidth + (INNER_DIFF * 2), bgHeight + (INNER_DIFF * 2));
 			g.endFill();
 
-			// Borde para mejor visibilidad
-			g.lineStyle(1, 0x666666, 0.8);
-			g.drawRect(x - 10, y, bgWidth, bgHeight);
+			// Inner rectangle (main background) with 50% opacity
+			g.beginFill(0x2c2f30, 0.5);
+			g.drawRect(INNER_DIFF, INNER_DIFF, bgWidth, bgHeight);
+			g.endFill();
+			
+			// Background visible
+			bgShape.visible = true;
 		} else {
-			// Remover el fondo si no se necesita
-			if (bgShape.parent != null) {
-				bgShape.parent.removeChild(bgShape);
-			}
+			// Hide background for mode 0 (normal without bg)
+			bgShape.visible = false;
 		}
 	}
 
@@ -724,14 +684,18 @@ class FPSCounter extends TextField
 		updateBackground();
 	}
 
-	// Función para limpiar recursos
+	// Clean up resources
 	public function destroy():Void {
 		if (FlxG.stage != null) {
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		}
 		
 		if (bgShape != null && bgShape.parent != null) {
-			bgShape.parent.removeChild(bgShape);
+			removeChild(bgShape);
+		}
+		
+		if (textDisplay != null && textDisplay.parent != null) {
+			removeChild(textDisplay);
 		}
 	}
 
