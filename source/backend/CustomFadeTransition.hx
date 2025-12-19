@@ -15,6 +15,14 @@ typedef TransitionRequest = {
     var id:String;
 }
 
+enum TransitionState {
+    NONE;
+    CREATING;
+    ACTIVE;
+    CLOSING;
+    DESTROYED;
+}
+
 class CustomFadeTransition extends MusicBeatSubstate {
     public var finishCallback:Void->Void;
 
@@ -27,13 +35,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
     public static var currentTransition(default, null):CustomFadeTransition = null;
 
     private var state:TransitionState = NONE;
-    private enum TransitionState {
-        NONE;
-        CREATING;
-        ACTIVE;
-        CLOSING;
-        DESTROYED;
-    }
 
     private var topDoor:FlxSprite;
     private var bottomDoor:FlxSprite;
