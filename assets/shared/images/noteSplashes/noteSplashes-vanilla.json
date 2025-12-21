@@ -1,119 +1,120 @@
 {
 	"animations": {
-		"purple": {
-			"noteData": 0,
-			"offsets": [
-				-26,
-				-20
-			],
-			"fps": [
-				22,
-				26
-			],
-			"prefix": "vanilla splash purple 1",
-			"name": "purple",
-			"indices": []
-		},
 		"blue2": {
 			"noteData": 5,
 			"offsets": [
-				-14,
-				-16
+				107,
+				107
 			],
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash blue 2",
+			"prefix": "vanilla splash blue 20",
 			"name": "blue2",
 			"indices": []
 		},
-		"red2": {
-			"noteData": 7,
+		"purple": {
 			"offsets": [
-				-14,
-				-16
+				87,
+				101
 			],
+			"noteData": 0,
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash red 2",
-			"name": "red2",
-			"indices": []
+			"prefix": "vanilla splash purple 10",
+			"indices": [],
+			"name": "purple"
 		},
 		"red": {
+			"offsets": [
+				75,
+				101
+			],
 			"noteData": 3,
-			"offsets": [
-				-26,
-				-20
-			],
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash red 1",
-			"name": "red",
-			"indices": []
+			"prefix": "vanilla splash red 10",
+			"indices": [],
+			"name": "red"
 		},
-		"purple2": {
-			"noteData": 4,
+		"red2": {
 			"offsets": [
-				-14,
-				-16
+				107,
+				107
 			],
+			"noteData": 7,
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash purple 2",
-			"name": "purple2",
-			"indices": []
+			"prefix": "vanilla splash red 20",
+			"indices": [],
+			"name": "red2"
 		},
 		"blue": {
+			"offsets": [
+				87,
+				101
+			],
 			"noteData": 1,
-			"offsets": [
-				-26,
-				-20
-			],
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash blue 1",
-			"name": "blue",
-			"indices": []
+			"prefix": "vanilla splash blue 10",
+			"indices": [],
+			"name": "blue"
 		},
-		"green2": {
-			"noteData": 6,
+		"purple2": {
 			"offsets": [
-				-14,
-				-16
+				107,
+				107
 			],
+			"noteData": 4,
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash green 2",
-			"name": "green2",
-			"indices": []
+			"prefix": "vanilla splash purple 20",
+			"indices": [],
+			"name": "purple2"
 		},
 		"green": {
-			"noteData": 2,
 			"offsets": [
-				-26,
-				-20
+				82,
+				106
 			],
+			"noteData": 2,
 			"fps": [
 				22,
 				26
 			],
-			"prefix": "vanilla splash green 1",
-			"name": "green",
-			"indices": []
+			"prefix": "vanilla splash green 10",
+			"indices": [],
+			"name": "green"
+		},
+		"green2": {
+			"offsets": [
+				107,
+				107
+			],
+			"noteData": 6,
+			"fps": [
+				22,
+				26
+			],
+			"prefix": "vanilla splash green 20",
+			"indices": [],
+			"name": "green2"
 		}
 	},
 	"allowRGB": true,
 	"allowPixel": true,
+	"rgb": null,
 	"scale": 1
 }
