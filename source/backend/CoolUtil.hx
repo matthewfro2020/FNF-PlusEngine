@@ -22,12 +22,12 @@ class CoolUtil
 	public static var onUpdateChecked:UpdateCheckCallback->Void = null;
 
 	typedef UpdateCheckCallback = {
-		var success:Bool;
-		var hasUpdate:Bool;
-		var currentVersion:String;
-		var latestVersion:String;
-		var errorMessage:String;
-	}
+		success:Bool,
+		hasUpdate:Bool,
+		currentVersion:String,
+		latestVersion:String,
+		errorMessage:String
+	};
 	
 	public static function checkForUpdates(url:String = null, ?callback:UpdateCheckCallback->Void):Void {
 		if (url == null || url.length == 0)
