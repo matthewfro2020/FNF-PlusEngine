@@ -80,7 +80,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		for(i in optionsArray)
 		{
 			var opt:GameplayOption = i;
-			if (opt.name == name)
+			// Match against localized display name, internal name or variable identifier
+			if (opt.name == name || opt.internalName == name || opt.variableName == name)
 				return opt;
 		}
 		return null;
@@ -226,9 +227,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 									curOption.curOption = num;
 									curOption.setValue(curOption.options[num]); //lol
 									
-									if (curOption.name == "Scroll Type")
+									if (curOption.variableName == "scrolltype" || curOption.internalName == "Scroll Type")
 									{
-										var oOption:GameplayOption = getOptionByName("Scroll Speed");
+										var oOption:GameplayOption = getOptionByName("scrollspeed");
 										if (oOption != null)
 										{
 											if (curOption.getValue() == "constant")
@@ -294,7 +295,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 						updateTextFrom(leOption);
 					}
 
-					if(leOption.name == 'Scroll Speed')
+					if(leOption.variableName == 'scrollspeed' || leOption.internalName == 'Scroll Speed')
 					{
 						leOption.displayFormat = "%vX";
 						leOption.maxValue = 3;
@@ -451,6 +452,15 @@ class GameplayOption
 
 	public function setChild(child:Alphabet)
 		this.child = child;
+
+	// Expose internal name and variable identifier via read-only properties
+	public var internalName(get, never):String;
+	private function get_internalName():String
+		return _name;
+
+	public var variableName(get, never):String;
+	private function get_variableName():String
+		return variable;
 
 	var _name:String = null;
 	var _text:String = null;
