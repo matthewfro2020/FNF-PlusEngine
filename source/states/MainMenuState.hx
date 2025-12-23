@@ -5,6 +5,7 @@ import flixel.effects.FlxFlicker;
 import flixel.util.FlxTimer; // Agregar esta línea
 import lime.app.Application;
 import states.editors.MasterEditorMenu;
+import objects.AudioVisualizer;
 import options.OptionsState;
 import flixel.text.FlxText;
 
