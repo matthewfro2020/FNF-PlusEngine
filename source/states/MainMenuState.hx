@@ -69,15 +69,6 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		add(bg);
 
-		var visualizer = new AudioDisplay(FlxG.sound.music);
-		visualizer.snd = FlxG.sound.music;
-		visualizer.stopUpdate = true;
-		visualizer.setMode(SPECTRUM);
-		visualizer.setColorMode(SOLID);
-		visualizer.setSensitivity(2.0);
-		visualizer.setFalloffSpeed(0.5);
-		visualizer.setSmoothing(0.9);
-		add(visualizer);
 
 		camFollow = new FlxObject(0, 0, 1, 1);
 		add(camFollow);

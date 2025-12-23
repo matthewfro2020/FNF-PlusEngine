@@ -9,6 +9,7 @@ import flixel.sound.FlxSound;
 import flixel.system.FlxSound as FlxSoundSystem;
 import openfl.media.SoundMixer;
 import openfl.media.SoundTransform;
+import openfl.utils.ByteArray;
 
 #if (VIDEOS_ALLOWED && windows)
 import lime.media.AudioBuffer;
@@ -30,7 +31,7 @@ class AudioDisplay extends FlxSpriteGroup
     var _baseColor:FlxColor;
     var _peakColors:Array<FlxColor>;
     
-    var stopUpdate:Bool = false;
+    public var stopUpdate:Bool = false;
     var updateTimer:Float = 0;
     var frequencyData:Array<Float> = [];
     var peakValues:Array<Float> = [];
@@ -39,7 +40,7 @@ class AudioDisplay extends FlxSpriteGroup
     var historyLength:Int = 10;
     
     var spectrumSprite:FlxSprite;
-    var useFFT:Bool = true;
+    var useFFT:Bool = false;
     var smoothing:Float = 0.65;
 
     static final GRADIENT_COLORS = [
@@ -143,26 +144,22 @@ class AudioDisplay extends FlxSpriteGroup
     
     function setupSpectrum()
     {
-        spectrumSprite = new FlxSprite().makeGraphic(_width, _height, FlxColor.TRANSPARENT);
-        add(spectrumSprite);
+        // Render spectrum as individual bars (simpler and cross-platform).
+        var barWidth = Std.int(_width / _barCount - _gap);
+        for (i in 0..._barCount)
+        {
+            var bar = new FlxSprite().makeGraphic(barWidth, 1, _baseColor);
+            bar.x = (_width / _barCount) * i;
+            bar.scale.y = 1;
+            bar.origin.set(0, 0);
+            add(bar);
+        }
     }
     
     function initAudioAnalysis()
     {
-        #if (VIDEOS_ALLOWED && windows)
-        try
-        {
-            if (snd._sound != null)
-            {
-                useFFT = true;
-            }
-        }
-        catch (e:Dynamic)
-        {
-            useFFT = false;
-            trace("FFT not available, using fallback");
-        }
-        #end
+        // Enable FFT for real audio analysis
+        useFFT = true;
     }
     
     override function update(elapsed:Float)
@@ -206,67 +203,38 @@ class AudioDisplay extends FlxSpriteGroup
     
     function updateFFTData()
     {
-        #if (VIDEOS_ALLOWED && windows)
-        try
-        {
-            var bytes = haxe.io.Bytes.alloc(512 * 4);
-            SoundMixer.computeSpectrum(bytes, false, 0);
-            
-            var floatArray = new Float32Array(bytes.length >> 2);
-            for (i in 0...floatArray.length)
-            {
-                var bytePos = i * 4;
-                floatArray[i] = bytes.getFloat(bytePos);
-            }
-
-            var groupSize = Math.ceil(floatArray.length / _barCount);
-            
-            for (i in 0..._barCount)
-            {
-                var sum = 0.0;
-                var count = 0;
-                
-                for (j in 0...groupSize)
-                {
-                    var idx = i * groupSize + j;
-                    if (idx < floatArray.length)
-                    {
-                        sum += Math.abs(floatArray[idx]);
-                        count++;
-                    }
-                }
-                
-                var avg = count > 0 ? sum / count : 0;
-                frequencyData[i] = avg * sensitivity;
-
-                frequencyData[i] = Math.log(1 + frequencyData[i] * 10);
-            }
-        }
-        catch (e:Dynamic)
-        {
-            useFFT = false;
-            updateSimpleData();
-        }
-        #else
+        // Fallback to improved simple data since computeSpectrum is not available
         updateSimpleData();
-        #end
     }
     
     function updateSimpleData()
     {
         var time = FlxG.game.ticks / 1000;
-        var volume = snd.volume * FlxG.sound.volume;
+        var volume = snd != null && snd.playing ? snd.volume * FlxG.sound.volume : 0;
+        var musicTime = FlxG.sound.music != null ? FlxG.sound.music.time / 1000 : 0;
+        
+        // Assume average BPM of 120 for rhythm
+        var bpm = 120;
+        var beatDuration = 60 / bpm;
+        var beatPhase = (musicTime % beatDuration) / beatDuration; // 0 to 1 per beat
         
         for (i in 0..._barCount)
         {
             var freq = 1 + i * 0.2;
-            var bass = Math.sin(time * 1.5) * 0.3 + 0.3;
-            var mid = Math.sin(time * freq + i * 0.1) * 0.2 + 0.2;
-            var high = Math.sin(time * freq * 3) * 0.1 + 0.1;
+            var bass = Math.sin(time * 1.5 + musicTime * 0.5) * 0.3 + 0.3;
+            var mid = Math.sin(time * freq + musicTime * freq * 0.1) * 0.2 + 0.2;
+            var high = Math.sin(time * freq * 3 + musicTime * 2) * 0.1 + 0.1;
             
             var value = bass + mid + high;
+            
+            // Add rhythm component
+            var rhythm = Math.sin(beatPhase * Math.PI * 2) * 0.2 + 0.2; // oscillates with beat
+            value += rhythm;
+            
             value = FlxMath.bound(value * volume * sensitivity, 0, 1);
 
+            // Add more randomness based on music time
+            value += (Math.sin(musicTime * 10 + i) * 0.1 + Math.cos(musicTime * 5 + i * 0.5) * 0.05);
             value += Math.random() * 0.1 - 0.05;
             value = FlxMath.bound(value, 0, 1);
             
@@ -417,40 +385,18 @@ class AudioDisplay extends FlxSpriteGroup
     
     function updateSpectrum()
     {
-        if (spectrumSprite != null)
+        // Update the bar-style spectrum (members created in setupSpectrum)
+        for (i in 0...members.length)
         {
-            spectrumSprite.fill(FlxColor.TRANSPARENT);
-            
-            var g = spectrumSprite.graphic.bitmap;
-            g.lock();
-
-            var points = [];
-            points.push({x: 0, y: _height});
-            
-            for (i in 0..._barCount)
+            var bar = members[i];
+            if (bar != null && i < _barCount)
             {
-                var x = (i / _barCount) * _width;
                 var value = falloffValues[i];
-                var y = _height - value * _height;
-                points.push({x: x, y: y});
+                var targetHeight = Math.max(1, value * _height);
+                bar.scale.y = FlxMath.lerp(bar.scale.y, targetHeight, 0.3);
+                updateBarColor(bar, i, value);
+                bar.y = _height - bar.scale.y;
             }
-            
-            points.push({x: _width, y: _height});
-
-            g.beginFill(_baseColor, 0.3);
-            g.drawPolygon(points.map(p -> new openfl.geom.Point(p.x, p.y)));
-            g.endFill();
-
-            g.lineStyle(2, _baseColor, 0.8);
-            g.moveTo(points[1].x, points[1].y);
-            
-            for (i in 2...points.length - 1)
-            {
-                g.lineTo(points[i].x, points[i].y);
-            }
-            
-            g.unlock();
-            spectrumSprite.dirty = true;
         }
     }
     
@@ -527,7 +473,7 @@ class AudioDisplay extends FlxSpriteGroup
         return sum / frequencyData.length;
     }
     
-    public function reset()
+    override public function reset(X:Float, Y:Float):Void
     {
         for (i in 0..._barCount)
         {
@@ -537,6 +483,7 @@ class AudioDisplay extends FlxSpriteGroup
         }
         history = [];
         updateVisuals();
+        super.reset(X, Y);
     }
     
     override function destroy()

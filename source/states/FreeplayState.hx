@@ -27,6 +27,7 @@ import mobile.backend.StorageUtil;
 #end
 
 import haxe.Json;
+import objects.AudioVisualizer;
 
 class FreeplayState extends MusicBeatState
 {
@@ -151,6 +152,20 @@ class FreeplayState extends MusicBeatState
 		blackOverlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		blackOverlay.alpha = 0.1;
 		add(blackOverlay);
+
+        /* Fixing =p
+		{
+			var visualizer = new AudioDisplay(FlxG.sound.music, 0, FlxG.height - 120, FlxG.width, 120, 128, 4, FlxColor.WHITE);
+			visualizer.snd = FlxG.sound.music;
+			visualizer.stopUpdate = false;
+			visualizer.setMode(SPECTRUM);
+			visualizer.setColorMode(SOLID);
+			visualizer.setSensitivity(5);
+			visualizer.setFalloffSpeed(0.9);
+			visualizer.setSmoothing(0.1); 
+			add(visualizer);
+		}
+		*/
 		
 		layerFree = new FlxSprite().loadGraphic(Paths.image('ui/layerfree'));
 		layerFree.antialiasing = ClientPrefs.data.antialiasing;
