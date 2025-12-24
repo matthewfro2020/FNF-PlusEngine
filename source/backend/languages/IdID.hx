@@ -521,8 +521,8 @@ class IdID
         "dialogue_editor" => "Editor Dialog",
         "dialogue_portrait_editor" => "Editor Portret Dialog",
         "note_splash_editor" => "Editor Note Splash",
-        "no_mod_directory_loaded" => "< Tidak ada direktori mod termuat. >",
-        "loaded_mod_directory" => "< Direktori mod termuat: {1} >",
+        "no_mod_directory_loaded" => "< Tidak ada direktori mod yang dimuat >",
+        "loaded_mod_directory" => "< Direktori Mod yang Diisi: {1} >",
 
         "time_hours" => "jam",
 
