@@ -66,6 +66,12 @@ final class PlayField extends FlxSprite {
 	public inline function getPercent(name:String, player:Int)
 		return modifiers.getPercent(name, player);
 
+	public inline function setRawValue(name:String, value:Float, player:Int = -1)
+		return modifiers.setRawValue(name, value, player);
+
+	public inline function getRawValue(name:String, player:Int)
+		return modifiers.getRawValue(name, player);
+
 	public inline function addModifier(name:String)
 		return modifiers.addModifier(name);
 
@@ -123,6 +129,9 @@ final class PlayField extends FlxSprite {
 
 	public inline function callback(beat:Float, callback:Event->Void):Void
 		addEvent(new Event(beat, callback, events));
+
+	public inline function scheduleCallback(beat:Float, cb:Event->Void):Void
+		callback(beat, cb);
 
 	public inline function alias(name:String, alias:String) {
 		aliases.push({

@@ -29,6 +29,19 @@ class LuaModchart
             return 0.0;
         });
         
+        // Establecer valor absoluto de modificador
+        Lua_helper.add_callback(lua, "setRawValue", function(name:String, value:Float, ?player:Int = -1, ?field:Int = -1) {
+            if (Manager.instance != null)
+                Manager.instance.setRawValue(name, value, player, field);
+        });
+        
+        // Obtener valor absoluto de modificador
+        Lua_helper.add_callback(lua, "getRawValue", function(name:String, ?player:Int = 0, ?field:Int = 0):Float {
+            if (Manager.instance != null)
+                return Manager.instance.getRawValue(name, player, field);
+            return 0.0;
+        });
+        
         // Establecer valor en un beat específico
         Lua_helper.add_callback(lua, "set", function(name:String, beat:Float, value:Float, ?player:Int = -1, ?field:Int = -1) {
             if (Manager.instance != null)
@@ -95,6 +108,15 @@ class LuaModchart
             }
         });
         
+        // Programar callback en un beat específico (una vez, sinónimo de callback)
+        Lua_helper.add_callback(lua, "scheduleCallback", function(beat:Float, funcName:String, ?field:Int = -1) {
+            if (Manager.instance != null) {
+                Manager.instance.scheduleCallback(beat, function(event) {
+                    funk.call(funcName, []); // No pasar el objeto event a Lua
+                }, field);
+            }
+        });
+        
         // Evento repeater: ejecutar una función repetidamente durante un período
         Lua_helper.add_callback(lua, "repeater", function(beat:Float, length:Float, funcName:String, ?field:Int = -1) {
             if (Manager.instance != null) {
@@ -112,22 +134,20 @@ class LuaModchart
             }
         });
         
-        /*
         // Crear nodo (node): vincular inputs y outputs con una función
         Lua_helper.add_callback(lua, "node", function(inputs:Array<String>, outputs:Array<String>, funcName:String, ?field:Int = -1) {
             if (Manager.instance != null) {
-                Manager.instance.node(inputs, outputs, function(curInput:Array<Float>, curOutput:Int):Int {
+                Manager.instance.node(inputs, outputs, function(curInput:Array<Float>, curOutput:Int):Array<Float> {
                     // Llamar función Lua con los valores de entrada
                     var result:Dynamic = funk.call(funcName, [curInput]);
-                    // Retornar resultado o valor actual si no hay resultado
-                    if (result != null && Std.isOfType(result, Int)) {
+                    // Retornar resultado como array de floats, o array con curOutput si no hay resultado
+                    if (result != null && Std.isOfType(result, Array)) {
                         return cast result;
                     }
-                    return curOutput;
+                    return [curOutput]; // Default to array with curOutput
                 }, field);
             }
         });
-        */
         
         // Obtener beat actual desde Conductor
         Lua_helper.add_callback(lua, "getCurrentBeat", function():Float {

@@ -120,6 +120,34 @@ final class Manager extends FlxBasic {
 	}
 
 	/**
+	 * Sets the raw value for a specific modifier (absolute value, not percentage).
+	 *
+	 * @param name The name of the modifier.
+	 * @param value The raw value to set.
+	 * @param player Optionally, the player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function setRawValue(name:String, value:Float, player:Int = -1, field:Int = -1)
+		__forEachPlayfield((pf) -> pf.setRawValue(name, value, player), field);
+
+	/**
+	 * Gets the raw value for a specific modifier.
+	 *
+	 * @param name The name of the modifier.
+	 * @param player The player to target.
+	 * @param field Optionally, the specific playfield to target.
+	 * @return The raw value for the modifier.
+	 */
+	public inline function getRawValue(name:String, player:Int = 0, field:Int = 0):Float {
+		final possiblePlayfield = playfields[field];
+
+		if (possiblePlayfield != null)
+			return possiblePlayfield.getRawValue(name, player);
+
+		return 0.;
+	}
+
+	/**
 	 * Adds an event to all playfields or a specific one.
 	 *
 	 * @param event The event to add.
@@ -200,6 +228,16 @@ final class Manager extends FlxBasic {
 	 */
 	public inline function callback(beat:Float, callback:Event->Void, field:Int = -1)
 		__forEachPlayfield((pf) -> pf.callback(beat, callback), field);
+
+	/**
+	 * Schedules a callback to run once at a specific beat (alias for callback).
+	 *
+	 * @param beat The beat at which the callback will be triggered.
+	 * @param callback The callback function to execute.
+	 * @param field Optionally, the specific playfield to target.
+	 */
+	public inline function scheduleCallback(beat:Float, callback:Event->Void, field:Int = -1)
+		__forEachPlayfield((pf) -> pf.scheduleCallback(beat, callback), field);
 
 	/**
 	 * Creates a node linking inputs and outputs to a function.

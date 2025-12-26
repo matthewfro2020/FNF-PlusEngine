@@ -3522,7 +3522,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			loadMusic();
 		});
 			
-		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() loadMusic(true), 80);	
+		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY -5, 'Reload Audio', function() loadMusic(true), 80);	
 		
 		#if (mac || mobile)
 		var reloadJsonButton:PsychUIButton = new PsychUIButton(objX + 205, objY, 'Reload JSON', function()
@@ -3606,7 +3606,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			trace('selected $stage');
 		});
 
-		animatedIconsCheckBox = new PsychUICheckBox(objX + 140, objY + -100, 'Animated Icons', 100, function()
+		animatedIconsCheckBox = new PsychUICheckBox(objX + 120, objY + -85, 'Animated Icons', 100, function()
 		{
 			PlayState.SONG.isAnimated = animatedIconsCheckBox.checked;
 			updateHeads(true);
@@ -5311,17 +5311,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			var fileContent:String = sys.io.File.getContent(droppedFilePath);
 			var jsonData:Dynamic = Json.parse(fileContent);
 			
-			if(jsonData == null || !Reflect.hasField(jsonData, 'events'))
-			{
-				showOutput('Error: No events found in file!', true);
-				droppedFilePath = null;
-				return;
-			}
-
 			var eventsChart:SwagSong = Song.parseJSON(Json.stringify(jsonData), fileName);
 			if(eventsChart == null || eventsChart.events == null || eventsChart.events.length < 1)
 			{
-				showOutput('Error: Invalid events format!', true);
+				showOutput('Error: No events found in file!', true);
 				droppedFilePath = null;
 				return;
 			}

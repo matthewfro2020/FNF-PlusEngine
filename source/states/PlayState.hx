@@ -1023,7 +1023,7 @@ class PlayState extends MusicBeatState
 		pauseButton = TouchPad.createStandaloneButton(FlxG.width - 132, 10, "PAUSE", 0xFFFF00, [MobileInputID.PAUSE]);
 		pauseButton.alpha = ClientPrefs.data.controlsAlpha * 0.6; // Un poco más transparente
 		pauseButton.onDown.callback = function() {
-			if(startedCountdown && canPause && !paused && !inCutscene && !transitioning)
+			if(startedCountdown && canPause && !paused && !transitioning)
 				openPauseMenu();
 		};
 		pauseButton.cameras = [camOther];
@@ -1467,7 +1467,7 @@ class PlayState extends MusicBeatState
 	{
 		#if VIDEOS_ALLOWED
 		inCutscene = !forMidSong;
-		canPause = forMidSong;
+		canPause = true;
 
 		var foundFile:Bool = false;
 		var fileName:String = Paths.video(name);
@@ -2611,6 +2611,12 @@ class PlayState extends MusicBeatState
 		callOnScripts('onUpdate', [elapsed]);
 
 		super.update(elapsed);
+
+		if(videoCutscene != null && videoCutscene.videoSprite != null)
+		{
+			videoCutscene.videoSprite.bitmap.rate = paused ? 0 : playbackRate;
+		}
+
 		if (ClientPrefs.data.littleTimmyMode && cpuControlled) {
 			for (daNote in notes) {
 				if (!daNote.blockHit && !daNote.ignoreNote && daNote.mustPress && daNote.canBeHit) {

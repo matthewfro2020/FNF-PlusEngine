@@ -55,6 +55,8 @@ class PauseSubState extends MusicBeatSubstate
 			menuItemsOG.insert(5 + num, 'Toggle Botplay');
 		} else if(PlayState.instance.practiceMode && !PlayState.instance.startingSong)
 			menuItemsOG.insert(3, 'Skip Time');
+		if(PlayState.instance.videoCutscene != null)
+			menuItemsOG.insert(1, 'Skip Video');
 		menuItems = menuItemsOG;
 
 		for (i in 0...Difficulty.list.length) {
@@ -298,6 +300,10 @@ class PauseSubState extends MusicBeatSubstate
 			{
 				case "Resume":
 					Paths.clearUnusedMemory();
+					close();
+				case 'Skip Video':
+					if(PlayState.instance.videoCutscene != null)
+						PlayState.instance.videoCutscene.onSkip();
 					close();
 				case 'Change Difficulty':
 					menuItems = difficultyChoices;

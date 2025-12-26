@@ -73,15 +73,6 @@ class HeavyChartManager
 		var totalRAMMB:Int = Std.int(totalRAM / (1024 * 1024));
 		var cacheBudgetMB:Int = Std.int(ramForNoteCache / (1024 * 1024));
 		
-		trace('');
-		trace('===== DYNAMIC NOTE LIMIT =====');
-		trace('Total RAM Available: ${totalRAMMB}MB');
-		trace('Cache Budget (50%): ${cacheBudgetMB}MB');
-		trace('Bytes per Note: 500');
-		trace('Dynamic Note Limit: $dynamicLimit notes');
-		trace('===============================');
-		trace('');
-		
 		return dynamicLimit;
 	}
 
@@ -127,22 +118,12 @@ class HeavyChartManager
 	 */
 	public static function logChartInfo(songName:String, noteCount:Int, useHeavy:Bool):Void
 	{
-		trace('');
-		trace('===== CHART LOADED - INFO =====');
-		trace('Song: $songName');
-		trace('Total Notes: $noteCount');
-		trace('Heavy Charts: ${useHeavy ? "ENABLED" : "DISABLED"}');
-		trace('Est. Memory: ${estimateMemoryUsage(noteCount)}');
 		if (useHeavy)
 		{
 			var totalRAM:Int = getTotalMemory();
 			var totalRAMMB:Int = Std.int(totalRAM / (1024 * 1024));
 			var cacheBudgetMB:Int = Std.int((totalRAM * 0.5) / (1024 * 1024));
-			trace('Total RAM: ${totalRAMMB}MB');
-			trace('Cache Budget (50%): ${cacheBudgetMB}MB');
 		}
-		trace('================================');
-		trace('');
 	}
 
 	/**

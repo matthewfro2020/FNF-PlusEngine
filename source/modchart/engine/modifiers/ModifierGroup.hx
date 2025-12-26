@@ -190,6 +190,10 @@ final class ModifierGroup {
 		return 0;
 	}
 
+	public inline function setRawValue(name:String, value:Float, player:Int = -1) setPercent(name, value, player);
+
+	public inline function getRawValue(name:String, player:Int) return getPercent(name, player);
+
 	inline private function __getUnsafe(id:Int, player:Int) {
 		final percs = percents.getUnsafe(id);
 
