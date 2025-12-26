@@ -5,7 +5,7 @@ import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
-import openfl._internal.formats.swf.SWFLiteLibrary;
+import swf.exporters.swflite.SWFLiteLibrary;
 import openfl.display.MovieClip;
 import haxe.Json;
 import backend.Song;
