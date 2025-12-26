@@ -119,7 +119,22 @@ function loadAnimateCharacter(symbolName:String)
 		
 		switch(curCharacter)
 		{
-		case 'bf-cud':
+		case 'bf-crud':
+		isAnimateSymbol = true;
+		skipDance = false;
+		playAnim('idle');
+		
+		case 'dave-crud', 'dave-crud-white':
+		isAnimateSymbol = true;
+		skipDance = false;
+		playAnim('idle');
+
+		case 'gary':
+		isAnimateSymbol = true;
+		skipDance = false;
+		playAnim('idle');
+
+		case 'jeff', 'jeff-good':
 		isAnimateSymbol = true;
 		skipDance = false;
 		playAnim('idle');
