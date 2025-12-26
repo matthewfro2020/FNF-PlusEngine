@@ -84,28 +84,27 @@ public var isAnimateSymbol:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var editorIsPlayer:Null<Bool> = null;
 
-	function loadAnimateCharacter(symbolName:String, json:Dynamic) {
-		var dataPath = Paths.getPath('images/' + json.image + '/data.json', TEXT);
-		var libPath = Paths.getPath('images/' + json.image + '/library.json', TEXT);
+function loadAnimateCharacter(symbolName:String)
+{
+	var dataPath = 'assets/characters/$curCharacter/data.json';
+	var libPath = 'assets/characters/$curCharacter/library.json';
 
-		#if MODS_ALLOWED
-		if (!FileSystem.exists(dataPath) || !FileSystem.exists(libPath))
-			return;
-		var dataJson = File.getContent(dataPath);
-		var libraryJson = File.getContent(libPath);
-		#else
-		if (!Assets.exists(dataPath) || !Assets.exists(libPath))
-			return;
-		var dataJson = Assets.getText(dataPath);
-		var libraryJson = Assets.getText(libPath);
-		#end
+	#if MODS_ALLOWED
+	if (!FileSystem.exists(dataPath) || !FileSystem.exists(libPath)) return;
+	var dataJson = File.getContent(dataPath);
+	var libraryJson = File.getContent(libPath);
+	#else
+	if (!Assets.exists(dataPath) || !Assets.exists(libPath)) return;
+	var dataJson = Assets.getText(dataPath);
+	var libraryJson = Assets.getText(libPath);
+	#end
 
-		animateLibrary = new AnimateLibrary();
-		animateLibrary.load(dataJson, libraryJson);
-		animateSymbol = animateLibrary.createSymbol(symbolName);
-		addChild(animateSymbol);
-		animateSymbol.play();
-	}
+	animateLibrary = new AnimateLibrary();
+	animateLibrary.load(dataJson, libraryJson);
+	animateSymbol = animateLibrary.createSymbol(symbolName);
+	addChild(animateSymbol);
+	animateSymbol.play();
+}
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false) {
 		super(x, y);
