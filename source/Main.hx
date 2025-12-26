@@ -46,7 +46,8 @@ import backend.Highscore;
 // // // // // // // // //
 class Main extends Sprite
 {
-        // Load JSON files
+
+        // Load JSON files (assumes embedded in assets/)
         var dataJson = Assets.getText("assets/data.json");
         var libraryJson = Assets.getText("assets/library.json");
 
@@ -54,18 +55,20 @@ class Main extends Sprite
         var library = new AnimateLibrary();
         library.load(dataJson, libraryJson);
 
-        // Create a symbol instance by linkage name
-        var symbolName = "Boyfriend"; // or "BF idle", etc.
-        var symbol:AnimateSymbol = library.createSymbol(symbolName);
+        // Create a character symbol by linkage name
+        var characterName = "Boyfriend"; // or "BF idle", "Dad", etc.
+        var character:AnimateSymbol = library.createSymbol(characterName);
 
-    	Assets.loadText("assets/data.json").onComplete(function(dataJson) {
-        Assets.loadText("assets/library.json").onComplete(function(libraryJson) {
-            var library = new AnimateLibrary();
-            library.load(dataJson, libraryJson);
-            var symbol = library.createSymbol("Boyfriend");
-            addChild(symbol);
-    });
-});
+        // Optional: scale and position
+        character.scaleX = character.scaleY = 2;
+        character.x = 400;
+        character.y = 300;
+
+        // Add to stage
+        addChild(character);
+
+        // Play animation
+        character.play();
 
         // Add to stage
         addChild(symbol);
