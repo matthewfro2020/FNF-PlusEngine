@@ -11,6 +11,7 @@ import haxe.Json;
 import backend.Song;
 import states.stages.objects.TankmenBG;
 import swf.exporters.animate.AnimateSymbol;
+import swf.exporters.animate.AnimateLibrary;
 
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
