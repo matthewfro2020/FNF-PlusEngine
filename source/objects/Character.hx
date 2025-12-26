@@ -5,10 +5,11 @@ import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
+import openfl._internal.formats.swf.SWFLiteLibrary;
+import openfl.display.MovieClip;
 import haxe.Json;
 import backend.Song;
 import states.stages.objects.TankmenBG;
-import swf.exporters.animate.AnimateLibrary;
 import swf.exporters.animate.AnimateSymbol;
 
 typedef CharacterFile = {
@@ -84,24 +85,30 @@ public var isAnimateSymbol:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var editorIsPlayer:Null<Bool> = null;
 
-function loadAnimateCharacter(symbolName:String)
+function loadAnimateCharacter(symbolName:String, json:Dynamic)
 {
-	var dataPath = 'assets/characters/$curCharacter/data.json';
-	var libPath = 'assets/characters/$curCharacter/library.json';
+	var libPath = Paths.getPath('images/' + json.image + '/library.json', TEXT);
 
 	#if MODS_ALLOWED
-	if (!FileSystem.exists(dataPath) || !FileSystem.exists(libPath)) return;
-	var dataJson = File.getContent(dataPath);
+	if (!FileSystem.exists(libPath)) return;
 	var libraryJson = File.getContent(libPath);
 	#else
-	if (!Assets.exists(dataPath) || !Assets.exists(libPath)) return;
-	var dataJson = Assets.getText(dataPath);
+	if (!Assets.exists(libPath)) return;
 	var libraryJson = Assets.getText(libPath);
 	#end
 
-	animateLibrary = new AnimateLibrary();
-	animateLibrary.load(dataJson, libraryJson);
-	animateSymbol = animateLibrary.createSymbol(symbolName);
+	// Create SWFLiteLibrary from JSON
+	animateLibrary = new SWFLiteLibrary('images/' + json.image, null);
+	animateLibrary.deserialize(libraryJson);
+
+	// Create MovieClip instance
+	var symbol = cast(animateLibrary.createMovieClip(symbolName), MovieClip);
+	if (symbol == null) {
+		trace('Symbol "$symbolName" not found in SWFLiteLibrary!');
+		return;
+	}
+
+	animateSymbol = symbol;
 	addChild(animateSymbol);
 	animateSymbol.play();
 }
