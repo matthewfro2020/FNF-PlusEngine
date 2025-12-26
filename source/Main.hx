@@ -43,6 +43,26 @@ import backend.Highscore;
 // // // // // // // // //
 class Main extends Sprite
 {
+        // Load JSON files
+        var dataJson = Assets.getText("assets/data.json");
+        var libraryJson = Assets.getText("assets/library.json");
+
+        // Parse into AnimateLibrary
+        var library = new AnimateLibrary();
+        library.load(dataJson, libraryJson);
+
+        // Create a symbol instance by linkage name
+        var symbolName = "Boyfriend"; // or "BF idle", etc.
+        var symbol:AnimateSymbol = library.createSymbol(symbolName);
+
+        // Add to stage
+        addChild(symbol);
+
+        // Optional: play timeline
+        symbol.play();
+    }
+
+
 	public static final game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
