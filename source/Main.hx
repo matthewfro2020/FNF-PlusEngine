@@ -15,6 +15,9 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
+import openfl.Assets;
+import swf.exporters.animate.AnimateLibrary;
+import swf.exporters.animate.AnimateSymbol;
 import lime.app.Application;
 import states.TitleState;
 #if HSCRIPT_ALLOWED
@@ -54,6 +57,15 @@ class Main extends Sprite
         // Create a symbol instance by linkage name
         var symbolName = "Boyfriend"; // or "BF idle", etc.
         var symbol:AnimateSymbol = library.createSymbol(symbolName);
+
+    	Assets.loadText("assets/data.json").onComplete(function(dataJson) {
+        Assets.loadText("assets/library.json").onComplete(function(libraryJson) {
+            var library = new AnimateLibrary();
+            library.load(dataJson, libraryJson);
+            var symbol = library.createSymbol("Boyfriend");
+            addChild(symbol);
+    });
+});
 
         // Add to stage
         addChild(symbol);
