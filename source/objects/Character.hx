@@ -12,6 +12,9 @@ import haxe.Json;
 import backend.Song;
 import states.stages.objects.TankmenBG;
 
+import swf.exporters.animate.AnimateLibrary;
+import swf.exporters.animate.AnimateSymbol;
+
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
 	var image:String;
@@ -83,6 +86,27 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var editorIsPlayer:Null<Bool> = null;
 
+function loadAnimateCharacter(symbolName:String)
+{
+	var dataPath = Paths.getPath('images/' + json.image + '/data.json', TEXT);
+	var libPath = Paths.getPath('images/' + json.image + '/library.json', TEXT);
+
+	#if MODS_ALLOWED
+	if (!FileSystem.exists(dataPath) || !FileSystem.exists(libPath)) return;
+	var dataJson = File.getContent(dataPath);
+	var libraryJson = File.getContent(libPath);
+	#else
+	if (!Assets.exists(dataPath) || !Assets.exists(libPath)) return;
+	var dataJson = Assets.getText(dataPath);
+	var libraryJson = Assets.getText(libPath);
+	#end
+
+	animateLibrary = new AnimateLibrary();
+	animateLibrary.load(dataJson, libraryJson);
+	animateSymbol = animateLibrary.createSymbol(symbolName);
+	addChild(animateSymbol);
+	animateSymbol.play();
+}
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
@@ -95,12 +119,10 @@ class Character extends FlxSprite
 		
 		switch(curCharacter)
 		{
-			case 'pico-speaker':
-				skipDance = true;
-				loadMappedAnims();
-				playAnim("shoot1");
-			case 'pico-blazin', 'darnell-blazin':
-				skipDance = true;
+		case 'bf-cud':
+		isAnimateSymbol = true;
+		skipDance = false;
+		playAnim('idle');
 		}
 	}
 
@@ -180,6 +202,18 @@ class Character extends FlxSprite
 				}
 				json.animations = newAnims;
 			}
+			if (json.library_json != null && json.data_json != null)
+{
+    isAnimateSymbol = true;
+    animateLibrary = new AnimateLibrary();
+    animateLibrary.load(json.data_json, json.library_json);
+
+    var symbolName = json.symbol != null ? json.symbol : "Boyfriend";
+    animateSymbol = animateLibrary.createSymbol(symbolName);
+    addChild(animateSymbol);
+    animateSymbol.play();
+    return;
+}
 		}
 
 		#if flxanimate
@@ -274,6 +308,15 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
+		    if (isAnimateSymbol)
+    {
+        animateSymbol.advanceFrame();
+        return;
+    }
+
+    super.update(elapsed);
+
+
 		if(isAnimateAtlas) atlas.update(elapsed);
 
 		if(debugMode || (!isAnimateAtlas && animation.curAnim == null) || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)))
@@ -413,6 +456,17 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+	
+		if (isAnimateSymbol)
+    {
+        animateSymbol.gotoAndPlay(name);
+        _lastPlayedAnimation = name;
+        return;
+    }
+
+    super.playAnim(name, force, reversed, frame);
+
+
 		specialAnim = false;
 		if(!isAnimateAtlas)
 		{
