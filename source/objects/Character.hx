@@ -38,6 +38,10 @@ typedef AnimArray = {
 }
 
 class Character extends FlxSprite {
+	public var animateLibrary:AnimateLibrary;
+public var animateSymbol:AnimateSymbol;
+public var isAnimateSymbol:Bool = false;
+
 	/**
 	 * In case a character is missing, it will use this on its place
 	**/
@@ -80,7 +84,7 @@ class Character extends FlxSprite {
 	public var originalFlipX:Bool = false;
 	public var editorIsPlayer:Null<Bool> = null;
 
-	function loadAnimateCharacter(symbolName:String) {
+	function loadAnimateCharacter(symbolName:String, json:Dynamic) {
 		var dataPath = Paths.getPath('images/' + json.image + '/data.json', TEXT);
 		var libPath = Paths.getPath('images/' + json.image + '/library.json', TEXT);
 
