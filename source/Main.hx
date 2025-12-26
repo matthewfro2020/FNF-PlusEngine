@@ -46,38 +46,6 @@ import backend.Highscore;
 // // // // // // // // //
 class Main extends Sprite
 {
-
-        // Load JSON files (assumes embedded in assets/)
-        var dataJson = Assets.getText("assets/data.json");
-        var libraryJson = Assets.getText("assets/library.json");
-
-        // Parse into AnimateLibrary
-        var library = new AnimateLibrary();
-        library.load(dataJson, libraryJson);
-
-        // Create a character symbol by linkage name
-        var characterName = "Boyfriend"; // or "BF idle", "Dad", etc.
-        var character:AnimateSymbol = library.createSymbol(characterName);
-
-        // Optional: scale and position
-        character.scaleX = character.scaleY = 2;
-        character.x = 400;
-        character.y = 300;
-
-        // Add to stage
-        addChild(character);
-
-        // Play animation
-        character.play();
-
-        // Add to stage
-        addChild(symbol);
-
-        // Optional: play timeline
-        symbol.play();
-    }
-
-
 	public static final game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
@@ -191,6 +159,35 @@ class Main extends Sprite
 				PlayState.instance.addTextToDebug('FATAL: $msgInfo', 0xFFBB0000);
 		}
 		#end
+
+        // Load JSON files (assumes embedded in assets/)
+        var dataJson = Assets.getText("assets/data.json");
+        var libraryJson = Assets.getText("assets/library.json");
+
+        // Parse into AnimateLibrary
+        var library = new AnimateLibrary();
+        library.load(dataJson, libraryJson);
+
+        // Create a character symbol by linkage name
+        var characterName = "Boyfriend"; // or "BF idle", "Dad", etc.
+        var character:AnimateSymbol = library.createSymbol(characterName);
+
+        // Optional: scale and position
+        character.scaleX = character.scaleY = 2;
+        character.x = 400;
+        character.y = 300;
+
+        // Add to stage
+        addChild(character);
+
+        // Play animation
+        character.play();
+
+        // Add to stage
+        addChild(symbol);
+
+        // Optional: play timeline
+        symbol.play();
 
 		#if SSCRIPT_ALLOWED
 		// Handlers para SScript (Psych 0.7.3)
