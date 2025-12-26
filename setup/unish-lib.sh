@@ -17,6 +17,8 @@ haxelib install sl-windows-api 1.2.0 --quiet
 haxelib install moonchart --quiet
 haxelib install flixel-tools 1.5.1 --quiet
 haxelib install hscript-iris 1.1.3 --quiet
+haxelib install swf --quiet
+haxelib install format --quiet
 haxelib git sscript-parch https://github.com/Psych-Plus-Team/SScript-Parch.git --quiet
 haxelib install tjson 1.4.0 --quiet
 haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 768740a56b26aa0c072720e0d1236b94afe68e3e --quiet
